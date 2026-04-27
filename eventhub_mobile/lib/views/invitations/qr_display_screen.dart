@@ -1,23 +1,31 @@
+/*
+ * FICHIER : qr_display_screen.dart
+ * RÔLE : Affiche le code QR complet d'une invitation
+ * DESCRIPTION (POUR DÉBUTANTS) : Cet écran permet à l'invité de voir son code QR
+ * de manière bien visible. Ce code QR sera scanné par l'organisateur à l'événement
+ * pour vérifier la présence. On peut aussi copier le code dans le presse-papiers.
+ * UTILISÉ PAR : my_invitations_screen.dart (quand on clique sur une invitation)
+ */
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter/services.dart'; // Pour copier dans le presse-papiers
+import 'package:qr_flutter/qr_flutter.dart'; // Pour générer le code QR visuel
 import 'package:eventhub_app/l10n/app_localizations.dart';
 import '../../models/invitation.dart';
 
 class QrDisplayScreen extends StatelessWidget {
-  final Invitation invitation;
+  final Invitation invitation; // L'invitation dont on affiche le QR
   const QrDisplayScreen({super.key, required this.invitation});
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context)!;
+    final l = AppLocalizations.of(context)!; // Traductions
     final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        title: Text(l.myQrCode,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(l.myQrCode, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -28,40 +36,34 @@ class QrDisplayScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Event title
+              // Titre de l'événement
               Text(
                 invitation.eventTitle,
-                style: theme.textTheme.headlineSmall!
-                    .copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              // Status chip
+
+              // Badge de statut (EN ATTENTE ou UTILISÉ)
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                 decoration: BoxDecoration(
-                  color: invitation.isPending
-                      ? Colors.green.shade50
-                      : Colors.grey.shade100,
+                  color: invitation.isPending ? Colors.green.shade50 : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: invitation.isPending
-                        ? Colors.green.shade300
-                        : Colors.grey.shade300,
+                    color: invitation.isPending ? Colors.green.shade300 : Colors.grey.shade300,
                   ),
                 ),
                 child: Text(
                   invitation.isPending ? l.pending : l.used,
                   style: TextStyle(
-                      color: invitation.isPending
-                          ? Colors.green.shade700
-                          : Colors.grey,
+                      color: invitation.isPending ? Colors.green.shade700 : Colors.grey,
                       fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 36),
-              // QR Code widget
+
+              // Code QR visuel (généré automatiquement avec la bibliothèque qr_flutter)
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -76,32 +78,33 @@ class QrDisplayScreen extends StatelessWidget {
                   ],
                 ),
                 child: QrImageView(
-                  data: invitation.qrCode,
-                  version: QrVersions.auto,
-                  size: 240,
+                  data: invitation.qrCode, // Le code QR en texte (UUID)
+                  version: QrVersions.auto, // Taille automatique
+                  size: 240, // Taille du carré QR
                   backgroundColor: Colors.white,
                   eyeStyle: QrEyeStyle(
-                    eyeShape: QrEyeShape.square,
-                    color: theme.colorScheme.primary,
+                    eyeShape: QrEyeShape.square, // Forme des coins du QR
+                    color: theme.colorScheme.primary, // Couleur des coins
                   ),
                   dataModuleStyle: QrDataModuleStyle(
-                    dataModuleShape: QrDataModuleShape.square,
-                    color: Colors.black87,
+                    dataModuleShape: QrDataModuleShape.square, // Carrés du QR
+                    color: Colors.black87, // Couleur des carrés
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-              // QR code value
+
+              // Code QR en texte (cliquable pour copier)
               GestureDetector(
                 onTap: () {
+                  // Copie le code QR dans le presse-papiers du téléphone
                   Clipboard.setData(ClipboardData(text: invitation.qrCode));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Code copié !')),
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(10),
@@ -110,15 +113,12 @@ class QrDisplayScreen extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.copy,
-                          size: 14, color: Colors.grey),
+                      const Icon(Icons.copy, size: 14, color: Colors.grey),
                       const SizedBox(width: 8),
                       Text(
                         invitation.qrCode,
                         style: const TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 11,
-                          color: Colors.grey,
+                          fontFamily: 'monospace', fontSize: 11, color: Colors.grey,
                         ),
                       ),
                     ],
@@ -126,6 +126,8 @@ class QrDisplayScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
+
+              // Nom de l'invité
               Text(
                 invitation.guestName,
                 style: const TextStyle(color: Colors.grey),

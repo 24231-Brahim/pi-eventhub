@@ -30,6 +30,7 @@
 /home/brahimtaleb/Documents/projet/pi-eventhub/eventhub_backend/src/main/java/com/brahim/eventhub/controller/CategoryController.java
 /home/brahimtaleb/Documents/projet/pi-eventhub/eventhub_backend/src/main/java/com/brahim/eventhub/repository/CategoryRepository.java
 /home/brahimtaleb/Documents/projet/pi-eventhub/eventhub_backend/src/main/java/com/brahim/eventhub/dto/CategoryRequest.java
+/home/brahimtaleb/Documents/projet/pi-eventhub/eventhub_backend/src/main/java/com/brahim/eventhub/exception/ResourceAlreadyExistsException.java
 /home/brahimtaleb/Documents/projet/pi-eventhub/eventhub_backend/src/main/java/com/brahim/eventhub/model/InvitationStatus.java
 /home/brahimtaleb/Documents/projet/pi-eventhub/eventhub_backend/src/main/java/com/brahim/eventhub/dto/InvitationResponse.java
 /home/brahimtaleb/Documents/projet/pi-eventhub/eventhub_backend/src/main/java/com/brahim/eventhub/security/CustomUserDetailsService.java
