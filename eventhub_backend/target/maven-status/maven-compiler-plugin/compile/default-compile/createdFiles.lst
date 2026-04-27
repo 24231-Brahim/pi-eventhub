@@ -46,8 +46,8 @@ com/brahim/eventhub/repository/UserRepository.class
 com/brahim/eventhub/service/CategoryServiceImpl.class
 com/brahim/eventhub/dto/InvitationResponse$Builder.class
 com/brahim/eventhub/service/AuthService.class
-com/brahim/eventhub/dto/EventRequest.class
 com/brahim/eventhub/dto/RegisterRequest.class
+com/brahim/eventhub/dto/EventRequest.class
 com/brahim/eventhub/dto/CategoryResponse.class
 com/brahim/eventhub/service/InvitationService.class
 com/brahim/eventhub/model/Category.class

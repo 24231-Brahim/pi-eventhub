@@ -8,7 +8,6 @@ import com.eventhub.model.User;
 import com.eventhub.repository.CategoryRepository;
 import com.eventhub.repository.EventRepository;
 import com.eventhub.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,12 +16,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class EventService {
 
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+
+    public EventService(EventRepository eventRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
+        this.eventRepository = eventRepository;
+        this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
+    }
 
     public List<EventResponse> getAllEvents() {
         return eventRepository.findAll()
@@ -40,14 +44,13 @@ public class EventService {
         User organizer = findUserOrThrow(organizerEmail);
         Category category = resolveCategory(request.getCategoryId());
 
-        Event event = Event.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .date(request.getDate())
-                .location(request.getLocation())
-                .category(category)
-                .organizer(organizer)
-                .build();
+        Event event = new Event();
+        event.setTitle(request.getTitle());
+        event.setDescription(request.getDescription());
+        event.setDate(request.getDate());
+        event.setLocation(request.getLocation());
+        event.setCategory(category);
+        event.setOrganizer(organizer);
 
         return toResponse(eventRepository.save(event));
     }
@@ -81,7 +84,7 @@ public class EventService {
         eventRepository.delete(event);
     }
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
+    // ── Helpers ──────────────────────────────────────────────────────
 
     private Event findEventOrThrow(Long id) {
         return eventRepository.findById(id)
@@ -100,15 +103,15 @@ public class EventService {
     }
 
     public EventResponse toResponse(Event event) {
-        return EventResponse.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .description(event.getDescription())
-                .date(event.getDate())
-                .location(event.getLocation())
-                .categoryName(event.getCategory() != null ? event.getCategory().getName() : null)
-                .organizerName(event.getOrganizer().getName())
-                .organizerEmail(event.getOrganizer().getEmail())
-                .build();
+        return new EventResponse(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getDate(),
+                event.getLocation(),
+                event.getCategory() != null ? event.getCategory().getName() : null,
+                event.getOrganizer().getName(),
+                event.getOrganizer().getEmail()
+        );
     }
 }

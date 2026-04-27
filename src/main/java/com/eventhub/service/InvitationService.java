@@ -9,7 +9,6 @@ import com.eventhub.model.User;
 import com.eventhub.repository.EventRepository;
 import com.eventhub.repository.InvitationRepository;
 import com.eventhub.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,12 +18,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class InvitationService {
 
     private final InvitationRepository invitationRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+
+    public InvitationService(InvitationRepository invitationRepository, EventRepository eventRepository, UserRepository userRepository) {
+        this.invitationRepository = invitationRepository;
+        this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
+    }
 
     /**
      * Create an invitation for a guest (looked up by email) to an event.
@@ -40,12 +44,11 @@ public class InvitationService {
 
         String qrCode = UUID.randomUUID().toString();
 
-        Invitation invitation = Invitation.builder()
-                .event(event)
-                .guest(guest)
-                .qrCode(qrCode)
-                .status(Invitation.Status.PENDING)
-                .build();
+        Invitation invitation = new Invitation();
+        invitation.setEvent(event);
+        invitation.setGuest(guest);
+        invitation.setQrCode(qrCode);
+        invitation.setStatus(Invitation.Status.PENDING);
 
         return toResponse(invitationRepository.save(invitation));
     }
@@ -79,20 +82,20 @@ public class InvitationService {
         invitationRepository.save(invitation);
 
         return "QR code verified successfully. Invitation for event '" +
-               invitation.getEvent().getTitle() + "' marked as USED.";
+                invitation.getEvent().getTitle() + "' marked as USED.";
     }
 
-    // ── Mapper ───────────────────────────────────────────────────────────────
+    // ── Mapper ───────────────────────────────────────────────────────
 
     private InvitationResponse toResponse(Invitation invitation) {
-        return InvitationResponse.builder()
-                .id(invitation.getId())
-                .eventId(invitation.getEvent().getId())
-                .eventTitle(invitation.getEvent().getTitle())
-                .guestName(invitation.getGuest().getName())
-                .guestEmail(invitation.getGuest().getEmail())
-                .qrCode(invitation.getQrCode())
-                .status(invitation.getStatus().name())
-                .build();
+        return new InvitationResponse(
+                invitation.getId(),
+                invitation.getEvent().getId(),
+                invitation.getEvent().getTitle(),
+                invitation.getGuest().getName(),
+                invitation.getGuest().getEmail(),
+                invitation.getQrCode(),
+                invitation.getStatus().name()
+        );
     }
 }

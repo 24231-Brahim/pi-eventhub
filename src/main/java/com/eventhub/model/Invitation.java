@@ -1,17 +1,9 @@
 package com.eventhub.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "invitations")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Invitation {
 
     @Id
@@ -32,6 +24,56 @@ public class Invitation {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
+
+    public Invitation() {}
+
+    public Invitation(Long id, Event event, User guest, String qrCode, Status status) {
+        this.id = id;
+        this.event = event;
+        this.guest = guest;
+        this.qrCode = qrCode;
+        this.status = status;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Event getEvent() {
+        return event;
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
+    public User getGuest() {
+        return guest;
+    }
+
+    public void setGuest(User guest) {
+        this.guest = guest;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public enum Status {
         PENDING, USED

@@ -7,8 +7,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class ApiService {
   // Use localhost for Web. For Android emulator, we would use 10.0.2.2 but we're testing on web now.
   static String get baseUrl {
-    // For now, since you are testing on Web/Desktop, localhost works perfectly.
-    return 'http://localhost:8080/api';
+    // Backend running on port 9090 with Swagger
+    return 'http://localhost:9090/api';
   }
   static const String _tokenKey = 'jwt_token';
 

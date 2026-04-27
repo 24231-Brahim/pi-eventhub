@@ -8,7 +8,8 @@ class AuthService {
       {'email': email, 'password': password},
       authenticated: false,
     );
-    final data = ApiService.parseResponse(response) as Map<String, dynamic>;
+    final responseData = ApiService.parseResponse(response) as Map<String, dynamic>;
+    final data = responseData['data'] as Map<String, dynamic>;
     final auth = AuthResponse.fromJson(data);
     await ApiService.saveToken(auth.token);
     return auth;
@@ -26,7 +27,8 @@ class AuthService {
       },
       authenticated: false,
     );
-    final data = ApiService.parseResponse(response) as Map<String, dynamic>;
+    final responseData = ApiService.parseResponse(response) as Map<String, dynamic>;
+    final data = responseData['data'] as Map<String, dynamic>;
     final auth = AuthResponse.fromJson(data);
     await ApiService.saveToken(auth.token);
     return auth;
