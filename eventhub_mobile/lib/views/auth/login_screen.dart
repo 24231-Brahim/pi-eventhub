@@ -1,22 +1,10 @@
-/*
- * FICHIER : login_screen.dart
- * RÔLE : Affiche l'écran de connexion et d'inscription (Login + Register)
- * DESCRIPTION (POUR DÉBUTANTS) : Ce fichier contient deux écrans dans un seul fichier.
- * 1. LoginScreen : Permet à un utilisateur existant de se connecter (email + mot de passe)
- * 2. RegisterScreen : Permet de créer un nouveau compte (nom, email, mot de passe, rôle)
- * Il y a aussi des widgets partagés : _InputField (champ de saisie) et _LanguageToggle (changement de langue)
- * UTILISÉ PAR : main.dart (première page affichée au démarrage)
- */
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/language_provider.dart';
 import 'package:eventhub_app/l10n/app_localizations.dart';
-import 'register_screen.dart'; // (redirige vers le même fichier, c'est juste pour la navigation)
+import 'register_screen.dart';
 import '../events/events_list_screen.dart';
-
-// ── ÉCRAN DE CONNEXION ────────────────────────────────────────────────
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,55 +14,40 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen>
-    with SingleTickerProviderStateMixin { // Pour l'animation de fondu
-  // Clé du formulaire (pour valider les champs)
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  // Contrôleurs pour récupérer le texte saisi dans les champs
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
-  // Indique si le mot de passe est masqué (true = points noirs)
   bool _obscure = true;
-  // Contrôleur d'animation (pour l'effet de fondu à l'apparition)
   late AnimationController _animCtrl;
   late Animation<double> _fadeAnim;
 
   @override
   void initState() {
     super.initState();
-    // Initialise l'animation (durée 900 millisecondes)
     _animCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900));
-    // Courbe d'animation (début lent, fin rapide)
     _fadeAnim = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut);
-    _animCtrl.forward(); // Lance l'animation
+    _animCtrl.forward();
   }
 
   @override
   void dispose() {
-    // Nettoie les contrôleurs et l'animation pour éviter les fuites mémoire
     _animCtrl.dispose();
     _emailCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
 
-  // MÉTHODE : Tenter la connexion
-  // CE QUE ÇA FAIT ÉTAPE PAR ÉTAPE :
-  // 1. Vérifie que le formulaire est valide (email + mot de passe corrects)
-  // 2. Appelle le AuthProvider pour connecter l'utilisateur
-  // 3. Si succès : redirige vers la page d'accueil (liste des événements)
-  // 4. Si échec : affiche un message d'erreur (SnackBar rouge)
   Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return; // Si formulaire invalide, on arrête
-    final auth = context.read<AuthProvider>(); // Récupère le provider d'authentification
+    if (!_formKey.currentState!.validate()) return;
+    final auth = context.read<AuthProvider>();
     final ok = await auth.login(_emailCtrl.text.trim(), _passCtrl.text);
-    if (!mounted) return; // Vérifie si le widget est encore affiché
+    if (!mounted) return;
     if (ok) {
-      // Connexion réussie : on va à la page d'accueil et on vire la page de connexion de l'historique
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (_) => const EventsListScreen()));
     } else {
-      // Échec : on affiche l'erreur en bas de l'écran
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(auth.error ?? 'Login failed'),
               backgroundColor: Colors.red.shade700));
@@ -83,14 +56,13 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context)!; // Traductions
-    final lang = context.read<LanguageProvider>(); // Gestionnaire de langue
-    final auth = context.watch<AuthProvider>(); // État d'authentification (pour le chargement)
-    final theme = Theme.of(context); // Thème de l'application
+    final l = AppLocalizations.of(context)!;
+    final lang = context.read<LanguageProvider>();
+    final auth = context.watch<AuthProvider>();
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: Container(
-        // Fond dégradé (du indigo au violet foncé)
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -105,21 +77,22 @@ class _LoginScreenState extends State<LoginScreen>
         child: SafeArea(
           child: Center(
             child: FadeTransition(
-              opacity: _fadeAnim, // Animation de fondu
-              child: SingleChildScrollView( // Permet de scroller si le clavier apparaît
+              opacity: _fadeAnim,
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Bouton de changement de langue (en haut à droite)
+                    // Language toggle
                     Align(
                       alignment: Alignment.topRight,
                       child: _LanguageToggle(lang: lang, l: l),
                     ),
                     const SizedBox(height: 20),
-                    // Logo de l'application (icône d'événement)
+                    // Logo
                     Container(
-                      width: 90, height: 90,
+                      width: 90,
+                      height: 90,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
                         shape: BoxShape.circle,
@@ -129,16 +102,15 @@ class _LoginScreenState extends State<LoginScreen>
                           size: 48, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
-                    // Titre de l'application
                     Text(l.appTitle,
                         style: theme.textTheme.headlineMedium!.copyWith(
                             color: Colors.white, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 36),
-                    // Carte blanche contenant le formulaire
+                    // Card
                     Card(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24)),
-                      elevation: 10, // Ombre portée
+                      elevation: 10,
                       child: Padding(
                         padding: const EdgeInsets.all(28),
                         child: Form(
@@ -146,12 +118,10 @@ class _LoginScreenState extends State<LoginScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // Titre "Connexion"
                               Text(l.login,
                                   style: theme.textTheme.titleLarge!
                                       .copyWith(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 24),
-                              // Champ Email
                               _InputField(
                                 controller: _emailCtrl,
                                 label: l.email,
@@ -164,18 +134,17 @@ class _LoginScreenState extends State<LoginScreen>
                                 },
                               ),
                               const SizedBox(height: 16),
-                              // Champ Mot de passe
                               _InputField(
                                 controller: _passCtrl,
                                 label: l.password,
                                 icon: Icons.lock_outline,
-                                obscure: _obscure, // Masqué par défaut
+                                obscure: _obscure,
                                 suffixIcon: IconButton(
                                   icon: Icon(_obscure
                                       ? Icons.visibility_off
                                       : Icons.visibility),
                                   onPressed: () =>
-                                      setState(() => _obscure = !_obscure), // Affiche/masque le mot de passe
+                                      setState(() => _obscure = !_obscure),
                                 ),
                                 validator: (v) {
                                   if (v == null || v.isEmpty) return l.fieldRequired;
@@ -184,24 +153,27 @@ class _LoginScreenState extends State<LoginScreen>
                                 },
                               ),
                               const SizedBox(height: 28),
-                              // Bouton de connexion
                               ElevatedButton(
-                                onPressed: auth.loading ? null : _login, // Désactivé si chargement en cours
+                                onPressed: auth.loading ? null : _login,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: theme.colorScheme.primary,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(14)),
                                 ),
                                 child: auth.loading
                                     ? const SizedBox(
-                                        height: 20, width: 20,
+                                        height: 20,
+                                        width: 20,
                                         child: CircularProgressIndicator(
-                                            strokeWidth: 2, color: Colors.white))
+                                            strokeWidth: 2,
+                                            color: Colors.white))
                                     : Text(l.login,
                                         style: const TextStyle(
-                                            fontSize: 16, fontWeight: FontWeight.bold)),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
@@ -209,20 +181,21 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Lien vers l'inscription
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(l.noAccount,
-                            style: const TextStyle(color: Colors.white70)),
+                            style:
+                                const TextStyle(color: Colors.white70)),
                         TextButton(
                           onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (_) => const RegisterScreen())),
                           child: Text(l.register,
-                              style: const TextStyle(color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
+                              style:
+                                  const TextStyle(color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -237,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 }
 
-// ── ÉCRAN D'INSCRIPTION ────────────────────────────────────────────────
+// ── Register Screen ────────────────────────────────────────────────────────────
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -246,32 +219,21 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // Clé du formulaire
   final _formKey = GlobalKey<FormState>();
-  // Contrôleurs pour les champs
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
-  // Rôle choisi (par défaut : GUEST)
   String _role = 'GUEST';
-  // Indique si le mot de passe est masqué
   bool _obscure = true;
 
   @override
   void dispose() {
-    // Nettoie les contrôleurs
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
 
-  // MÉTHODE : Créer un nouveau compte
-  // CE QUE ÇA FAIT ÉTAPE PAR ÉTAPE :
-  // 1. Vérifie que le formulaire est valide
-  // 2. Appelle le AuthProvider pour inscrire l'utilisateur
-  // 3. Si succès : va à la page d'accueil et vide tout l'historique
-  // 4. Si échec : affiche un message d'erreur
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthProvider>();
@@ -279,7 +241,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _nameCtrl.text.trim(), _emailCtrl.text.trim(), _passCtrl.text, _role);
     if (!mounted) return;
     if (ok) {
-      // Inscription réussie : on va à la page d'accueil et on vide l'historique
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const EventsListScreen()),
@@ -299,7 +260,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       body: Container(
-        // Fond dégradé
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -318,7 +278,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 16),
-                  // Bouton retour
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
@@ -326,9 +285,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                  // Logo inscription
                   Container(
-                    width: 80, height: 80,
+                    width: 80,
+                    height: 80,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.15),
                       shape: BoxShape.circle,
@@ -342,7 +301,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: theme.textTheme.headlineSmall!.copyWith(
                           color: Colors.white, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 28),
-                  // Carte blanche formulaire
                   Card(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24)),
@@ -358,7 +316,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: theme.textTheme.titleLarge!
                                     .copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 20),
-                            // Champ Nom
                             _InputField(
                               controller: _nameCtrl,
                               label: l.name,
@@ -368,7 +325,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   : null,
                             ),
                             const SizedBox(height: 14),
-                            // Champ Email
                             _InputField(
                               controller: _emailCtrl,
                               label: l.email,
@@ -381,7 +337,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               },
                             ),
                             const SizedBox(height: 14),
-                            // Champ Mot de passe
                             _InputField(
                               controller: _passCtrl,
                               label: l.password,
@@ -401,43 +356,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               },
                             ),
                             const SizedBox(height: 14),
-                            // Sélecteur de rôle (GUEST ou ORGANIZER)
+                            // Role selector
                             DropdownButtonFormField<String>(
                               value: _role,
                               decoration: InputDecoration(
                                 labelText: l.role,
-                                prefixIcon: const Icon(Icons.badge_outlined),
+                                prefixIcon:
+                                    const Icon(Icons.badge_outlined),
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12)),
                               ),
                               items: [
                                 DropdownMenuItem(
-                                    value: 'GUEST', child: Text(l.guest)),
+                                    value: 'GUEST',
+                                    child: Text(l.guest)),
                                 DropdownMenuItem(
-                                    value: 'ORGANIZER', child: Text(l.organizer)),
+                                    value: 'ORGANIZER',
+                                    child: Text(l.organizer)),
                               ],
                               onChanged: (v) =>
                                   setState(() => _role = v ?? 'GUEST'),
                             ),
                             const SizedBox(height: 24),
-                            // Bouton Inscription
                             ElevatedButton(
                               onPressed: auth.loading ? null : _register,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: theme.colorScheme.primary,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14)),
                               ),
                               child: auth.loading
                                   ? const SizedBox(
-                                      height: 20, width: 20,
+                                      height: 20,
+                                      width: 20,
                                       child: CircularProgressIndicator(
-                                          strokeWidth: 2, color: Colors.white))
+                                          strokeWidth: 2,
+                                          color: Colors.white))
                                   : Text(l.register,
                                       style: const TextStyle(
-                                          fontSize: 16, fontWeight: FontWeight.bold)),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ),
@@ -445,7 +406,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Lien vers la connexion
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -455,7 +415,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: () => Navigator.pop(context),
                         child: Text(l.login,
                             style: const TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.bold)),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -470,9 +431,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-// ── WIDGETS PARTAGÉS ───────────────────────────────────────────────────
+// ── Shared widgets ─────────────────────────────────────────────────────────────
 
-// Widget réutilisable pour les champs de saisie
 class _InputField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -503,7 +463,8 @@ class _InputField extends StatelessWidget {
         labelText: label,
         prefixIcon: Icon(icon),
         suffixIcon: suffixIcon,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border:
+            OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: Colors.grey.shade50,
       ),
@@ -511,7 +472,6 @@ class _InputField extends StatelessWidget {
   }
 }
 
-// Widget pour basculer entre les langues (FR/AR)
 class _LanguageToggle extends StatelessWidget {
   final LanguageProvider lang;
   final AppLocalizations l;
@@ -542,7 +502,6 @@ class _LanguageToggle extends StatelessWidget {
   }
 }
 
-// Bouton de sélection de langue
 class _LangButton extends StatelessWidget {
   final String label;
   final bool selected;
@@ -557,9 +516,11 @@ class _LangButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? Colors.white : Colors.transparent,
+          color:
+              selected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(label,
