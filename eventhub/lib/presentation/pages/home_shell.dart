@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeShell extends StatelessWidget {
   final Widget child;
@@ -38,7 +39,7 @@ class HomeShell extends StatelessWidget {
   }
 
   int _getSelectedIndex(BuildContext context) {
-    final location = ModalRoute.of(context)?.settings.name ?? '';
+    final location = GoRouterState.of(context).uri.toString();
     if (location == '/tickets') return 1;
     if (location == '/notifications') return 2;
     if (location == '/profile') return 3;
@@ -48,16 +49,16 @@ class HomeShell extends StatelessWidget {
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, '/');
+        context.go('/');
         break;
       case 1:
-        Navigator.pushReplacementNamed(context, '/tickets');
+        context.go('/tickets');
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, '/notifications');
+        context.go('/notifications');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/profile');
+        context.go('/profile');
         break;
     }
   }
