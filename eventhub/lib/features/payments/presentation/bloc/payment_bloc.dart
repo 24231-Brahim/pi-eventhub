@@ -14,14 +14,14 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   PaymentBloc({
     required this.createPaymentIntentUseCase,
     required this.confirmPaymentUseCase,
-  }) : super(PaymentInitial()) {
+  }) : super(const PaymentInitial()) {
     on<CreatePaymentIntentEvent>(_onCreatePaymentIntent);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
   }
 
   Future<void> _onCreatePaymentIntent(
       CreatePaymentIntentEvent event, Emitter<PaymentState> emit) async {
-    emit(PaymentLoading());
+    emit(const PaymentLoading());
     final result =
         await createPaymentIntentUseCase.call(event.amount, event.currency);
     result.fold(
@@ -33,7 +33,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
   Future<void> _onConfirmPayment(
       ConfirmPaymentEvent event, Emitter<PaymentState> emit) async {
-    emit(PaymentLoading());
+    emit(const PaymentLoading());
     final result = await confirmPaymentUseCase.call(event.paymentIntentId);
     result.fold(
       (failure) => emit(PaymentError(message: failure.message)),

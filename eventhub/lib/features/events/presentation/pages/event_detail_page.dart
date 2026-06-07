@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +6,8 @@ import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
+import 'package:eventhub/shared/services/local_storage_service.dart';
+import 'package:eventhub/core/di/injection_container.dart' as di;
 
 class EventDetailPage extends StatefulWidget {
   final String eventId;
@@ -15,10 +18,39 @@ class EventDetailPage extends StatefulWidget {
 }
 
 class _EventDetailPageState extends State<EventDetailPage> {
+  bool _isFavorite = false;
+
   @override
   void initState() {
     super.initState();
     context.read<EventBloc>().add(GetEventByIdEvent(id: widget.eventId));
+    _checkFavorite();
+  }
+
+  void _checkFavorite() {
+    final storage = di.sl<LocalStorageService>();
+    final favs = storage.getString('favorites') ?? '[]';
+    final ids = List<String>.from(jsonDecode(favs));
+    if (mounted) setState(() => _isFavorite = ids.contains(widget.eventId));
+  }
+
+  void _toggleFavorite(String eventId) {
+    final storage = di.sl<LocalStorageService>();
+    final favs = storage.getString('favorites') ?? '[]';
+    final ids = List<String>.from(jsonDecode(favs));
+    if (_isFavorite) {
+      ids.remove(eventId);
+    } else {
+      ids.add(eventId);
+    }
+    storage.setString('favorites', jsonEncode(ids));
+    setState(() => _isFavorite = !_isFavorite);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(_isFavorite ? 'Added to favorites' : 'Removed from favorites'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   @override
@@ -28,8 +60,11 @@ class _EventDetailPageState extends State<EventDetailPage> {
         title: const Text('Event Details'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border),
-            onPressed: () {},
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? Colors.red : null,
+            ),
+            onPressed: () => _toggleFavorite(widget.eventId),
           ),
           IconButton(
             icon: const Icon(Icons.share),

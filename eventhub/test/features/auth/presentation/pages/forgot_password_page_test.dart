@@ -4,11 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../helpers/mocks.dart';
 
 Widget createTestWidget(AuthBloc authBloc) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: BlocProvider<AuthBloc>(
         create: (_) => authBloc,
         child: const ForgotPasswordPage(),

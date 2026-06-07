@@ -14,14 +14,14 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   BookingBloc({
     required this.createBookingUseCase,
     required this.getUserBookingsUseCase,
-  }) : super(BookingInitial()) {
+  }) : super(const BookingInitial()) {
     on<CreateBookingEvent>(_onCreateBooking);
     on<GetUserBookingsEvent>(_onGetUserBookings);
   }
 
   Future<void> _onCreateBooking(
       CreateBookingEvent event, Emitter<BookingState> emit) async {
-    emit(BookingLoading());
+    emit(const BookingLoading());
     final result = await createBookingUseCase.call(
         event.eventId, event.quantity, event.amount);
     result.fold(
@@ -32,7 +32,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
   Future<void> _onGetUserBookings(
       GetUserBookingsEvent event, Emitter<BookingState> emit) async {
-    emit(BookingLoading());
+    emit(const BookingLoading());
     final result = await getUserBookingsUseCase.call();
     result.fold(
       (failure) => emit(BookingError(message: failure.message)),

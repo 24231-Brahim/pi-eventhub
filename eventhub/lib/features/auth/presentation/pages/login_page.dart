@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -65,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'EventHub',
+                    AppLocalizations.of(context)!.appName,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -73,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Discover and book amazing events',
+                    AppLocalizations.of(context)!.discoverEvents,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Colors.grey[600],
@@ -83,9 +84,9 @@ class _LoginPageState extends State<LoginPage> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.email,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -102,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: AppLocalizations.of(context)!.password,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -126,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                         onPressed: () => context.push('/forgot-password'),
-                      child: const Text('Forgot password?'),
+                        child: Text(AppLocalizations.of(context)!.forgotPassword),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -137,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                       }
                       return ElevatedButton(
                         onPressed: _onLogin,
-                        child: const Text('Login'),
+                        child: Text(AppLocalizations.of(context)!.login),
                       );
                     },
                   ),
@@ -145,10 +146,10 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account?"),
+                      Text(AppLocalizations.of(context)!.noAccount),
                       TextButton(
                         onPressed: () => context.push('/register'),
-                        child: const Text('Register'),
+                        child: Text(AppLocalizations.of(context)!.register),
                       ),
                     ],
                   ),

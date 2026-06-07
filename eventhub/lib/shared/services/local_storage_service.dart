@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class LocalStorageService {
   final SharedPreferences _prefs;
-  LocalStorageService({required SharedPreferences prefs}) : _prefs = prefs;
+  LocalStorageService({required this._prefs});
 
   String? getString(String key) => _prefs.getString(key);
   Future<bool> setString(String key, String value) => _prefs.setString(key, value);

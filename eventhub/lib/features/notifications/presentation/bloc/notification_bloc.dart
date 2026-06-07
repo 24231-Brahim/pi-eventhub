@@ -10,13 +10,13 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final GetNotificationsUseCase getNotificationsUseCase;
 
   NotificationBloc({required this.getNotificationsUseCase})
-      : super(NotificationInitial()) {
+      : super(const NotificationInitial()) {
     on<GetNotificationsEvent>(_onGetNotifications);
   }
 
   Future<void> _onGetNotifications(
       GetNotificationsEvent event, Emitter<NotificationState> emit) async {
-    emit(NotificationLoading());
+    emit(const NotificationLoading());
     final result = await getNotificationsUseCase.call();
     result.fold(
       (failure) => emit(NotificationError(message: failure.message)),

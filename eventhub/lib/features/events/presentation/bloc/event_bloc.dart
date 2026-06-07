@@ -23,7 +23,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     required this.createEventUseCase,
     required this.updateEventUseCase,
     required this.deleteEventUseCase,
-  }) : super(EventInitial()) {
+  }) : super(const EventInitial()) {
     on<GetEventsEvent>(_onGetEvents);
     on<GetEventByIdEvent>(_onGetEventById);
     on<CreateEventEvent>(_onCreateEvent);
@@ -32,7 +32,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   }
 
   Future<void> _onGetEvents(GetEventsEvent event, Emitter<EventState> emit) async {
-    emit(EventLoading());
+    emit(const EventLoading());
     final result = await getEventsUseCase.call(
       page: event.page,
       size: event.size,
@@ -50,7 +50,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
   Future<void> _onGetEventById(
       GetEventByIdEvent event, Emitter<EventState> emit) async {
-    emit(EventLoading());
+    emit(const EventLoading());
     final result = await getEventByIdUseCase.call(event.id);
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
@@ -60,7 +60,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
   Future<void> _onCreateEvent(
       CreateEventEvent event, Emitter<EventState> emit) async {
-    emit(EventLoading());
+    emit(const EventLoading());
     final result = await createEventUseCase.call(event.event);
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
@@ -70,7 +70,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
   Future<void> _onUpdateEvent(
       UpdateEventEvent event, Emitter<EventState> emit) async {
-    emit(EventLoading());
+    emit(const EventLoading());
     final result = await updateEventUseCase.call(event.event);
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
@@ -80,11 +80,11 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
   Future<void> _onDeleteEvent(
       DeleteEventEvent event, Emitter<EventState> emit) async {
-    emit(EventLoading());
+    emit(const EventLoading());
     final result = await deleteEventUseCase.call(event.id);
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
-      (_) => emit(EventDeleted()),
+      (_) => emit(const EventDeleted()),
     );
   }
 }

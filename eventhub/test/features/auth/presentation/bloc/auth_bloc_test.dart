@@ -30,7 +30,7 @@ void main() {
       build: createBloc,
       act: (bloc) {
         when(() => mockLoginUseCase.call('test@test.com', 'Password123'))
-            .thenAnswer((_) async => Right(tUser));
+            .thenAnswer((_) async => const Right(tUser));
         bloc.add(const LoginEvent(email: 'test@test.com', password: 'Password123'));
       },
       expect: () => [isA<AuthLoading>(), isA<Authenticated>()],
@@ -52,7 +52,7 @@ void main() {
       build: createBloc,
       act: (bloc) {
         when(() => mockRegisterUseCase.call('Test', 'test@test.com', 'Pass1234', 'participant'))
-            .thenAnswer((_) async => Right(tUser));
+            .thenAnswer((_) async => const Right(tUser));
         bloc.add(const RegisterEvent(
           name: 'Test',
           email: 'test@test.com',

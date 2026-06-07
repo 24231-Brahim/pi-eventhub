@@ -50,10 +50,9 @@ class AuthSupabaseDataSourceImpl implements AuthSupabaseDataSource {
   final SupabaseClient supabase;
 
   AuthSupabaseDataSourceImpl({
-    required GoTrueClient auth,
-    required SupabaseClient supabase,
-  })  : auth = auth,
-        supabase = supabase;
+    required this.auth,
+    required this.supabase,
+  });
 
   @override
   Future<AuthResponse> login(String email, String password) async {

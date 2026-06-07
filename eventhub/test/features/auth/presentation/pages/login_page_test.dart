@@ -2,35 +2,38 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:dartz/dartz.dart';
+import 'package:go_router/go_router.dart';
 import 'package:eventhub/features/auth/domain/entities/user.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/auth/presentation/pages/login_page.dart';
 import 'package:eventhub/features/auth/presentation/pages/register_page.dart';
 import 'package:eventhub/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../helpers/mocks.dart';
 
-Widget createTestWidget(AuthBloc authBloc) => BlocProvider<AuthBloc>.value(
-      value: authBloc,
-      child: MaterialApp(
-        home: const LoginPage(),
-        onGenerateRoute: (settings) {
-          if (settings.name == '/register') {
-            return MaterialPageRoute(
-              builder: (_) => const RegisterPage(),
-            );
-          }
-          if (settings.name == '/forgot-password') {
-            return MaterialPageRoute(
-              builder: (_) => const ForgotPasswordPage(),
-            );
-          }
-          return null;
-        },
+Widget createTestWidget(AuthBloc authBloc) {
+  final goRouter = GoRouter(
+    initialLocation: '/login',
+    routes: [
+      GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
+      GoRoute(path: '/register', builder: (_, _) => const RegisterPage()),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (_, _) => const ForgotPasswordPage(),
       ),
-    );
+    ],
+  );
+  return BlocProvider<AuthBloc>.value(
+    value: authBloc,
+    child: MaterialApp.router(
+      routerConfig: goRouter,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+    ),
+  );
+}
 
 void main() {
   late MockLoginUseCase mockLoginUseCase;
@@ -64,7 +67,7 @@ void main() {
       expect(find.text('Login'), findsOneWidget);
       expect(find.byType(TextFormField), findsNWidgets(2));
       expect(find.text("Don't have an account?"), findsOneWidget);
-      expect(find.text('Forgot password?'), findsOneWidget);
+      expect(find.text('Forgot Password?'), findsOneWidget);
     });
 
     testWidgets('shows validation error for empty fields', (tester) async {
@@ -92,7 +95,7 @@ void main() {
 
       expect(authBloc.state, isA<AuthLoading>());
 
-      completer.complete(Right(tUser));
+      completer.complete(const Right(tUser));
       await tester.pump();
 
       expect(authBloc.state, isA<Authenticated>());
@@ -110,7 +113,7 @@ void main() {
     testWidgets('navigates to forgot password page', (tester) async {
       await tester.pumpWidget(createTestWidget(authBloc));
 
-      await tester.tap(find.text('Forgot password?'));
+      await tester.tap(find.text('Forgot Password?'));
       await tester.pumpAndSettle();
 
       expect(find.text('Reset your password'), findsOneWidget);

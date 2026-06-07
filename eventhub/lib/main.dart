@@ -12,21 +12,26 @@ import 'package:eventhub/features/payments/presentation/bloc/payment_bloc.dart';
 import 'package:eventhub/features/notifications/presentation/bloc/notification_bloc.dart';
 import 'package:eventhub/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:eventhub/shared/themes/app_theme.dart';
+import 'package:eventhub/shared/services/local_storage_service.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
     url: SupabaseConstants.supabaseUrl,
-    anonKey: SupabaseConstants.anonKey,
+    publishableKey: SupabaseConstants.anonKey,
   );
 
   await di.initDependencies();
-  runApp(const EventHubApp());
+  final themeNotifier = ThemeNotifier(storage: di.sl<LocalStorageService>());
+  di.sl.registerLazySingleton<ThemeNotifier>(() => themeNotifier);
+  runApp(EventHubApp(themeNotifier: themeNotifier));
 }
 
 class EventHubApp extends StatefulWidget {
-  const EventHubApp({super.key});
+  final ThemeNotifier themeNotifier;
+  const EventHubApp({super.key, required this.themeNotifier});
 
   @override
   State<EventHubApp> createState() => _EventHubAppState();
@@ -41,11 +46,17 @@ class _EventHubAppState extends State<EventHubApp> {
     final authBloc = di.sl<AuthBloc>();
     authBloc.add(const CheckAuthEvent());
     _appRouter = AppRouter(authBloc: authBloc);
+    widget.themeNotifier.addListener(_onChanged);
+  }
+
+  void _onChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
     _appRouter.dispose();
+    widget.themeNotifier.removeListener(_onChanged);
     super.dispose();
   }
 
@@ -67,17 +78,47 @@ class _EventHubAppState extends State<EventHubApp> {
         routerConfig: _appRouter.router,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
-        localizationsDelegates: const [
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en', 'US'),
-          Locale('fr', 'FR'),
-          Locale('ar', 'SA'),
-        ],
+        themeMode: widget.themeNotifier.themeMode,
+        locale: widget.themeNotifier.locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       ),
     );
+  }
+}
+
+class ThemeNotifier extends ChangeNotifier {
+  final LocalStorageService storage;
+  ThemeMode _themeMode = ThemeMode.light;
+  Locale _locale = const Locale('en');
+
+  ThemeNotifier({required this.storage}) {
+    _load();
+  }
+
+  ThemeMode get themeMode => _themeMode;
+  Locale get locale => _locale;
+
+  void _load() {
+    final savedTheme = storage.getString('theme_mode');
+    if (savedTheme != null) {
+      _themeMode = ThemeMode.values.byName(savedTheme);
+    }
+    final savedLocale = storage.getString('locale');
+    if (savedLocale != null && savedLocale.isNotEmpty) {
+      _locale = Locale(savedLocale);
+    }
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    notifyListeners();
+    await storage.setString('theme_mode', mode.name);
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    _locale = locale;
+    notifyListeners();
+    await storage.setString('locale', locale.languageCode);
   }
 }

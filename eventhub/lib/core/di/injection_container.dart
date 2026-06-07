@@ -1,7 +1,9 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:eventhub/shared/services/local_storage_service.dart';
 import 'package:eventhub/core/network/network_info.dart';
 import 'package:eventhub/core/utils/token_manager.dart';
 import 'package:eventhub/features/auth/data/datasources/auth_supabase_datasource.dart';
@@ -54,7 +56,7 @@ import 'package:eventhub/features/profile/presentation/bloc/profile_bloc.dart';
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
-  _initCore();
+  await _initCore();
   _initAuth();
   _initEvents();
   _initBookings();
@@ -64,8 +66,11 @@ Future<void> initDependencies() async {
   _initProfile();
 }
 
-void _initCore() {
-  sl.registerLazySingleton(() => FlutterSecureStorage());
+Future<void> _initCore() async {
+  final prefs = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => prefs);
+  sl.registerLazySingleton(() => LocalStorageService(prefs: sl()));
+  sl.registerLazySingleton(() => const FlutterSecureStorage());
   sl.registerLazySingleton<TokenManager>(
     () => TokenManager(storage: sl()),
   );

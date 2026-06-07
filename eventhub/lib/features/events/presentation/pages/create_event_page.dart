@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
@@ -20,6 +22,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
   final _cityController = TextEditingController();
   final _priceController = TextEditingController();
   final _maxParticipantsController = TextEditingController();
+  final _imagePicker = ImagePicker();
+  File? _selectedImage;
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 7));
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
   EventCategory _selectedCategory = EventCategory.conference;
@@ -53,6 +57,37 @@ class _CreateEventPageState extends State<CreateEventPage> {
     _priceController.dispose();
     _maxParticipantsController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Select Image Source'),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, ImageSource.camera),
+            child: const ListTile(
+              leading: Icon(Icons.camera_alt),
+              title: Text('Camera'),
+            ),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, ImageSource.gallery),
+            child: const ListTile(
+              leading: Icon(Icons.photo_library),
+              title: Text('Gallery'),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (source != null) {
+      final picked = await _imagePicker.pickImage(source: source);
+      if (picked != null) {
+        setState(() => _selectedImage = File(picked.path));
+      }
+    }
   }
 
   void _onSubmit() {
@@ -106,14 +141,52 @@ class _CreateEventPageState extends State<CreateEventPage> {
             );
           }
         },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  InkWell(
+                    onTap: _pickImage,
+                    child: Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: _selectedImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                _selectedImage!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              ),
+                            )
+                          : widget.event?.imageUrl != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    widget.event!.imageUrl!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
+                                )
+                              : const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add_photo_alternate,
+                                        size: 48),
+                                    SizedBox(height: 8),
+                                    Text('Add Event Image'),
+                                  ],
+                                ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(
                     labelText: 'Event Title',
@@ -136,7 +209,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<EventCategory>(
-                  value: _selectedCategory,
+                  initialValue: _selectedCategory,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     prefixIcon: Icon(Icons.category),

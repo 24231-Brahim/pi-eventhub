@@ -20,11 +20,11 @@ void main() {
 
   test('should register successfully', () async {
     when(() => mockRepository.register(tName, tEmail, tPassword, tRole))
-        .thenAnswer((_) async => Right(tUser));
+        .thenAnswer((_) async => const Right(tUser));
 
     final result = await useCase(tName, tEmail, tPassword, tRole);
 
-    expect(result, Right(tUser));
+    expect(result, const Right(tUser));
     verify(() => mockRepository.register(tName, tEmail, tPassword, tRole)).called(1);
   });
 
@@ -34,6 +34,6 @@ void main() {
 
     final result = await useCase(tName, tEmail, tPassword, tRole);
 
-    expect(result, Left(tFailure));
+    expect(result, const Left(tFailure));
   });
 }

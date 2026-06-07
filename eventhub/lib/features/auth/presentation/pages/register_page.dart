@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -44,8 +45,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Account')),
+      appBar: AppBar(title: Text(l10n.createAccount)),
       body: SafeArea(
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
@@ -68,9 +70,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Full Name',
-                      prefixIcon: Icon(Icons.person_outlined),
+                    decoration: InputDecoration(
+                      labelText: l10n.fullName,
+                      prefixIcon: const Icon(Icons.person_outlined),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -83,9 +85,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: l10n.email,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -102,7 +104,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: l10n.password,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -129,7 +131,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirm,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: l10n.confirmPassword,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -156,7 +158,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       Expanded(
                         child: _RoleCard(
                           icon: Icons.explore,
-                          label: 'Discover Events',
+                          label: l10n.discoverEvents,
                           isSelected: _selectedRole == 'participant',
                           onTap: () => setState(() => _selectedRole = 'participant'),
                         ),
@@ -165,7 +167,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       Expanded(
                         child: _RoleCard(
                           icon: Icons.add_circle_outline,
-                          label: 'Organize Events',
+                          label: l10n.organizeEvents,
                           isSelected: _selectedRole == 'organizer',
                           onTap: () => setState(() => _selectedRole = 'organizer'),
                         ),
@@ -180,7 +182,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       }
                       return ElevatedButton(
                         onPressed: _onRegister,
-                        child: const Text('Create Account'),
+                        child: Text(l10n.createAccount),
                       );
                     },
                   ),
@@ -188,10 +190,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already have an account?'),
+                      Text(l10n.haveAccount),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Login'),
+                        child: Text(l10n.login),
                       ),
                     ],
                   ),

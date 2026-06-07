@@ -2,15 +2,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:dartz/dartz.dart';
 import 'package:eventhub/features/auth/domain/entities/user.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/auth/presentation/pages/register_page.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../helpers/mocks.dart';
 
 Widget createTestWidget(AuthBloc authBloc) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: BlocProvider<AuthBloc>(
         create: (_) => authBloc,
         child: const RegisterPage(),
@@ -92,7 +94,7 @@ void main() {
 
       expect(authBloc.state, isA<AuthLoading>());
 
-      completer.complete(Right(tUser));
+      completer.complete(const Right(tUser));
       await tester.pump();
 
       expect(authBloc.state, isA<Authenticated>());

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:eventhub/core/di/injection_container.dart' as di;
+import 'package:eventhub/l10n/app_localizations.dart';
+import 'package:eventhub/main.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -8,13 +11,33 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _isDarkMode = false;
-  String _selectedLanguage = 'English';
+  late final ThemeNotifier _themeNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeNotifier = di.sl<ThemeNotifier>();
+    _themeNotifier.addListener(_onChanged);
+  }
+
+  void _onChanged() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _themeNotifier.removeListener(_onChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = _themeNotifier.themeMode == ThemeMode.dark;
+    final locale = _themeNotifier.locale;
+    final languageName = _getLanguageName(locale);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -26,17 +49,18 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 8),
           Card(
             child: SwitchListTile(
-              title: const Text('Dark Mode'),
+              title: Text(AppLocalizations.of(context)!.darkMode),
               subtitle: const Text('Toggle dark theme'),
-              secondary: Icon(
-                  _isDarkMode ? Icons.dark_mode : Icons.light_mode),
-              value: _isDarkMode,
-              onChanged: (value) =>
-                  setState(() => _isDarkMode = value),
+              secondary:
+                  Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
+              value: isDarkMode,
+              onChanged: (value) => _themeNotifier.setThemeMode(
+                value ? ThemeMode.dark : ThemeMode.light,
+              ),
             ),
           ),
           const SizedBox(height: 24),
-          Text('Language',
+          Text(AppLocalizations.of(context)!.language,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -45,8 +69,8 @@ class _SettingsPageState extends State<SettingsPage> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.language),
-              title: const Text('Language'),
-              subtitle: Text(_selectedLanguage),
+              title: Text(AppLocalizations.of(context)!.language),
+              subtitle: Text(languageName),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _showLanguagePicker(),
             ),
@@ -58,13 +82,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   .titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Card(
+          const Card(
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.info),
-                  title: const Text('Version'),
-                  subtitle: const Text('1.0.0'),
+                  leading: Icon(Icons.info),
+                  title: Text('Version'),
+                  subtitle: Text('1.0.0'),
                 ),
               ],
             ),
@@ -74,22 +98,49 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  String _getLanguageName(Locale locale) {
+    if (locale.languageCode == 'fr') return 'Français';
+    if (locale.languageCode == 'ar') return 'العربية';
+    return 'English';
+  }
+
   void _showLanguagePicker() {
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
         title: const Text('Select Language'),
-        children: ['English', 'Français', 'العربية']
-            .map((lang) => RadioListTile<String>(
-                  title: Text(lang),
-                  value: lang,
-                  groupValue: _selectedLanguage,
-                  onChanged: (value) {
-                    setState(() => _selectedLanguage = value!);
-                    Navigator.pop(context);
-                  },
-                ))
-            .toList(),
+        children: [
+          SimpleDialogOption(
+            onPressed: () {
+              _themeNotifier.setLocale(const Locale('en'));
+              Navigator.pop(context);
+            },
+            child: const ListTile(
+              title: Text('English'),
+              trailing: Icon(Icons.check),
+            ),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              _themeNotifier.setLocale(const Locale('fr'));
+              Navigator.pop(context);
+            },
+            child: const ListTile(
+              title: Text('Français'),
+              trailing: Icon(Icons.check),
+            ),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              _themeNotifier.setLocale(const Locale('ar'));
+              Navigator.pop(context);
+            },
+            child: const ListTile(
+              title: Text('العربية'),
+              trailing: Icon(Icons.check),
+            ),
+          ),
+        ],
       ),
     );
   }

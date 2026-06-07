@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:dartz/dartz.dart';
-import 'package:eventhub/core/errors/failures.dart';
 import 'package:eventhub/features/auth/data/datasources/auth_supabase_datasource.dart';
 import 'package:eventhub/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:mocktail/mocktail.dart';

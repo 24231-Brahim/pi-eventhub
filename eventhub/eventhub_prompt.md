@@ -4,7 +4,7 @@
 
 ## ROLE
 
-Tu es un architecte logiciel senior spécialisé en Flutter, Dart, Clean Architecture, Firebase et Spring Boot.
+Tu es un architecte logiciel senior spécialisé en Flutter, Dart, Clean Architecture et Supabase.
 
 Ton objectif est de concevoir et développer une application mobile professionnelle nommée **EventHub**.
 
@@ -18,8 +18,9 @@ EventHub est une plateforme mobile complète de gestion, découverte et réserva
 
 Elle permet :
 
-- Aux organisateurs de créer et gérer leurs événements
-- Aux participants de découvrir et réserver des événements
+- Aux **administrateurs** de gérer et superviser toute la plateforme
+- Aux **organisateurs** de créer et gérer leurs événements
+- Aux **participants** de découvrir et réserver des événements
 - La génération et la validation de billets QR Code
 - La gestion des paiements
 - Le suivi statistique des événements
@@ -72,6 +73,46 @@ Elle permet :
 - Ajouter aux favoris
 - Voir ses billets et son historique
 - Afficher son QR Code
+
+---
+
+### Admin (Super Administrateur)
+
+> L'Admin est le responsable de la plateforme EventHub. Il dispose d'un accès total à toutes les données et fonctionnalités de l'application.
+
+**Fonctionnalités :**
+
+- Accéder à un dashboard d'administration global
+- Gérer tous les utilisateurs (Organisateurs + Participants)
+  - Voir la liste complète des utilisateurs
+  - Activer / Désactiver un compte
+  - Supprimer un compte
+  - Changer le rôle d'un utilisateur
+- Gérer tous les événements de la plateforme
+  - Voir, modifier ou supprimer n'importe quel événement
+  - Approuver ou rejeter les événements soumis par les organisateurs
+  - Mettre en avant (featured) certains événements sur la Home
+- Gérer les catégories d'événements
+- Voir toutes les transactions et paiements
+- Gérer les remboursements
+- Envoyer des notifications globales à tous les utilisateurs
+- Voir les statistiques globales de la plateforme
+
+**Dashboard Admin — afficher :**
+
+- Nombre total d'utilisateurs (par rôle)
+- Nombre total d'événements (actifs / en attente / terminés)
+- Revenus totaux de la plateforme
+- Nouvelles inscriptions (graphique hebdomadaire)
+- Événements en attente d'approbation
+- Signalements et incidents
+
+**Accès Admin :**
+
+- L'Admin ne peut pas s'inscrire via l'interface publique
+- Le compte Admin est créé manuellement dans Supabase (rôle défini dans la table `profiles`)
+- L'interface Admin est une section séparée dans l'application, accessible uniquement si `role = 'admin'`
+- GoRouter doit bloquer l'accès à toutes les routes Admin pour les autres rôles
 
 ---
 
@@ -168,7 +209,23 @@ Utiliser :
 
 ---
 
-## MODULE QR CODE
+## ÉCRANS ADMIN
+
+| Écran | Contenu |
+|---|---|
+| Dashboard Global | Statistiques complètes de la plateforme |
+| Gestion Utilisateurs | Liste, filtres, activation/désactivation, suppression |
+| Détail Utilisateur | Profil, historique, rôle, statut |
+| Gestion Événements | Tous les événements, approbation, mise en avant |
+| Approbation Événement | Approuver / Rejeter avec motif |
+| Gestion Paiements | Toutes les transactions, remboursements |
+| Gestion Catégories | Ajouter / Modifier / Supprimer des catégories |
+| Notifications Globales | Envoyer une notification à tous les utilisateurs |
+| Rapports | Export des données (CSV) |
+
+---
+
+
 
 ### Génération
 
@@ -213,7 +270,7 @@ Résultats possibles :
 
 ## NOTIFICATIONS
 
-Firebase Cloud Messaging (FCM)
+**Supabase Realtime** pour les mises à jour en temps réel.
 
 **Déclencheurs :**
 
@@ -221,6 +278,8 @@ Firebase Cloud Messaging (FCM)
 - Paiement validé
 - Événement annulé
 - Rappel avant événement
+
+> Utiliser les **Supabase Edge Functions** pour envoyer des emails transactionnels (confirmation, reçu de paiement).
 
 ---
 
@@ -249,7 +308,17 @@ lib/
     ├── tickets/
     ├── payments/
     ├── notifications/
-    └── profile/
+    ├── profile/
+    └── admin/
+        ├── data/
+        ├── domain/
+        └── presentation/
+            ├── dashboard/
+            ├── users/
+            ├── events/
+            ├── payments/
+            ├── categories/
+            └── notifications/
 ```
 
 **Séparation stricte :**
@@ -271,8 +340,9 @@ lib/
 ## NAVIGATION
 
 - `GoRouter` avec guards et routes nommées
-- Gestion des rôles (Organisateur / Participant)
+- Gestion des rôles (Admin / Organisateur / Participant)
 - Redirection automatique selon l'état d'authentification
+- Routes Admin entièrement protégées : inaccessibles pour Organisateur et Participant
 
 ---
 
@@ -289,18 +359,32 @@ lib/
 
 ## BACKEND
 
-**Option A — Firebase :**
+**Supabase uniquement** (pas de Firebase, pas de Spring Boot)
 
-- Authentication
-- Cloud Firestore
-- Firebase Storage
-- Cloud Functions
+| Service Supabase | Usage |
+|---|---|
+| `supabase_flutter` | Client officiel Flutter |
+| **Auth** | Email + Password, JWT, sessions persistantes |
+| **PostgreSQL** | Base de données relationnelle principale |
+| **Storage** | Images des événements et photos de profil |
+| **Edge Functions** | Logique métier serveur (validation QR, paiement) |
+| **Realtime** | Mises à jour en temps réel (inscriptions, notifications) |
+| **Row Level Security (RLS)** | Sécurité des données par rôle (obligatoire) |
 
-**Option B — Spring Boot + PostgreSQL :**
+**Schéma PostgreSQL — tables principales :**
 
-- API REST sécurisée
-- Documentation Swagger
-- Architecture documentée
+- `profiles` (id, role **[admin | organizer | participant]**, full_name, avatar_url, is_active)
+- `events` (id, organizer_id, title, description, date, location, price, status, is_approved, is_featured)
+- `bookings` (id, event_id, user_id, status, created_at)
+- `tickets` (id, booking_id, qr_data, is_used, scanned_at)
+- `payments` (id, booking_id, amount, status, stripe_id)
+- `favorites` (id, user_id, event_id)
+- `notifications` (id, user_id, title, body, is_read, is_global)
+- `categories` (id, name, icon)
+- `admin_logs` (id, admin_id, action, target_type, target_id, created_at)
+
+> **Règle stricte :** Toutes les tables doivent avoir des politiques RLS activées.  
+> Ne jamais accéder à la base de données sans passer par les politiques RLS.
 
 ---
 
@@ -344,12 +428,7 @@ Pipeline **GitHub Actions** :
 dependencies:
   flutter_bloc: ^8.x
   go_router: ^13.x
-  dio: ^5.x
-  firebase_core: ^3.x
-  firebase_auth: ^5.x
-  cloud_firestore: ^5.x
-  firebase_storage: ^12.x
-  firebase_messaging: ^15.x
+  supabase_flutter: ^2.x
   qr_flutter: ^4.x
   mobile_scanner: ^5.x
   image_picker: ^1.x
@@ -361,6 +440,7 @@ dependencies:
   shimmer: ^3.x
   hive: ^2.x
   hive_flutter: ^1.x
+  flutter_stripe: ^10.x
 ```
 
 ---
@@ -371,24 +451,27 @@ dependencies:
 
 1. Analyse fonctionnelle complète
 2. Architecture globale + structure des dossiers
-3. Modèle de données + schéma Firestore/PostgreSQL
+3. Modèle de données + schéma PostgreSQL Supabase + politiques RLS
 4. Diagrammes UML
 5. Routes GoRouter
 6. BLoC/Cubit nécessaires
 7. Thème global + localisation
-8. Module Auth (Login / Register / Forgot Password)
-9. Module Events (CRUD complet)
+8. Module Auth (Login / Register / Forgot Password + Guards par rôle)
+9. Module Events (CRUD complet + approbation Admin)
 10. Module QR Code (génération + scanner)
 11. Module Paiement
-12. Module Notifications
+12. Module Notifications (+ notifications globales Admin)
 13. Dashboard Organisateur
-14. Tests unitaires et d'intégration
-15. Pipeline CI/CD
+14. **Module Admin** (Dashboard global, gestion utilisateurs, gestion événements, paiements)
+15. Tests unitaires et d'intégration
+16. Pipeline CI/CD
 
 ---
 
 ## RÈGLES ABSOLUES — CE QUE TU NE DOIS JAMAIS FAIRE
 
+- ❌ Ne jamais permettre à un Organisateur ou Participant d'accéder aux routes Admin
+- ❌ Ne jamais créer le compte Admin via l'interface d'inscription publique
 - ❌ Ne jamais utiliser `setState` pour la logique métier
 - ❌ Ne jamais mélanger UI, logique métier et accès aux données
 - ❌ Ne jamais écrire du code non testé

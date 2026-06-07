@@ -50,8 +50,10 @@ class _EventListPageState extends State<EventListPage> {
           if (_selectedCategory != null)
             Chip(
               label: Text(_selectedCategory!),
-              onDeleted: () =>
-                  setState(() => _selectedCategory = null),
+              onDeleted: () => setState(() {
+                _selectedCategory = null;
+                context.read<EventBloc>().add(const GetEventsEvent());
+              }),
             ),
           Expanded(
             child: BlocBuilder<EventBloc, EventState>(
@@ -118,8 +120,8 @@ class _EventListPageState extends State<EventListPage> {
                         label: Text(cat),
                         selected: _selectedCategory == cat,
                         onSelected: (selected) {
-                          setState(() =>
-                              _selectedCategory = selected ? cat : null);
+                          setState(
+                              () => _selectedCategory = selected ? cat : null);
                           Navigator.pop(context);
                           context.read<EventBloc>().add(GetEventsEvent(
                                 category: _selectedCategory?.toLowerCase(),
@@ -159,6 +161,34 @@ class _EventSearchDelegate extends SearchDelegate {
     if (query.isEmpty) {
       return const EmptyWidget(message: 'Search events...');
     }
-    return const Center(child: Text('Search results'));
+    return BlocBuilder<EventBloc, EventState>(
+      builder: (context, state) {
+        if (state is! EventsLoaded) {
+          return const LoadingWidget();
+        }
+        final filtered = state.events.where((e) =>
+            e.title.toLowerCase().contains(query.toLowerCase()) ||
+            e.description.toLowerCase().contains(query.toLowerCase()) ||
+            (e.city?.toLowerCase().contains(query.toLowerCase()) ?? false));
+        if (filtered.isEmpty) {
+          return const EmptyWidget(message: 'No events found');
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: filtered.length,
+          itemBuilder: (context, index) => EventCard(
+            event: filtered.elementAt(index),
+            onTap: () {
+              close(context, null);
+              Navigator.pushNamed(
+                context,
+                '/event-details',
+                arguments: filtered.elementAt(index).id,
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }

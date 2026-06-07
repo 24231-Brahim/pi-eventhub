@@ -22,7 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.registerUseCase,
     required this.forgotPasswordUseCase,
     required this.logoutUseCase,
-  }) : super(AuthInitial()) {
+  }) : super(const AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
     on<ForgotPasswordEvent>(_onForgotPassword);
@@ -31,7 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await loginUseCase.call(event.email, event.password);
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
@@ -41,7 +41,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onRegister(
       RegisterEvent event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await registerUseCase.call(
         event.name, event.email, event.password, event.role);
     result.fold(
@@ -52,7 +52,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onForgotPassword(
       ForgotPasswordEvent event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await forgotPasswordUseCase.call(event.email);
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
@@ -61,11 +61,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await logoutUseCase.call();
     result.fold(
       (failure) => emit(const AuthError(message: 'Logout failed')),
-      (_) => emit(Unauthenticated()),
+      (_) => emit(const Unauthenticated()),
     );
   }
 
@@ -74,7 +74,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final session = Supabase.instance.client.auth.currentSession;
       if (session != null) {
-        emit(AuthLoading());
+        emit(const AuthLoading());
         final user = session.user;
         try {
           final profile = await Supabase.instance.client

@@ -14,14 +14,14 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
   TicketBloc({
     required this.getUserTicketsUseCase,
     required this.validateTicketUseCase,
-  }) : super(TicketInitial()) {
+  }) : super(const TicketInitial()) {
     on<GetUserTicketsEvent>(_onGetUserTickets);
     on<ValidateTicketEvent>(_onValidateTicket);
   }
 
   Future<void> _onGetUserTickets(
       GetUserTicketsEvent event, Emitter<TicketState> emit) async {
-    emit(TicketLoading());
+    emit(const TicketLoading());
     final result = await getUserTicketsUseCase.call();
     result.fold(
       (failure) => emit(TicketError(message: failure.message)),
@@ -31,7 +31,7 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
 
   Future<void> _onValidateTicket(
       ValidateTicketEvent event, Emitter<TicketState> emit) async {
-    emit(TicketLoading());
+    emit(const TicketLoading());
     final result = await validateTicketUseCase.call(event.qrData);
     result.fold(
       (failure) => emit(TicketError(message: failure.message)),

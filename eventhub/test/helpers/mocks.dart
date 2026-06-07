@@ -48,7 +48,7 @@ class MockGetUserBookingsUseCase extends Mock implements GetUserBookingsUseCase 
 
 class MockConnectivity extends Mock implements Connectivity {}
 
-final tUser = User(
+const tUser = User(
   id: '1',
   email: 'test@test.com',
   name: 'Test User',
@@ -69,7 +69,7 @@ final tEvent = Event(
   status: EventStatus.published,
 );
 
-final tBooking = Booking(
+const tBooking = Booking(
   id: '1',
   eventId: '1',
   userId: '1',

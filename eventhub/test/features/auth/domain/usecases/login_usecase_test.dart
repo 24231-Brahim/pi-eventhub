@@ -18,11 +18,11 @@ void main() {
 
   test('should login successfully', () async {
     when(() => mockRepository.login(tEmail, tPassword))
-        .thenAnswer((_) async => Right(tUser));
+        .thenAnswer((_) async => const Right(tUser));
 
     final result = await useCase(tEmail, tPassword);
 
-    expect(result, Right(tUser));
+    expect(result, const Right(tUser));
     verify(() => mockRepository.login(tEmail, tPassword)).called(1);
   });
 
@@ -32,6 +32,6 @@ void main() {
 
     final result = await useCase(tEmail, tPassword);
 
-    expect(result, Left(tFailure));
+    expect(result, const Left(tFailure));
   });
 }

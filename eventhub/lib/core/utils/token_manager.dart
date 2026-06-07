@@ -3,7 +3,7 @@ import 'package:eventhub/core/constants/app_constants.dart';
 
 class TokenManager {
   final FlutterSecureStorage _storage;
-  TokenManager({required FlutterSecureStorage storage}) : _storage = storage;
+  TokenManager({required this._storage});
 
   Future<void> saveToken(String token) async =>
       await _storage.write(key: AppConstants.tokenKey, value: token);

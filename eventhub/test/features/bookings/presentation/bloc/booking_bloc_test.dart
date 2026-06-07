@@ -25,7 +25,7 @@ void main() {
       build: createBloc,
       act: (bloc) {
         when(() => mockCreateBookingUseCase.call('1', 2, 50.0))
-            .thenAnswer((_) async => Right(tBooking));
+            .thenAnswer((_) async => const Right(tBooking));
         bloc.add(const CreateBookingEvent(eventId: '1', quantity: 2, amount: 50.0));
       },
       expect: () => [isA<BookingLoading>(), isA<BookingCreated>()],
@@ -47,7 +47,7 @@ void main() {
       build: createBloc,
       act: (bloc) {
         when(() => mockGetUserBookingsUseCase.call())
-            .thenAnswer((_) async => Right([tBooking]));
+            .thenAnswer((_) async => const Right([tBooking]));
         bloc.add(const GetUserBookingsEvent());
       },
       expect: () => [isA<BookingLoading>(), isA<UserBookingsLoaded>()],

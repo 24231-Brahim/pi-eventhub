@@ -19,7 +19,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
   Future<Either<Failure, String>> createPaymentIntent(
       double amount, String currency) async {
     try {
-      final bookingId = ''; // In a real flow, this comes from creating a booking first
+      const bookingId = ''; // In a real flow, this comes from creating a booking first
       final data =
           await dataSource.createPaymentIntent(amount, currency, bookingId);
       final payment = PaymentModel.fromJson(data);
@@ -33,7 +33,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
   Future<Either<Failure, Payment>> confirmPayment(
       String paymentIntentId) async {
     try {
-      final bookingId = ''; // In a real flow, this comes from the booking
+      const bookingId = ''; // In a real flow, this comes from the booking
       final data =
           await dataSource.confirmPayment(paymentIntentId, bookingId);
       return Right(PaymentModel.fromJson(data));
