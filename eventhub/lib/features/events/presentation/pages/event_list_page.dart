@@ -1,0 +1,164 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
+import 'package:eventhub/features/events/presentation/widgets/event_card.dart';
+import 'package:eventhub/shared/widgets/loading_widget.dart';
+import 'package:eventhub/shared/widgets/error_widget.dart';
+import 'package:eventhub/shared/widgets/empty_widget.dart';
+
+class EventListPage extends StatefulWidget {
+  const EventListPage({super.key});
+
+  @override
+  State<EventListPage> createState() => _EventListPageState();
+}
+
+class _EventListPageState extends State<EventListPage> {
+  final _searchController = TextEditingController();
+  String? _selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<EventBloc>().add(const GetEventsEvent());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('EventHub'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => _showSearch(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () => _showFilters(context),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          if (_selectedCategory != null)
+            Chip(
+              label: Text(_selectedCategory!),
+              onDeleted: () =>
+                  setState(() => _selectedCategory = null),
+            ),
+          Expanded(
+            child: BlocBuilder<EventBloc, EventState>(
+              builder: (context, state) {
+                if (state is EventLoading) {
+                  return const LoadingWidget();
+                }
+                if (state is EventError) {
+                  return AppErrorWidget(
+                    message: state.message,
+                    onRetry: () =>
+                        context.read<EventBloc>().add(const GetEventsEvent()),
+                  );
+                }
+                if (state is EventsLoaded) {
+                  if (state.events.isEmpty) {
+                    return const EmptyWidget(message: 'No events found');
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: state.events.length,
+                    itemBuilder: (context, index) => EventCard(
+                      event: state.events[index],
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        '/event-details',
+                        arguments: state.events[index].id,
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSearch(BuildContext context) {
+    showSearch(
+      context: context,
+      delegate: _EventSearchDelegate(),
+    );
+  }
+
+  void _showFilters(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Filter by category',
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: ['Conference', 'Concert', 'Exhibition', 'Workshop']
+                  .map((cat) => FilterChip(
+                        label: Text(cat),
+                        selected: _selectedCategory == cat,
+                        onSelected: (selected) {
+                          setState(() =>
+                              _selectedCategory = selected ? cat : null);
+                          Navigator.pop(context);
+                          context.read<EventBloc>().add(GetEventsEvent(
+                                category: _selectedCategory?.toLowerCase(),
+                              ));
+                        },
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EventSearchDelegate extends SearchDelegate {
+  @override
+  List<Widget>? buildActions(BuildContext context) => [
+        IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () => query = '',
+        ),
+      ];
+
+  @override
+  Widget? buildLeading(BuildContext context) => IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => close(context, null),
+      );
+
+  @override
+  Widget buildResults(BuildContext context) =>
+      buildSuggestions(context);
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    if (query.isEmpty) {
+      return const EmptyWidget(message: 'Search events...');
+    }
+    return const Center(child: Text('Search results'));
+  }
+}
