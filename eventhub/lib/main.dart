@@ -25,19 +25,35 @@ void main() async {
   runApp(const EventHubApp());
 }
 
-class EventHubApp extends StatelessWidget {
+class EventHubApp extends StatefulWidget {
   const EventHubApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<EventHubApp> createState() => _EventHubAppState();
+}
+
+class _EventHubAppState extends State<EventHubApp> {
+  late final AppRouter _appRouter;
+
+  @override
+  void initState() {
+    super.initState();
     final authBloc = di.sl<AuthBloc>();
     authBloc.add(const CheckAuthEvent());
+    _appRouter = AppRouter(authBloc: authBloc);
+  }
 
-    final router = AppRouter(authBloc: authBloc).router;
+  @override
+  void dispose() {
+    _appRouter.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider.value(value: authBloc),
+        BlocProvider.value(value: di.sl<AuthBloc>()),
         BlocProvider.value(value: di.sl<EventBloc>()),
         BlocProvider.value(value: di.sl<BookingBloc>()),
         BlocProvider.value(value: di.sl<TicketBloc>()),
@@ -48,7 +64,7 @@ class EventHubApp extends StatelessWidget {
       child: MaterialApp.router(
         title: 'EventHub',
         debugShowCheckedModeBanner: false,
-        routerConfig: router,
+        routerConfig: _appRouter.router,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,

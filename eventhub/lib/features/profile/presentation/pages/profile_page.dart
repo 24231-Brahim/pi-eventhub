@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:eventhub/features/auth/domain/entities/user.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProfileBloc>().add(const GetProfileEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +29,7 @@ class ProfilePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),
@@ -37,6 +49,9 @@ class ProfilePage extends StatelessWidget {
             final profile = state is ProfileLoaded
                 ? state.profile
                 : (state as ProfileUpdated).profile;
+            final authState = context.watch<AuthBloc>().state;
+            final isAdmin =
+                authState is Authenticated && authState.user.role == UserRole.admin;
             return ListView(
               padding: const EdgeInsets.all(24),
               children: [
@@ -72,9 +87,7 @@ class ProfilePage extends StatelessWidget {
                       _ProfileInfoTile(
                         icon: Icons.person,
                         label: 'Role',
-                        value: profile.role == UserRole.organizer
-                            ? 'Organizer'
-                            : 'Participant',
+                        value: _roleDisplayName(profile.role),
                       ),
                       if (profile.phone != null)
                         _ProfileInfoTile(
@@ -87,11 +100,23 @@ class ProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
                 OutlinedButton.icon(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, '/edit-profile'),
+                  onPressed: () => context.push('/edit-profile'),
                   icon: const Icon(Icons.edit),
                   label: const Text('Edit Profile'),
                 ),
+                if (isAdmin) ...[
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/admin'),
+                    icon: const Icon(Icons.admin_panel_settings,
+                        color: Colors.red),
+                    label: const Text('Admin Panel',
+                        style: TextStyle(color: Colors.red)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.red),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () =>
@@ -105,11 +130,21 @@ class ProfilePage extends StatelessWidget {
               ],
             );
           }
-          context.read<ProfileBloc>().add(const GetProfileEvent());
           return const LoadingWidget();
         },
       ),
     );
+  }
+
+  String _roleDisplayName(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return 'Admin';
+      case UserRole.organizer:
+        return 'Organizer';
+      case UserRole.participant:
+        return 'Participant';
+    }
   }
 }
 

@@ -1,27 +1,25 @@
 import 'package:dartz/dartz.dart';
 import 'package:eventhub/core/errors/failures.dart';
-import 'package:eventhub/core/network/network_info.dart';
-import 'package:eventhub/features/notifications/data/datasources/notification_remote_datasource.dart';
+import 'package:eventhub/features/notifications/data/datasources/notification_supabase_datasource.dart';
 import 'package:eventhub/features/notifications/data/models/notification_model.dart';
 import 'package:eventhub/features/notifications/domain/entities/notification.dart';
 import 'package:eventhub/features/notifications/domain/repositories/notification_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotificationRepositoryImpl implements NotificationRepository {
-  final NotificationRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
+  final NotificationSupabaseDataSource dataSource;
+  final SupabaseClient supabase;
 
   NotificationRepositoryImpl({
-    required this.remoteDataSource,
-    required this.networkInfo,
+    required this.dataSource,
+    required this.supabase,
   });
 
   @override
   Future<Either<Failure, List<AppNotification>>> getNotifications() async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure(message: 'No internet connection'));
-    }
     try {
-      final data = await remoteDataSource.getNotifications();
+      final userId = supabase.auth.currentUser?.id ?? '';
+      final data = await dataSource.getNotifications(userId);
       final notifications =
           data.map((e) => NotificationModel.fromJson(e)).toList();
       return Right(notifications);

@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
+import 'package:eventhub/features/auth/data/models/user_model.dart';
 import 'package:eventhub/features/auth/domain/entities/user.dart';
 import 'package:eventhub/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:eventhub/features/auth/domain/usecases/login_usecase.dart';
@@ -79,7 +80,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           final profile = await Supabase.instance.client
               .from('profiles')
               .select()
-              .eq('id', user!.id)
+              .eq('id', user.id)
               .single();
           emit(Authenticated(
             user: User(
@@ -88,9 +89,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               name: profile['name'] as String? ?? '',
               phone: profile['phone'] as String?,
               photoUrl: profile['photo_url'] as String?,
-              role: profile['role'] == 'organizer'
-                  ? UserRole.organizer
-                  : UserRole.participant,
+              role: UserModel.parseRole(profile['role'] as String?),
               createdAt: DateTime.tryParse(user.createdAt),
             ),
           ));

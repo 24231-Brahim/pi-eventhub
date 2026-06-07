@@ -18,9 +18,7 @@ class UserModel extends User {
       name: json['name'] as String,
       phone: json['phone'] as String?,
       photoUrl: json['photoUrl'] as String?,
-      role: json['role'] == 'organizer'
-          ? UserRole.organizer
-          : UserRole.participant,
+      role: parseRole(json['role'] as String?),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -34,9 +32,7 @@ class UserModel extends User {
       name: profile['name'] as String? ?? '',
       phone: profile['phone'] as String?,
       photoUrl: profile['photo_url'] as String?,
-      role: profile['role'] == 'organizer'
-          ? UserRole.organizer
-          : UserRole.participant,
+      role: parseRole(profile['role'] as String?),
       createdAt: profile['created_at'] != null
           ? DateTime.parse(profile['created_at'] as String)
           : null,
@@ -50,8 +46,30 @@ class UserModel extends User {
       'name': name,
       'phone': phone,
       'photoUrl': photoUrl,
-      'role': role == UserRole.organizer ? 'organizer' : 'participant',
+      'role': _roleToString(role),
       'createdAt': createdAt?.toIso8601String(),
     };
+  }
+
+  static UserRole parseRole(String? role) {
+    switch (role) {
+      case 'admin':
+        return UserRole.admin;
+      case 'organizer':
+        return UserRole.organizer;
+      default:
+        return UserRole.participant;
+    }
+  }
+
+  static String _roleToString(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return 'admin';
+      case UserRole.organizer:
+        return 'organizer';
+      case UserRole.participant:
+        return 'participant';
+    }
   }
 }

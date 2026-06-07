@@ -1,22 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:eventhub/core/errors/failures.dart';
+import 'package:eventhub/features/auth/data/datasources/auth_supabase_datasource.dart';
 import 'package:eventhub/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../../../helpers/mocks.dart';
 
 void main() {
-  late MockAuthRemoteDataSource mockDataSource;
-  late MockNetworkInfo mockNetworkInfo;
+  late MockAuthSupabaseDataSource mockDataSource;
   late AuthRepositoryImpl repository;
 
   setUp(() {
-    mockDataSource = MockAuthRemoteDataSource();
-    mockNetworkInfo = MockNetworkInfo();
+    mockDataSource = MockAuthSupabaseDataSource();
     repository = AuthRepositoryImpl(
       remoteDataSource: mockDataSource,
-      networkInfo: mockNetworkInfo,
     );
   });
 
@@ -26,25 +24,20 @@ void main() {
     const tName = 'Test';
     const tRole = 'participant';
 
-    final tUserJson = {
-      'user': {
-        'id': '1',
-        'email': 'test@test.com',
-        'name': 'Test',
-        'role': 'participant',
-      },
-      'token': 'jwt-token',
-      'refreshToken': 'refresh-token',
-    };
-
-    setUp(() {
-      when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => true);
-    });
+    setUp(() {});
 
     group('login', () {
       test('should return User on successful login', () async {
-        when(() => mockDataSource.login(tEmail, tPassword))
-            .thenAnswer((_) async => tUserJson);
+        when(() => mockDataSource.login(tEmail, tPassword)).thenAnswer(
+          (_) async => AuthResponse(
+            id: '1',
+            email: tEmail,
+            name: 'Test',
+            role: 'participant',
+            accessToken: 'token',
+            refreshToken: 'refresh',
+          ),
+        );
 
         final result = await repository.login(tEmail, tPassword);
 
@@ -55,18 +48,6 @@ void main() {
             expect(user.email, tEmail);
             expect(user.name, 'Test');
           },
-        );
-      });
-
-      test('should return NetworkFailure when no connection', () async {
-        when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => false);
-
-        final result = await repository.login(tEmail, tPassword);
-
-        expect(result.isLeft(), true);
-        result.fold(
-          (failure) => expect(failure, isA<NetworkFailure>()),
-          (_) => fail('Expected Left'),
         );
       });
 
@@ -87,25 +68,21 @@ void main() {
     group('register', () {
       test('should return User on successful registration', () async {
         when(() => mockDataSource.register(tName, tEmail, tPassword, tRole))
-            .thenAnswer((_) async => tUserJson);
+            .thenAnswer(
+          (_) async => AuthResponse(
+            id: '1',
+            email: tEmail,
+            name: tName,
+            role: tRole,
+            accessToken: 'token',
+            refreshToken: 'refresh',
+          ),
+        );
 
         final result =
             await repository.register(tName, tEmail, tPassword, tRole);
 
         expect(result.isRight(), true);
-      });
-
-      test('should return NetworkFailure when no connection', () async {
-        when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => false);
-
-        final result =
-            await repository.register(tName, tEmail, tPassword, tRole);
-
-        expect(result.isLeft(), true);
-        result.fold(
-          (failure) => expect(failure, isA<NetworkFailure>()),
-          (_) => fail('Expected Left'),
-        );
       });
     });
 

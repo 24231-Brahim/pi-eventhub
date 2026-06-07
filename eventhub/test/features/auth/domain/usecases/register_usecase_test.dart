@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:dartz/dartz.dart';
-import 'package:eventhub/core/errors/failures.dart';
 import 'package:eventhub/features/auth/domain/usecases/register_usecase.dart';
 import 'package:mocktail/mocktail.dart';
 

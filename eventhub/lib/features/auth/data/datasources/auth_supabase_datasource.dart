@@ -70,7 +70,7 @@ class AuthSupabaseDataSourceImpl implements AuthSupabaseDataSource {
           .from('profiles')
           .select()
           .eq('id', user.id)
-          .single() as Map<String, dynamic>;
+          .single();
     } catch (_) {}
 
     return AuthResponse(
@@ -102,7 +102,7 @@ class AuthSupabaseDataSourceImpl implements AuthSupabaseDataSource {
             .from('profiles')
             .select()
             .eq('id', user.id)
-            .single() as Map<String, dynamic>;
+            .single();
       } catch (_) {}
 
       return AuthResponse(
@@ -117,11 +117,8 @@ class AuthSupabaseDataSourceImpl implements AuthSupabaseDataSource {
       );
     }
 
-    return AuthResponse(
-      id: response.user?.id ?? '',
-      email: email,
-      name: name,
-      role: role,
+    throw Exception(
+      'Email confirmation required. Please check your inbox or disable email confirmation in Supabase dashboard.',
     );
   }
 

@@ -1,18 +1,18 @@
 import 'package:dartz/dartz.dart';
 import 'package:eventhub/core/errors/failures.dart';
-import 'package:eventhub/core/network/network_info.dart';
-import 'package:eventhub/features/events/data/datasources/event_remote_datasource.dart';
+import 'package:eventhub/features/events/data/datasources/event_supabase_datasource.dart';
 import 'package:eventhub/features/events/data/models/event_model.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/features/events/domain/repositories/event_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EventRepositoryImpl implements EventRepository {
-  final EventRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
+  final EventSupabaseDataSource dataSource;
+  final SupabaseClient supabase;
 
   EventRepositoryImpl({
-    required this.remoteDataSource,
-    required this.networkInfo,
+    required this.dataSource,
+    required this.supabase,
   });
 
   @override
@@ -25,11 +25,8 @@ class EventRepositoryImpl implements EventRepository {
     double? maxPrice,
     DateTime? date,
   }) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure(message: 'No internet connection'));
-    }
     try {
-      final data = await remoteDataSource.getEvents(
+      final data = await dataSource.getEvents(
         page: page,
         size: size,
         category: category,
@@ -47,11 +44,8 @@ class EventRepositoryImpl implements EventRepository {
 
   @override
   Future<Either<Failure, Event>> getEventById(String id) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure(message: 'No internet connection'));
-    }
     try {
-      final data = await remoteDataSource.getEventById(id);
+      final data = await dataSource.getEventById(id);
       return Right(EventModel.fromJson(data));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
@@ -60,10 +54,8 @@ class EventRepositoryImpl implements EventRepository {
 
   @override
   Future<Either<Failure, Event>> createEvent(Event event) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure(message: 'No internet connection'));
-    }
     try {
+      final userId = supabase.auth.currentUser?.id ?? '';
       final eventModel = EventModel(
         id: event.id,
         title: event.title,
@@ -80,12 +72,12 @@ class EventRepositoryImpl implements EventRepository {
         currentParticipants: event.currentParticipants,
         category: event.category,
         status: event.status,
-        organizerId: event.organizerId,
+        organizerId: userId,
         organizerName: event.organizerName,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
       );
-      final data = await remoteDataSource.createEvent(eventModel.toJson());
+      final data = await dataSource.createEvent(eventModel.toJson());
       return Right(EventModel.fromJson(data));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
@@ -94,9 +86,6 @@ class EventRepositoryImpl implements EventRepository {
 
   @override
   Future<Either<Failure, Event>> updateEvent(Event event) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure(message: 'No internet connection'));
-    }
     try {
       final eventModel = EventModel(
         id: event.id,
@@ -119,7 +108,7 @@ class EventRepositoryImpl implements EventRepository {
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
       );
-      final data = await remoteDataSource.updateEvent(eventModel.toJson());
+      final data = await dataSource.updateEvent(eventModel.toJson());
       return Right(EventModel.fromJson(data));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
@@ -128,11 +117,8 @@ class EventRepositoryImpl implements EventRepository {
 
   @override
   Future<Either<Failure, void>> deleteEvent(String id) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure(message: 'No internet connection'));
-    }
     try {
-      await remoteDataSource.deleteEvent(id);
+      await dataSource.deleteEvent(id);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));

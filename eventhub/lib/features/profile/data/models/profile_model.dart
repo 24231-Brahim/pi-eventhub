@@ -19,9 +19,7 @@ class ProfileModel extends Profile {
       name: json['name'] as String,
       phone: json['phone'] as String?,
       photoUrl: json['photoUrl'] as String?,
-      role: json['role'] == 'organizer'
-          ? UserRole.organizer
-          : UserRole.participant,
+      role: parseRole(json['role'] as String?),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -35,8 +33,30 @@ class ProfileModel extends Profile {
       'name': name,
       'phone': phone,
       'photoUrl': photoUrl,
-      'role': role == UserRole.organizer ? 'organizer' : 'participant',
+      'role': _roleToString(role),
       'createdAt': createdAt?.toIso8601String(),
     };
+  }
+
+  static UserRole parseRole(String? role) {
+    switch (role) {
+      case 'admin':
+        return UserRole.admin;
+      case 'organizer':
+        return UserRole.organizer;
+      default:
+        return UserRole.participant;
+    }
+  }
+
+  static String _roleToString(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return 'admin';
+      case UserRole.organizer:
+        return 'organizer';
+      case UserRole.participant:
+        return 'participant';
+    }
   }
 }

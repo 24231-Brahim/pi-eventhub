@@ -6,9 +6,20 @@ import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
 
-class EventDetailPage extends StatelessWidget {
+class EventDetailPage extends StatefulWidget {
   final String eventId;
   const EventDetailPage({super.key, required this.eventId});
+
+  @override
+  State<EventDetailPage> createState() => _EventDetailPageState();
+}
+
+class _EventDetailPageState extends State<EventDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<EventBloc>().add(GetEventByIdEvent(id: widget.eventId));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,13 +47,12 @@ class EventDetailPage extends StatelessWidget {
               message: state.message,
               onRetry: () => context
                   .read<EventBloc>()
-                  .add(GetEventByIdEvent(id: eventId)),
+                  .add(GetEventByIdEvent(id: widget.eventId)),
             );
           }
           if (state is EventDetailLoaded) {
             return _EventDetailContent(event: state.event);
           }
-          context.read<EventBloc>().add(GetEventByIdEvent(id: eventId));
           return const LoadingWidget();
         },
       ),

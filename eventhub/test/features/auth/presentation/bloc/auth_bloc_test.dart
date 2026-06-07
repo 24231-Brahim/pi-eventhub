@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:dartz/dartz.dart';
-import 'package:eventhub/core/errors/failures.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -12,14 +10,11 @@ void main() {
   late MockRegisterUseCase mockRegisterUseCase;
   late MockForgotPasswordUseCase mockForgotPasswordUseCase;
   late MockLogoutUseCase mockLogoutUseCase;
-  late MockTokenManager mockTokenManager;
-
   setUp(() {
     mockLoginUseCase = MockLoginUseCase();
     mockRegisterUseCase = MockRegisterUseCase();
     mockForgotPasswordUseCase = MockForgotPasswordUseCase();
     mockLogoutUseCase = MockLogoutUseCase();
-    mockTokenManager = MockTokenManager();
   });
 
   AuthBloc createBloc() => AuthBloc(
@@ -27,7 +22,6 @@ void main() {
         registerUseCase: mockRegisterUseCase,
         forgotPasswordUseCase: mockForgotPasswordUseCase,
         logoutUseCase: mockLogoutUseCase,
-        tokenManager: mockTokenManager,
       );
 
   group('AuthBloc', () {
@@ -84,7 +78,6 @@ void main() {
       'emits [AuthLoading, Unauthenticated] when logout succeeds',
       build: createBloc,
       setUp: () {
-        when(() => mockTokenManager.clearTokens()).thenAnswer((_) async => {});
         when(() => mockLogoutUseCase.call()).thenAnswer((_) async => const Right(null));
       },
       act: (bloc) => bloc.add(const LogoutEvent()),

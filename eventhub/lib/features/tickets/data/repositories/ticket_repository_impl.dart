@@ -1,27 +1,25 @@
 import 'package:dartz/dartz.dart';
 import 'package:eventhub/core/errors/failures.dart';
-import 'package:eventhub/core/network/network_info.dart';
-import 'package:eventhub/features/tickets/data/datasources/ticket_remote_datasource.dart';
+import 'package:eventhub/features/tickets/data/datasources/ticket_supabase_datasource.dart';
 import 'package:eventhub/features/tickets/data/models/ticket_model.dart';
 import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
 import 'package:eventhub/features/tickets/domain/repositories/ticket_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TicketRepositoryImpl implements TicketRepository {
-  final TicketRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
+  final TicketSupabaseDataSource dataSource;
+  final SupabaseClient supabase;
 
   TicketRepositoryImpl({
-    required this.remoteDataSource,
-    required this.networkInfo,
+    required this.dataSource,
+    required this.supabase,
   });
 
   @override
   Future<Either<Failure, List<Ticket>>> getUserTickets() async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure(message: 'No internet connection'));
-    }
     try {
-      final data = await remoteDataSource.getUserTickets();
+      final userId = supabase.auth.currentUser?.id ?? '';
+      final data = await dataSource.getUserTickets(userId);
       final tickets = data.map((e) => TicketModel.fromJson(e)).toList();
       return Right(tickets);
     } catch (e) {
@@ -31,11 +29,8 @@ class TicketRepositoryImpl implements TicketRepository {
 
   @override
   Future<Either<Failure, Ticket>> validateTicket(String qrData) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure(message: 'No internet connection'));
-    }
     try {
-      final data = await remoteDataSource.validateTicket(qrData);
+      final data = await dataSource.validateTicket(qrData);
       return Right(TicketModel.fromJson(data));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));

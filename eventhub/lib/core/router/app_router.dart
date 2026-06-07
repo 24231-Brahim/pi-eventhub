@@ -17,6 +17,12 @@ import 'package:eventhub/features/tickets/presentation/pages/qr_scanner_page.dar
 import 'package:eventhub/features/payments/presentation/pages/booking_page.dart';
 import 'package:eventhub/features/events/presentation/pages/organizer_dashboard_page.dart';
 import 'package:eventhub/features/events/presentation/pages/manage_events_page.dart';
+import 'package:eventhub/features/admin/presentation/pages/admin_dashboard_page.dart';
+import 'package:eventhub/features/admin/presentation/pages/admin_users_page.dart';
+import 'package:eventhub/features/admin/presentation/pages/admin_events_page.dart';
+import 'package:eventhub/features/admin/presentation/pages/admin_bookings_page.dart';
+import 'package:eventhub/features/admin/presentation/pages/admin_tickets_page.dart';
+import 'package:eventhub/features/admin/presentation/pages/admin_analytics_page.dart';
 import 'package:eventhub/presentation/pages/splash_page.dart';
 import 'package:eventhub/presentation/pages/onboarding_page.dart';
 import 'package:eventhub/presentation/pages/settings_page.dart';
@@ -60,11 +66,19 @@ class AppRouter {
           state.matchedLocation == '/splash' ||
           state.matchedLocation == '/onboarding';
 
+      final isAdminRoute = state.matchedLocation.startsWith('/admin');
+
       if (!isAuthenticated && !isAuthRoute) {
         return '/login';
       }
       if (isAuthenticated && isAuthRoute) {
         return '/';
+      }
+      if (isAdminRoute && isAuthenticated) {
+        final user = authState.user;
+        if (user.role.name != 'admin') {
+          return '/';
+        }
       }
       return null;
     },
@@ -154,6 +168,30 @@ class AppRouter {
       GoRoute(
         path: '/edit-profile',
         builder: (context, state) => const EditProfilePage(),
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) => const AdminDashboardPage(),
+      ),
+      GoRoute(
+        path: '/admin/users',
+        builder: (context, state) => const AdminUsersPage(),
+      ),
+      GoRoute(
+        path: '/admin/events',
+        builder: (context, state) => const AdminEventsPage(),
+      ),
+      GoRoute(
+        path: '/admin/bookings',
+        builder: (context, state) => const AdminBookingsPage(),
+      ),
+      GoRoute(
+        path: '/admin/tickets',
+        builder: (context, state) => const AdminTicketsPage(),
+      ),
+      GoRoute(
+        path: '/admin/analytics',
+        builder: (context, state) => const AdminAnalyticsPage(),
       ),
     ],
   );
