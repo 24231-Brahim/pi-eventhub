@@ -1,0 +1,46 @@
+# Flutter
+**/build/
+**/.dart_tool/
+**/pubspec.lock
+**/pubspec_overrides.yaml
+**/.packages
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Android
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+
+# iOS
+**/ios/Pods/
+**/ios/.symlinks/
+
+# Coverage
+coverage/
+
+# Maven (backend)
+target/
+*.class
+*.jar
+*.war
+
+# Node
+node_modules/

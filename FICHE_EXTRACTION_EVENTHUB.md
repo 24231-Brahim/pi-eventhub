@@ -1,7 +1,7 @@
 # FICHE D'EXTRACTION — EventHub
 
 > **Plateforme mobile de gestion, découverte et réservation d'événements**
-> Architecture : Clean Architecture (Flutter) + Architecture en couches (Spring Boot)
+> Architecture : Clean Architecture (Flutter) + Supabase (Backend as a Service)
 
 ---
 
@@ -16,12 +16,7 @@ pi-eventhub/
 │   ├── assets/                        ← Images, Lottie, Icônes
 │   └── l10n/                          ← Fichiers de traduction (ARB)
 │
-├── src/                               ← API REST Spring Boot (Backend)
-│   └── main/
-│       ├── java/com/eventhub/         ← Code source Java
-│       └── resources/                 ← Configuration (application.properties)
-│
-├── pom.xml                            ← Dépendances Maven
+├── supabase_schema.sql                ← Schéma PostgreSQL Supabase + RLS
 └── FICHE_EXTRACTION_EVENTHUB.md       ← Ce document
 ```
 
@@ -38,31 +33,21 @@ graph TB
         CORE["Core<br/>Network + DI + Router + Errors"]
     end
 
-    subgraph "☕ Spring Boot API (Backend)"
-        REST["Controllers REST<br/>Auth / Events / Categories / Invitations"]
-        SVC["Services<br/>Business Logic"]
-        DAO["Repositories JPA"]
-        DB[("MySQL Database<br/>EventHub")]
-        SEC["Security<br/>JWT + Spring Security + CORS"]
+    subgraph "☁️ Supabase (Backend as a Service)"
+        AUTH["Supabase Auth<br/>Login / Register / Session"]
+        DB[("PostgreSQL Database<br/>RLS Policies")]
+        STORAGE["Supabase Storage<br/>Images"]
     end
 
     PRES --> DOM
     DOM --> DATA
-    DATA -->|"Dio HTTP"| REST
-    REST --> SVC
-    SVC --> DAO
-    DAO --> DB
-    SEC --> REST
-
-    subgraph "☁️ Supabase Auth"
-        SUPABASE["Supabase Auth<br/>Login / Register / Session"]
-    end
-
-    PRES -->|"Auth"| SUPABASE
+    DATA --> AUTH
+    DATA --> DB
+    DATA --> STORAGE
 ```
 
 **FLUX D'AUTHENTIFICATION :** `Flutter → Supabase Auth (JWT) → SecureStorage`
-**FLUX API :** `Flutter → Spring Boot REST (Dio + JWT Bearer) → MySQL`
+**FLUX DONNÉES :** `Flutter → Supabase SDK (postgrest) → PostgreSQL`
 
 ---
 
@@ -125,105 +110,7 @@ lib/features/
 
 ---
 
-## 4. DIAGRAMME DE L'ARCHITECTURE SPRING BOOT
-
-```mermaid
-graph TB
-    subgraph "Controllers (REST API)"
-        AUTH_C["AuthController<br/>POST /register<br/>POST /login"]
-        CAT_C["CategoryController<br/>GET /categories<br/>POST /categories"]
-        EVT_C["EventController<br/>GET/POST/PUT/DELETE /events"]
-        INV_C["InvitationController<br/>POST /invitations<br/>GET /my<br/>POST /verify"]
-    end
-
-    subgraph "Services (Business Logic)"
-        AUTH_S["AuthService<br/>register() / login()"]
-        CAT_S["CategoryService<br/>getAll() / create()"]
-        EVT_S["EventService<br/>CRUD + owner check"]
-        INV_S["InvitationService<br/>create / verify QR"]
-    end
-
-    subgraph "Data Layer"
-        REPO["Repositories JPA<br/>User / Category / Event / Invitation"]
-    end
-
-    subgraph "Config"
-        SEC["SecurityConfig<br/>JWT Filter + CORS + Roles"]
-        JWT["JwtUtil<br/>generate / validate token"]
-        EXC["GlobalExceptionHandler<br/>Error handling"]
-    end
-
-    DB[("MySQL")]
-
-    AUTH_C --> AUTH_S
-    CAT_C --> CAT_S
-    EVT_C --> EVT_S
-    INV_C --> INV_S
-    AUTH_S --> REPO
-    CAT_S --> REPO
-    EVT_S --> REPO
-    INV_S --> REPO
-    REPO --> DB
-    SEC --> AUTH_C
-    SEC --> EVT_C
-    SEC --> INV_C
-```
-
----
-
-## 5. DIAGRAMME ENTITÉ-RELATION (BACKEND — SPRING BOOT)
-
-```mermaid
-erDiagram
-    users {
-        Long id PK
-        string name
-        string email UK
-        string password
-        enum role "ORGANIZER | GUEST"
-    }
-
-    categories {
-        Long id PK
-        string name UK
-    }
-
-    events {
-        Long id PK
-        string title
-        text description
-        datetime date
-        string location
-        Long category_id FK
-        Long organizer_id FK
-    }
-
-    invitations {
-        Long id PK
-        Long event_id FK
-        Long guest_id FK
-        string qr_code UK
-        enum status "PENDING | USED"
-    }
-
-    users ||--o{ events : "organizes"
-    categories ||--o{ events : "categorizes"
-    events ||--o{ invitations : "has"
-    users ||--o{ invitations : "receives"
-```
-
-### Relations JPA
-
-| Entité | Relation | Cible | Fetch | Contrainte |
-|--------|----------|-------|-------|------------|
-| `Event` → `Category` | `@ManyToOne` | `category` | LAZY | `category_id` nullable |
-| `Event` → `User` | `@ManyToOne` | `organizer` | LAZY | `organizer_id` NOT NULL |
-| `Invitation` → `Event` | `@ManyToOne` | `event` | LAZY | `event_id` NOT NULL |
-| `Invitation` → `User` | `@ManyToOne` | `guest` | LAZY | `guest_id` NOT NULL |
-
----
-
-## 6. DIAGRAMME ENTITÉ-RELATION (FRONTEND — FLUTTER)
+## 4. DIAGRAMME ENTITÉ-RELATION (FLUTTER)
 
 ```mermaid
 erDiagram
@@ -308,232 +195,7 @@ erDiagram
 
 ---
 
-## 7. DIAGRAMME DE CLASSES UML — BACKEND (SPRING BOOT)
-
-```mermaid
-classDiagram
-    class User {
-        +Long id
-        +String name
-        +String email
-        +String password
-        +Role role
-        +User()
-        +User(Long, String, String, String, Role)
-        +getId() Long
-        +setId(Long) void
-        +getName() String
-        +setName(String) void
-        +getEmail() String
-        +setEmail(String) void
-        +getPassword() String
-        +setPassword(String) void
-        +getRole() Role
-        +setRole(Role) void
-    }
-    class Role {
-        <<enumeration>>
-        ORGANIZER
-        GUEST
-    }
-
-    class Category {
-        +Long id
-        +String name
-        +Category()
-        +Category(Long, String)
-        +getId() Long
-        +setId(Long) void
-        +getName() String
-        +setName(String) void
-    }
-
-    class Event {
-        +Long id
-        +String title
-        +String description
-        +LocalDateTime date
-        +String location
-        +Event()
-        +Event(Long, String, String, LocalDateTime, String, Category, User)
-        +getId() Long
-        +setId(Long) void
-        +getTitle() String
-        +setTitle(String) void
-        +getDescription() String
-        +setDescription(String) void
-        +getDate() LocalDateTime
-        +setDate(LocalDateTime) void
-        +getLocation() String
-        +setLocation(String) void
-        +getCategory() Category
-        +setCategory(Category) void
-        +getOrganizer() User
-        +setOrganizer(User) void
-    }
-
-    class Invitation {
-        +Long id
-        +String qrCode
-        +Status status
-        +Invitation()
-        +Invitation(Long, Event, User, String, Status)
-        +getId() Long
-        +setId(Long) void
-        +getEvent() Event
-        +setEvent(Event) void
-        +getGuest() User
-        +setGuest(User) void
-        +getQrCode() String
-        +setQrCode(String) void
-        +getStatus() Status
-        +setStatus(Status) void
-    }
-    class Status {
-        <<enumeration>>
-        PENDING
-        USED
-    }
-
-    class AuthController {
-        -AuthService authService
-        +register(RegisterRequest) ResponseEntity~AuthResponse~
-        +login(LoginRequest) ResponseEntity~AuthResponse~
-    }
-
-    class EventController {
-        -EventService eventService
-        +getAllEvents() ResponseEntity~List~EventResponse~~
-        +getEventById(Long) ResponseEntity~EventResponse~
-        +createEvent(EventRequest, UserDetails) ResponseEntity~EventResponse~
-        +updateEvent(Long, EventRequest, UserDetails) ResponseEntity~EventResponse~
-        +deleteEvent(Long, UserDetails) ResponseEntity~Void~
-    }
-
-    class CategoryController {
-        -CategoryService categoryService
-        +getAllCategories() ResponseEntity~List~Category~~
-        +createCategory(CategoryRequest) ResponseEntity~Category~
-    }
-
-    class InvitationController {
-        -InvitationService invitationService
-        +createInvitation(InvitationRequest) ResponseEntity~InvitationResponse~
-        +getMyInvitations(UserDetails) ResponseEntity~List~InvitationResponse~~
-        +verifyQrCode(QrVerifyRequest) ResponseEntity~Map~String, String~~
-    }
-
-    class AuthService {
-        -UserRepository userRepository
-        -PasswordEncoder passwordEncoder
-        -JwtUtil jwtUtil
-        -AuthenticationManager authenticationManager
-        +register(RegisterRequest) AuthResponse
-        +login(LoginRequest) AuthResponse
-        -buildUserDetails(User) UserDetails
-    }
-
-    class EventService {
-        -EventRepository eventRepository
-        -CategoryRepository categoryRepository
-        -UserRepository userRepository
-        +getAllEvents() List~EventResponse~
-        +getEventById(Long) EventResponse
-        +createEvent(EventRequest, String) EventResponse
-        +updateEvent(Long, EventRequest, String) EventResponse
-        +deleteEvent(Long, String) void
-        -findEventOrThrow(Long) Event
-        -findUserOrThrow(String) User
-        -resolveCategory(Long) Category
-        +toResponse(Event) EventResponse
-    }
-
-    class CategoryService {
-        -CategoryRepository categoryRepository
-        +getAllCategories() List~Category~
-        +createCategory(CategoryRequest) Category
-    }
-
-    class InvitationService {
-        -InvitationRepository invitationRepository
-        -EventRepository eventRepository
-        -UserRepository userRepository
-        +createInvitation(InvitationRequest) InvitationResponse
-        +getMyInvitations(String) List~InvitationResponse~
-        +verifyQrCode(QrVerifyRequest) String
-        -toResponse(Invitation) InvitationResponse
-    }
-
-    class JwtUtil {
-        -String jwtSecret
-        -long jwtExpirationMs
-        +generateToken(UserDetails) String
-        +generateToken(Map~String,Object~, UserDetails) String
-        +isTokenValid(String, UserDetails) boolean
-        +extractUsername(String) String
-        +extractExpiration(String) Date
-        +extractClaim(String, Function) T
-        -extractAllClaims(String) Claims
-        -getSigningKey() Key
-    }
-
-    class JwtAuthFilter {
-        -JwtUtil jwtUtil
-        -UserDetailsService userDetailsService
-        +doFilterInternal(Request, Response, FilterChain) void
-    }
-
-    class SecurityConfig {
-        -JwtAuthFilter jwtAuthFilter
-        -UserRepository userRepository
-        +userDetailsService() UserDetailsService
-        +passwordEncoder() PasswordEncoder
-        +authenticationProvider() AuthenticationProvider
-        +authenticationManager(AuthenticationConfiguration) AuthenticationManager
-        +securityFilterChain(HttpSecurity) SecurityFilterChain
-        +corsConfigurationSource() CorsConfigurationSource
-    }
-
-    class GlobalExceptionHandler {
-        +handleResponseStatus(ResponseStatusException) ResponseEntity
-        +handleBadCredentials(BadCredentialsException) ResponseEntity
-        +handleAccessDenied(AccessDeniedException) ResponseEntity
-        +handleValidation(MethodArgumentNotValidException) ResponseEntity
-        +handleGeneric(Exception) ResponseEntity
-        -buildError(int, String) ResponseEntity
-    }
-
-    %% ── Relations ──────────────────────────────────────────
-    User "1" --> "1" Role : possède
-    Invitation "1" --> "1" Status : possède
-
-    Event "*" --> "1" Category : classé par
-    Event "*" --> "1" User : organisé par
-    Invitation "*" --> "1" Event : concerne
-    Invitation "*" --> "1" User : invité
-
-    AuthController --> AuthService
-    EventController --> EventService
-    CategoryController --> CategoryService
-    InvitationController --> InvitationService
-
-    AuthService --> JwtUtil
-    AuthService --> SecurityConfig : uses PasswordEncoder + AuthenticationManager
-
-    SecurityConfig --> JwtAuthFilter : injecte
-    JwtAuthFilter --> JwtUtil : utilise
-    JwtAuthFilter --> SecurityConfig : uses UserDetailsService
-
-    EventService --> User
-    EventService --> Category
-    InvitationService --> Invitation
-    InvitationService --> Event
-    InvitationService --> User
-```
-
----
-
-## 8. DIAGRAMME DE CLASSES UML — FRONTEND (FLUTTER)
+## 5. DIAGRAMME DE CLASSES UML — FRONTEND (FLUTTER)
 
 ```mermaid
 classDiagram
@@ -871,7 +533,7 @@ classDiagram
 
 ---
 
-## 9. MODÈLE CONCEPTUEL DE DONNÉES (MCD)
+## 6. MODÈLE CONCEPTUEL DE DONNÉES (MCD)
 
 ```mermaid
 erDiagram
@@ -1002,7 +664,7 @@ erDiagram
 
 ---
 
-## 10. DIAGRAMME DE NAVIGATION (GO ROUTER)
+## 7. DIAGRAMME DE NAVIGATION (GO ROUTER)
 
 ```mermaid
 graph TD
@@ -1048,6 +710,8 @@ graph TD
 
 ## 8. DIAGRAMME DE SÉQUENCE — FLUX D'AUTHENTIFICATION
 
+> **Backend :** Supabase Auth (JWT) — pas de serveur Spring Boot
+
 ```mermaid
 sequenceDiagram
     actor User as Utilisateur
@@ -1077,6 +741,8 @@ sequenceDiagram
 
 ## 9. DIAGRAMME DE SÉQUENCE — FLUX QR CODE
 
+> **Backend :** Supabase PostgreSQL (table `tickets`) — pas de serveur Spring Boot
+
 ```mermaid
 sequenceDiagram
     actor Org as Organisateur
@@ -1084,19 +750,20 @@ sequenceDiagram
     participant TBLOC as TicketBloc
     participant UC as ValidateTicketUseCase
     participant REPO as TicketRepositoryImpl
-    participant API as Spring Boot API
-    participant DB as MySQL
+    participant API as Supabase (PostgREST)
+    participant DB as PostgreSQL
 
     Org->>SCAN: Scanne QR code
     SCAN->>TBLOC: ValidateTicketEvent(qrCode)
     TBLOC->>UC: call(qrCode)
     UC->>REPO: validateTicket(qrCode)
-    REPO->>API: POST /api/tickets/validate
-    API->>DB: SELECT invitation WHERE qr_code = ?
-    DB-->>API: Invitation (PENDING)
-    API->>DB: UPDATE status = 'USED'
+    REPO->>API: supabase.from('tickets').select().eq('qr_code', qr)
+    API->>DB: SELECT * FROM tickets WHERE qr_code = ?
+    DB-->>API: Ticket (active)
+    REPO->>API: supabase.from('tickets').update({'status': 'used'})
+    API->>DB: UPDATE tickets SET status = 'used'
     DB-->>API: done
-    API-->>REPO: { message: "QR validé", status: "SUCCESS" }
+    API-->>REPO: Ticket mis à jour
     REPO-->>UC: Right(Ticket)
     UC-->>TBLOC: Right(Ticket)
     TBLOC->>TBLOC: emit(TicketValidated)
@@ -1105,42 +772,30 @@ sequenceDiagram
 
 ---
 
-## 11. DIAGRAMME DE DÉPLOIEMENT
+## 10. DIAGRAMME DE DÉPLOIEMENT
 
 ```mermaid
 graph TB
     subgraph "Client Mobile"
-        A["Appareil Android<br/>Flutter App"]
+        A["Appareil Android / iOS<br/>Flutter App"]
     end
 
-    subgraph "Serveur Spring Boot"
-        B["Tomcat (Embedded)<br/>Port 8081"]
-        C["JWT Auth Filter"]
-        D["Controllers REST"]
-        E["Services"]
-        F["JPA Repositories"]
+    subgraph "Supabase Cloud"
+        B["Supabase Auth<br/>JWT + Sessions"]
+        C["Supabase PostgreSQL<br/>RLS Policies"]
+        D["Supabase Storage<br/>Images"]
     end
 
-    subgraph "Base de Données"
-        G["MySQL Server<br/>Port 3306<br/>Database: EventHub"]
-    end
-
-    subgraph "Services Cloud"
-        H["Supabase<br/>Auth Service"]
-    end
-
-    A -->|"JWT Bearer + Dio"| B
-    A -->|"Supabase SDK"| H
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F -->|"JDBC"| G
+    A -->|"Supabase SDK"| B
+    A -->|"postgrest (SQL)"| C
+    A -->|"Storage API"| D
 ```
 
 ---
 
-## 12. TABLEAUX DES ENDPOINTS API
+## 11. TABLEAUX DES ENDPOINTS API
+
+> **Note :** Le projet utilise Supabase comme unique backend. Les endpoints ci-dessous sont fournis à titre de référence pour une éventuelle API REST mais ne sont pas implémentés dans le code actuel.
 
 ### Authentification
 
@@ -1176,48 +831,22 @@ graph TB
 
 ---
 
-## 13. SCHÉMA DE LA BASE DE DONNÉES (MySQL)
+## 12. SCHÉMA DE LA BASE DE DONNÉES (PostgreSQL — Supabase)
 
-```sql
-CREATE TABLE users (
-    id      BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name    VARCHAR(255) NOT NULL,
-    email   VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role    ENUM('ORGANIZER', 'GUEST') NOT NULL
-);
+Le schéma complet est défini dans `supabase_schema.sql` à la racine du projet. Il inclut les tables :
 
-CREATE TABLE categories (
-    id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
-);
+- `profiles` — utilisateurs (lié à Supabase Auth)
+- `events` — événements avec RLS
+- `bookings` — réservations
+- `tickets` — billets avec QR codes
+- `payments` — paiements
+- `notifications` — notifications
 
-CREATE TABLE events (
-    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title        VARCHAR(255) NOT NULL,
-    description  TEXT,
-    date         DATETIME NOT NULL,
-    location     VARCHAR(255) NOT NULL,
-    category_id  BIGINT,
-    organizer_id BIGINT NOT NULL,
-    FOREIGN KEY (category_id)  REFERENCES categories(id),
-    FOREIGN KEY (organizer_id) REFERENCES users(id)
-);
-
-CREATE TABLE invitations (
-    id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    event_id BIGINT NOT NULL,
-    guest_id BIGINT NOT NULL,
-    qr_code  VARCHAR(255) NOT NULL UNIQUE,
-    status   ENUM('PENDING', 'USED') NOT NULL,
-    FOREIGN KEY (event_id) REFERENCES events(id),
-    FOREIGN KEY (guest_id) REFERENCES users(id)
-);
-```
+Avec politiques Row Level Security (RLS) pour la sécurité au niveau ligne.
 
 ---
 
-## 14. STACK TECHNIQUE
+## 13. STACK TECHNIQUE
 
 ### Frontend (Flutter)
 
@@ -1226,7 +855,7 @@ CREATE TABLE invitations (
 | Dart SDK | `^3.12.1` | Langage |
 | `flutter_bloc` | `^8.1.6` | State management (BLoC pattern) |
 | `go_router` | `^14.8.1` | Navigation avec guards |
-| `dio` | `^5.7.0` | HTTP client (JWT interceptor) |
+| `supabase_flutter` | `^2.8.4` | HTTP client + Auth + Database SDK |
 | `supabase_flutter` | `^2.8.4` | Auth backend |
 | `get_it` | `^8.0.3` | Injection de dépendances |
 | `dartz` | `^0.10.1` | Functional (Either pour error handling) |
@@ -1245,32 +874,25 @@ CREATE TABLE invitations (
 | `flutter_screenutil` | `^5.9.3` | Responsive design |
 | `flutter_svg` | `^2.0.17` | SVG rendering |
 
-### Backend (Spring Boot)
+### Backend
 
-| Technologie | Version | Usage |
-|-------------|---------|-------|
-| Java | 21 | Langage |
-| Spring Boot | `3.2.5` | Framework |
-| Spring Security | — | Authentification + autorisation |
-| Spring Data JPA | — | ORM / Hibernate |
-| Spring Validation | — | Validation des DTOs |
-| MySQL Connector | — | Driver JDBC |
-| JJWT | `0.11.5` | JWT (HMAC-SHA256) |
-| ZXing | `3.5.3` | QR Code (non utilisé dans le code actuel) |
-| Lombok | `1.18.46` | Boilerplate reduction |
+| Technologie | Usage |
+|-------------|-------|
+| Supabase Auth | Authentification (JWT) |
+| Supabase PostgreSQL | Base de données avec Row Level Security |
+| Supabase Storage | Stockage d'images |
 
 ### Tests
 
-| Technologie | Type | Backend | Frontend |
-|-------------|------|---------|----------|
-| JUnit + Spring Test | Unitaire + Intégration | ❌ Aucun | — |
-| `flutter_test` | Widget | — | ✅ |
-| `bloc_test` | Bloc | — | ✅ |
-| `mocktail` | Mocking | — | ✅ |
+| Technologie | Type | Status |
+|-------------|------|--------|
+| `flutter_test` | Widget | ✅ |
+| `bloc_test` | Bloc | ✅ |
+| `mocktail` | Mocking | ✅ |
 
 ---
 
-## 15. DIAGRAMME DES ÉTATS BLOC
+## 14. DIAGRAMME DES ÉTATS BLOC
 
 ### AuthBloc
 
@@ -1303,7 +925,7 @@ graph LR
 
 ---
 
-## 16. FICHIERS DE TRADUCTION (ARB)
+## 15. FICHIERS DE TRADUCTION (ARB)
 
 | Clé | Anglais (`app_en.arb`) | Français (`app_fr.arb`) | Arabe (`app_ar.arb`) |
 |-----|------------------------|-------------------------|----------------------|
@@ -1320,7 +942,7 @@ graph LR
 
 ---
 
-## 17. SCHÉMA D'INJECTION DE DÉPENDANCES (GetIt)
+## 16. SCHÉMA D'INJECTION DE DÉPENDANCES (GetIt)
 
 ```mermaid
 graph TD
@@ -1384,7 +1006,7 @@ graph TD
 
 ---
 
-## 18. DÉPENDANCES ENTRE PACKAGES (FRONTEND)
+## 17. DÉPENDANCES ENTRE PACKAGES (FRONTEND)
 
 ```
 main.dart
@@ -1396,13 +1018,13 @@ core/
 ├── constants/       ← api_constants, app_constants, supabase_constants
 ├── di/              ← injection_container (importe TOUS les blocs/repos/usecases)
 ├── errors/          ← exceptions, failures (utilisés par toutes les features)
-├── network/         ← api_client (Dio), network_info (connectivity)
+├── network/         ← Supabase client, network_info (connectivity)
 ├── router/          ← app_router (importe toutes les pages)
 └── utils/           ← date_utils, token_manager, validators
 
 features/{feature}/
 ├── data/
-│   ├── datasources/ ← Appelle soit api_client, soit supabase
+│   ├── datasources/ ← Appelle Supabase (via supabase_flutter SDK)
 │   ├── models/       ← JSON serialization
 │   └── repositories/ ← Implémente l'interface domain
 ├── domain/
@@ -1417,7 +1039,7 @@ features/{feature}/
 
 ---
 
-## 19. COUVERTURE DE TESTS
+## 18. COUVERTURE DE TESTS
 
 | Feature | Type | Fichier | Tests |
 |---------|------|---------|-------|
@@ -1442,66 +1064,56 @@ features/{feature}/
 | ✅ Events | Bloc | `event_bloc_test.dart` | 5 |
 | ✅ Events | Widget | `event_card_test.dart` | 7 |
 | ✅ General | Smoke | `widget_test.dart` | 1 |
-| ❌ Backend | — | `src/test/` | **0 test** |
+| ❌ Payments | Bloc | `payment_bloc_test.dart` | **0 test** |
+| ❌ Notifications | — | — | **0 test** |
+| ❌ Profile | — | — | **0 test** |
+| ❌ Admin | — | — | **0 test** |
 
 ---
 
-## 20. SCHÉMA DE SÉCURITÉ
+## 19. SCHÉMA DE SÉCURITÉ
 
 ```mermaid
 graph TD
-    subgraph "Spring Security Filter Chain"
-        REQ["Request HTTP"] --> CORS["CORS Filter<br/>Allow all origins"]
-        CORS --> JWT_FILTER["JwtAuthFilter<br/>OncePerRequestFilter"]
-        JWT_FILTER -->|"No Bearer token"| PASS["Passe au filtre suivant"]
-        JWT_FILTER -->|"Bearer token présent"| EXTRACT["Extract email from JWT"]
-        EXTRACT --> VALID{"Token valide ?"}
-        VALID -->|"Oui"| SET_CTX["Set SecurityContext<br/>UsernamePasswordAuthToken"]
-        VALID -->|"Non"| PASS
-        SET_CTX --> AUTHZ["Authorization<br/>Rules"]
-        PASS --> AUTHZ
-        AUTHZ -->|"/api/auth/**"| PUBLIC["✅ Public"]
-        AUTHZ -->|"POST/PUT/DELETE /api/events"| ROLE{"hasRole ORGANIZER ?"}
-        AUTHZ -->|"Autres"| AUTH_CHECK{"Authenticated ?"}
-        ROLE -->|"Oui"| CTRL["→ Controller"]
-        ROLE -->|"Non"| 403["403 Forbidden"]
-        AUTH_CHECK -->|"Oui"| CTRL
-        AUTH_CHECK -->|"Non"| 401["401 Unauthorized"]
+    subgraph "Supabase Auth"
+        USER["Utilisateur"] --> LOGIN["Login / Register"]
+        LOGIN --> SUPABASE["Supabase Auth"]
+        SUPABASE --> JWT["JWT Token"]
+        JWT --> STORAGE["FlutterSecureStorage"]
     end
 
-    subgraph "JWT Token"
-        JWT_DETAILS["Header: HS256<br/>Payload: email (sub), iat, exp<br/>Signé avec clé 256-bit Base64<br/>Expiration: 24h"]
+    subgraph "Row Level Security (RLS)"
+        DB["PostgreSQL"] --> POLICY["RLS Policies"]
+        POLICY -->|"profiles"| PROF_P["Users can read/write own profile"]
+        POLICY -->|"events"| EVT_P["Organizers CRUD own events<br/>Participants read published"]
+        POLICY -->|"bookings"| BOOK_P["Users CRUD own bookings<br/>Organizers read event bookings"]
+        POLICY -->|"tickets"| TICK_P["Users read own tickets<br/>Organizers read event tickets"]
     end
+
+    SUPABASE --> DB
+    JWT --> DB
 ```
 
 ---
 
-## 21. VARIABLES D'ENVIRONNEMENT / CONFIGURATION
-
-```properties
-# ===== Backend (application.properties) =====
-server.port=8081
-spring.datasource.url=jdbc:mysql://localhost:3306/EventHub
-spring.datasource.username=spring
-spring.datasource.password=spring
-spring.jpa.hibernate.ddl-auto=update
-app.jwt.secret=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-app.jwt.expiration-ms=86400000
-```
+## 20. VARIABLES D'ENVIRONNEMENT / CONFIGURATION
 
 ```dart
-// ===== Frontend (api_constants.dart) =====
-static const String baseUrl = 'http://localhost:8080/api';
-static const Duration connectTimeout = Duration(seconds: 30);
-
 // ===== Frontend (supabase_constants.dart) =====
 static const String supabaseUrl = 'https://xxxxx.supabase.co';
 static const String anonKey = '...';
 ```
 
+Les credentials peuvent être passés au build-time :
+
+```bash
+flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=your-anon-key
+```
+
 ---
 
-## 22. THÈME MATERIAL 3 — PALETTE DE COULEURS
+## 21. THÈME MATERIAL 3 — PALETTE DE COULEURS
 
 ```dart
 static const Color primary   = Color(0xFF6C63FF);  // Violet (branding)
@@ -1517,15 +1129,15 @@ static const Color surfaceDark  = Color(0xFF121212);
 
 ---
 
-## 23. OBSERVATIONS ET NOTES
+## 22. OBSERVATIONS ET NOTES
 
 | # | Observation | Détail |
 |---|-------------|--------|
-| 1 | **Double backend** | Le projet Spring Boot semble être une version alternative non utilisée par le frontend Flutter. Le frontend utilise Supabase. Incohérence API : `api_constants.dart` définit des endpoints REST mais l'auth réelle passe par Supabase. |
-| 2 | **QR Codes simplifiés** | Le backend génère des UUID comme QR codes (pas de ZXing utilisé). Le frontend utilise `qr_flutter` pour l'affichage et `mobile_scanner` pour le scan. |
-| 3 | **Paiements** | Stripe est intégré côté Flutter (création de PaymentIntent) mais le backend n'a pas de endpoints de paiement. Le flux est partiellement implémenté. |
-| 4 | **Tests** | Backend : 0 test. Frontend : ~90 tests (bonne couverture auth, events, bookings, shared widgets). |
-| 5 | **Pas de CI/CD** | Aucun pipeline GitHub Actions visible malgré le prompt qui en spécifie un. |
-| 6 | **Lombok mixte** | Le backend Spring Boot utilise Lombok (`@RequiredArgsConstructor`) sur certains fichiers mais pas sur les DTOs (getters/setters manuels). |
-| 7 | **Static management** | Le thème et la langue sont sélectionnables dans `SettingsPage` mais ne sont pas persistés côté backend. |
-| 8 | **Dashboard hardcodé** | Les statistiques de `OrganizerDashboardPage` sont des valeurs statiques (non connectées à une API). |
+| 1 | **Spring Boot supprimé** | Le backend Spring Boot a été retiré du projet. L'architecture est désormais 100% Flutter + Supabase. La documentation a été mise à jour en conséquence. |
+| 2 | **QR Codes** | Le frontend utilise `qr_flutter` pour l'affichage et `mobile_scanner` pour le scan. Les QR codes sont stockés en base Supabase. |
+| 3 | **Paiements Stripe** | L'architecture est préparée (entité `Payment`, datasource Supabase) mais il n'y a pas d'intégration réelle du SDK Stripe. Les paiements sont simulés via des enregistrements en base. |
+| 4 | **Tests** | ~90 tests (bonne couverture auth, events, bookings, shared widgets). Manque : tests pour payments, notifications, profile, admin. |
+| 5 | **CI/CD** | Pipeline GitHub Actions présent (`.github/workflows/ci.yml`) : `flutter analyze` + `flutter test`. |
+| 6 | **Thème/Langue** | Persistés localement via `SharedPreferences`. Pas de synchro backend (non nécessaire sans compte multi-appareil). |
+| 7 | **Dashboard** | Les statistiques de `OrganizerDashboardPage` sont calculées dynamiquement depuis les événements chargés. |
+| 8 | **Dépendances** | Plusieurs packages ont des versions majeures disponibles (`go_router`, `get_it`, `mobile_scanner`, etc.). |
