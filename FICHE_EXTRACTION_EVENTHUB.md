@@ -17,7 +17,8 @@ pi-eventhub/
 │   └── l10n/                          ← Fichiers de traduction (ARB)
 │
 ├── supabase_schema.sql                ← Schéma PostgreSQL Supabase + RLS
-└── FICHE_EXTRACTION_EVENTHUB.md       ← Ce document
+├── FICHE_EXTRACTION_EVENTHUB.md       ← Ce document
+└── LICENSE                            ← MIT License
 ```
 
 ---
@@ -95,17 +96,18 @@ graph TB
     FEATURES --> PRES_LAYER
 ```
 
-### Structure des features (7 modules)
+### Structure des features (8 modules)
 
 ```
 lib/features/
 ├── auth/           ← Authentification (Login, Register, Forgot Password, Logout)
-├── events/         ← Événements (CRUD, liste, détail, gestion, dashboard)
+├── events/         ← Événements (CRUD, liste, détail, gestion, dashboard, favoris)
 ├── bookings/       ← Réservations (création, historique)
 ├── tickets/        ← Billets (liste, QR code, scanner)
-├── payments/       ← Paiements (Stripe intent, confirmation)
-├── notifications/  ← Notifications (liste)
-└── profile/        ← Profil (affichage, édition)
+├── payments/       ← Paiements (simulés, Stripe intent préparé)
+├── notifications/  ← Notifications (liste, lecture)
+├── profile/        ← Profil (affichage, édition)
+└── admin/          ← Panneau d'administration (dashboard, utilisateurs, événements, réservations, tickets, analytics)
 ```
 
 ---
@@ -120,7 +122,8 @@ erDiagram
         string name
         string phone "nullable"
         string photoUrl "nullable"
-        enum role "organizer | participant"
+        enum role "admin | organizer | participant"
+        bool isActive
         datetime createdAt
     }
 
@@ -139,8 +142,13 @@ erDiagram
         int maxParticipants
         int currentParticipants
         enum category "conference | concert | etc."
-        enum status "draft | published | etc."
+        enum status "draft | published | cancelled | completed"
         string organizerId FK
+        string organizerName "nullable"
+        bool isFeatured
+        string rejectionReason "nullable"
+        datetime createdAt
+        datetime updatedAt
     }
 
     Booking {
@@ -183,12 +191,21 @@ erDiagram
         datetime createdAt
     }
 
+    Favorite {
+        string id PK
+        string userId FK
+        string eventId FK
+        datetime createdAt
+    }
+
     User ||--o{ Event : "organizes"
     User ||--o{ Booking : "makes"
     User ||--o{ Ticket : "owns"
     User ||--o{ AppNotification : "receives"
+    User ||--o{ Favorite : "saves"
     Event ||--o{ Booking : "has"
     Event ||--o{ Ticket : "generates"
+    Event ||--o{ Favorite : "favorited_by"
     Booking ||--o{ Ticket : "produces"
     Booking ||--o{ Payment : "requires"
 ```
@@ -277,6 +294,7 @@ classDiagram
     }
     class UserRole {
         <<enumeration>>
+        admin
         organizer
         participant
     }
@@ -392,6 +410,14 @@ classDiagram
         +DateTime? createdAt
     }
 
+    class DashboardStats {
+        +int totalUsers
+        +int totalEvents
+        +int totalBookings
+        +int totalTickets
+        +double totalRevenue
+    }
+
     %% ── Repository Interfaces ───────────────────────────────
     class AuthRepository {
         <<abstract>>
@@ -431,6 +457,20 @@ classDiagram
     class NotificationRepository {
         <<abstract>>
         +getNotifications(String) Future~Either~Failure, List~AppNotification~~
+    }
+
+    class AdminRepository {
+        <<abstract>>
+        +getDashboardStats() Future~Either~Failure, DashboardStats~~
+        +getUsers() Future~Either~Failure, List~Profile~~
+        +updateUserRole(String, String) Future~Either~Failure, void~~
+        +toggleUserActive(String) Future~Either~Failure, void~~
+        +getAllEvents() Future~Either~Failure, List~Event~~
+        +approveEvent(String) Future~Either~Failure, void~~
+        +toggleEventFeatured(String) Future~Either~Failure, void~~
+        +deleteEvent(String) Future~Either~Failure, void~~
+        +getAllBookings() Future~Either~Failure, List~Booking~~
+        +getAllTickets() Future~Either~Failure, List~Ticket~~
     }
 
     %% ── BLoCs ───────────────────────────────────────────────
@@ -476,6 +516,13 @@ classDiagram
     class ProfileBloc {
         +GetProfileUseCase getProfileUseCase
         +UpdateProfileUseCase updateProfileUseCase
+    }
+
+    class AdminBloc {
+        +GetDashboardStatsUseCase getDashboardStatsUseCase
+        +GetAllEventsUseCase getAllEventsUseCase
+        +GetUsersUseCase getUsersUseCase
+        +AdminRepository adminRepository
     }
 
     %% ── Use Cases ───────────────────────────────────────────
@@ -529,6 +576,7 @@ classDiagram
     RegisterUseCase --> AuthRepository
     CreateEventUseCase --> EventRepository
     ValidateTicketUseCase --> TicketRepository
+    AdminBloc --> AdminRepository
 ```
 
 ---
@@ -541,10 +589,10 @@ erDiagram
     UTILISATEUR ||--o{ RESERVATION : "effectue"
     UTILISATEUR ||--o{ TICKET : "possède"
     UTILISATEUR ||--o{ NOTIFICATION : "reçoit"
-    UTILISATEUR ||--o{ PROFIL : "a"
-    CATEGORIE ||--o{ EVENEMENT : "classe"
+    UTILISATEUR ||--o{ FAVORIS : "sauvegarde"
     EVENEMENT ||--o{ RESERVATION : "concerne"
     EVENEMENT ||--o{ TICKET : "génère"
+    EVENEMENT ||--o{ FAVORIS : "favorisé_par"
     RESERVATION ||--o{ PAIEMENT : "nécessite"
     RESERVATION ||--o{ TICKET : "produit"
 
@@ -554,13 +602,9 @@ erDiagram
         string nom
         string telephone "nullable"
         string photo_url "nullable"
-        string role "organisateur | participant"
+        string role "admin | organisateur | participant"
+        bool actif
         datetime date_creation
-    }
-
-    CATEGORIE {
-        string id PK
-        string libelle
     }
 
     EVENEMENT {
@@ -577,9 +621,11 @@ erDiagram
         float prix
         int participants_max
         int participants_actuels
-        string categorie_id FK
+        string categorie "conférence | concert | etc."
         string organisateur_id FK
         string statut "brouillon | publié | annulé | terminé"
+        bool featured
+        string motif_rejet "nullable"
         datetime date_creation
         datetime date_modification
     }
@@ -625,12 +671,11 @@ erDiagram
         datetime date_creation
     }
 
-    PROFIL {
+    FAVORIS {
         string id PK
         string utilisateur_id FK
-        string biographie "nullable"
-        string site_web "nullable"
-        string reseaux_sociaux "nullable"
+        string evenement_id FK
+        datetime date_creation
     }
 ```
 
@@ -647,12 +692,12 @@ erDiagram
 
 | Règle | Description |
 |-------|-------------|
-| RG01 | Un **Utilisateur** ne peut avoir qu'un seul **Profil** |
+| RG01 | Un **Utilisateur** a un profil intégré (table `profiles`, lié à Supabase Auth) |
 | RG02 | Un **Utilisateur** peut organiser 0 ou plusieurs **Événements** |
 | RG03 | Un **Utilisateur** peut effectuer 0 ou plusieurs **Réservations** |
 | RG04 | Un **Utilisateur** peut posséder 0 ou plusieurs **Tickets** |
 | RG05 | Un **Utilisateur** peut recevoir 0 ou plusieurs **Notifications** |
-| RG06 | Une **Catégorie** peut classer 0 ou plusieurs **Événements** |
+| RG06 | Un **Événement** a une **catégorie** (texte, pas de table dédiée) |
 | RG07 | Un **Événement** peut avoir 0 ou plusieurs **Réservations** |
 | RG08 | Un **Événement** peut générer 0 ou plusieurs **Tickets** |
 | RG09 | Une **Réservation** nécessite 0 ou 1 **Paiement** |
@@ -661,6 +706,8 @@ erDiagram
 | RG12 | Un **Paiement** est obligatoire pour les événements payants (prix > 0) |
 | RG13 | Un **Utilisateur** de rôle `organisateur` peut créer/modifier/supprimer ses événements |
 | RG14 | Un **Utilisateur** de rôle `participant` peut réserver et annuler ses réservations |
+| RG15 | Un **Utilisateur** peut ajouter/supprimer des **Favoris** |
+| RG16 | Un **Utilisateur** de rôle `admin` a accès au panneau d'administration complet |
 
 ---
 
@@ -696,7 +743,25 @@ graph TD
     MGMT -->|"éditer"| EDIT_EVT["/edit-event<br/>CreateEventPage(edit)"]
     MGMT -->|"créer"| CREATE
     SCAN -->|"résultat"| VALID{"Ticket<br/>Valide/Invalide"}
+
+    PROF -->|"admin"| ADMIN["/admin<br/>AdminDashboardPage"]
+    ADMIN -->|"utilisateurs"| ADM_USR["/admin/users<br/>AdminUsersPage"]
+    ADMIN -->|"événements"| ADM_EVT["/admin/events<br/>AdminEventsPage"]
+    ADMIN -->|"réservations"| ADM_BOK["/admin/bookings<br/>AdminBookingsPage"]
+    ADMIN -->|"tickets"| ADM_TKT["/admin/tickets<br/>AdminTicketsPage"]
+    ADMIN -->|"analytiques"| ADM_ANL["/admin/analytics<br/>AdminAnalyticsPage"]
 ```
+
+### Routes admin (6 pages)
+
+| Route | Page |
+|-------|------|
+| `/admin` | AdminDashboardPage |
+| `/admin/users` | AdminUsersPage |
+| `/admin/events` | AdminEventsPage |
+| `/admin/bookings` | AdminBookingsPage |
+| `/admin/tickets` | AdminTicketsPage |
+| `/admin/analytics` | AdminAnalyticsPage |
 
 ### Protection des routes
 
@@ -704,6 +769,7 @@ graph TD
 |-----------|-------------|
 | Non authentifié → route protégée | → `/login` |
 | Authentifié → `/login`, `/register`, `/forgot-password`, `/splash`, `/onboarding` | → `/` |
+| Non-admin → `/admin/*` | → `/` |
 | Sinon | Route demandée |
 
 ---
@@ -841,6 +907,7 @@ Le schéma complet est défini dans `supabase_schema.sql` à la racine du projet
 - `tickets` — billets avec QR codes
 - `payments` — paiements
 - `notifications` — notifications
+- `favorites` — favoris utilisateur/événement
 
 Avec politiques Row Level Security (RLS) pour la sécurité au niveau ligne.
 
@@ -854,25 +921,30 @@ Avec politiques Row Level Security (RLS) pour la sécurité au niveau ligne.
 |-------------|---------|-------|
 | Dart SDK | `^3.12.1` | Langage |
 | `flutter_bloc` | `^8.1.6` | State management (BLoC pattern) |
+| `bloc` | `^8.1.4` | Bloc core library |
 | `go_router` | `^14.8.1` | Navigation avec guards |
-| `supabase_flutter` | `^2.8.4` | HTTP client + Auth + Database SDK |
-| `supabase_flutter` | `^2.8.4` | Auth backend |
-| `get_it` | `^8.0.3` | Injection de dépendances |
+| `supabase_flutter` | `^2.14.1` | SDK Supabase (Auth + Database + Storage) |
+| `get_it` | `^8.3.0` | Injection de dépendances |
 | `dartz` | `^0.10.1` | Functional (Either pour error handling) |
-| `equatable` | `^2.0.7` | Value equality |
-| `json_annotation` | `^4.9.0` | JSON serialization |
+| `equatable` | `^2.0.8` | Value equality |
+| `json_annotation` | `^4.12.0` | JSON serialization |
+| `shared_preferences` | `^2.3.5` | Stockage local (thème, langue) |
+| `hive` | `^2.2.3` | Base locale NoSQL |
+| `hive_flutter` | `^1.1.0` | Flutter adapter Hive |
 | `flutter_secure_storage` | `^9.2.4` | Stockage sécurisé JWT |
-| `connectivity_plus` | `^6.1.2` | Vérification réseau |
+| `connectivity_plus` | `^6.1.5` | Vérification réseau |
 | `qr_flutter` | `^4.1.0` | Génération QR code |
-| `mobile_scanner` | `^6.0.6` | Scanner QR code (caméra) |
-| `image_picker` | `^1.1.2` | Sélection photo |
+| `mobile_scanner` | `^6.0.11` | Scanner QR code (caméra) |
+| `image_picker` | `^1.2.2` | Sélection photo |
 | `cached_network_image` | `^3.4.1` | Cache images réseau |
-| `lottie` | `^3.3.1` | Animations Lottie |
+| `lottie` | `^3.3.3` | Animations Lottie |
 | `shimmer` | `^3.0.0` | Effet de chargement |
 | `flutter_localizations` | SDK | Internationalisation |
 | `intl` | `^0.20.2` | i18n + ARB files |
 | `flutter_screenutil` | `^5.9.3` | Responsive design |
-| `flutter_svg` | `^2.0.17` | SVG rendering |
+| `flutter_svg` | `^2.3.0` | SVG rendering |
+| `share_plus` | `^12.0.2` | Partage d'événements |
+| `path_provider` | `^2.1.5` | Chemins de fichiers système |
 
 ### Backend
 
@@ -884,11 +956,12 @@ Avec politiques Row Level Security (RLS) pour la sécurité au niveau ligne.
 
 ### Tests
 
-| Technologie | Type | Status |
-|-------------|------|--------|
-| `flutter_test` | Widget | ✅ |
-| `bloc_test` | Bloc | ✅ |
-| `mocktail` | Mocking | ✅ |
+| Technologie | Type | Version |
+|-------------|------|---------|
+| `flutter_test` | Widget | SDK |
+| `bloc_test` | Bloc | `^9.1.7` |
+| `mocktail` | Mocking | `^1.0.5` |
+| `flutter_lints` | Linting | `^6.0.0` |
 
 ---
 
@@ -975,6 +1048,15 @@ graph TD
             EB["EventBloc"]
         end
 
+        subgraph "Admin"
+            AD_DS["AdminSupabaseDataSource"]
+            AD_Repo["AdminRepositoryImpl"]
+            GDSU["GetDashboardStatsUseCase"]
+            GAE["GetAllEventsUseCase"]
+            GU["GetUsersUseCase"]
+            AD_B["AdminBloc"]
+        end
+
         subgraph "Other"
             B["Bookings Feature"]
             T["Tickets Feature"]
@@ -1012,14 +1094,14 @@ graph TD
 main.dart
 ├── supabase_flutter (initialization)
 ├── get_it (DI container)
-└── MultiBlocProvider (7 blocs)
+└── MultiBlocProvider (8 blocs)
 
 core/
-├── constants/       ← api_constants, app_constants, supabase_constants
+├── constants/       ← app_constants, supabase_constants
 ├── di/              ← injection_container (importe TOUS les blocs/repos/usecases)
 ├── errors/          ← exceptions, failures (utilisés par toutes les features)
 ├── network/         ← Supabase client, network_info (connectivity)
-├── router/          ← app_router (importe toutes les pages)
+├── router/          ← app_router (importe toutes les pages, 25 routes)
 └── utils/           ← date_utils, token_manager, validators
 
 features/{feature}/
@@ -1063,11 +1145,17 @@ features/{feature}/
 | ✅ Bookings | Bloc | `booking_bloc_test.dart` | 3 |
 | ✅ Events | Bloc | `event_bloc_test.dart` | 5 |
 | ✅ Events | Widget | `event_card_test.dart` | 7 |
+| ✅ Admin | Bloc | `admin_bloc_test.dart` | 10 |
 | ✅ General | Smoke | `widget_test.dart` | 1 |
-| ❌ Payments | Bloc | `payment_bloc_test.dart` | **0 test** |
-| ❌ Notifications | — | — | **0 test** |
-| ❌ Profile | — | — | **0 test** |
-| ❌ Admin | — | — | **0 test** |
+| 🟡 Events | UseCase | 7 use cases non testés | **0 test** |
+| 🟡 Bookings | UseCase | 2 use cases non testés | **0 test** |
+| 🟡 Auth | Pages | Navigation post-auth manquante | — |
+| ❌ Payments | — | Feature entière | **0 test** |
+| ❌ Notifications | — | Feature entière | **0 test** |
+| ❌ Profile | — | Feature entière | **0 test** |
+| ❌ Tickets | — | Feature entière | **0 test** |
+| ❌ Events | Pages | Pages événements non testées | **0 test** |
+| ❌ Admin | Pages | Pages admin non testées | **0 test** |
 
 ---
 
@@ -1084,12 +1172,16 @@ graph TD
 
     subgraph "Row Level Security (RLS)"
         DB["PostgreSQL"] --> POLICY["RLS Policies"]
-        POLICY -->|"profiles"| PROF_P["Users can read/write own profile"]
-        POLICY -->|"events"| EVT_P["Organizers CRUD own events<br/>Participants read published"]
-        POLICY -->|"bookings"| BOOK_P["Users CRUD own bookings<br/>Organizers read event bookings"]
-        POLICY -->|"tickets"| TICK_P["Users read own tickets<br/>Organizers read event tickets"]
+        POLICY -->|"profiles"| PROF_P["Users read/update own<br/>Admins CRUD all"]
+        POLICY -->|"events"| EVT_P["Organizers CRUD own<br/>Participants read published<br/>Admins CRUD all"]
+        POLICY -->|"bookings"| BOOK_P["Users CRUD own<br/>Organizers read event's<br/>Admins CRUD all"]
+        POLICY -->|"tickets"| TICK_P["Users read own<br/>Anyone read by qr_code<br/>Admins CRUD all"]
+        POLICY -->|"payments"| PAY_P["Users read/insert/update own<br/>Admins CRUD all"]
+        POLICY -->|"notifications"| NOTIF_P["Users read/update own<br/>Admins read all"]
+        POLICY -->|"favorites"| FAV_P["Users manage own<br/>Admins manage all"]
     end
 
+    DB -->|"Bypass RLS"| ADMIN_FN["is_admin() helper function"]
     SUPABASE --> DB
     JWT --> DB
 ```
@@ -1103,6 +1195,8 @@ graph TD
 static const String supabaseUrl = 'https://xxxxx.supabase.co';
 static const String anonKey = '...';
 ```
+
+Un fichier `.env.example` est fourni à la racine de `eventhub/` pour référence.
 
 Les credentials peuvent être passés au build-time :
 
@@ -1133,11 +1227,18 @@ static const Color surfaceDark  = Color(0xFF121212);
 
 | # | Observation | Détail |
 |---|-------------|--------|
-| 1 | **Spring Boot supprimé** | Le backend Spring Boot a été retiré du projet. L'architecture est désormais 100% Flutter + Supabase. La documentation a été mise à jour en conséquence. |
-| 2 | **QR Codes** | Le frontend utilise `qr_flutter` pour l'affichage et `mobile_scanner` pour le scan. Les QR codes sont stockés en base Supabase. |
-| 3 | **Paiements Stripe** | L'architecture est préparée (entité `Payment`, datasource Supabase) mais il n'y a pas d'intégration réelle du SDK Stripe. Les paiements sont simulés via des enregistrements en base. |
-| 4 | **Tests** | ~90 tests (bonne couverture auth, events, bookings, shared widgets). Manque : tests pour payments, notifications, profile, admin. |
-| 5 | **CI/CD** | Pipeline GitHub Actions présent (`.github/workflows/ci.yml`) : `flutter analyze` + `flutter test`. |
-| 6 | **Thème/Langue** | Persistés localement via `SharedPreferences`. Pas de synchro backend (non nécessaire sans compte multi-appareil). |
-| 7 | **Dashboard** | Les statistiques de `OrganizerDashboardPage` sont calculées dynamiquement depuis les événements chargés. |
-| 8 | **Dépendances** | Plusieurs packages ont des versions majeures disponibles (`go_router`, `get_it`, `mobile_scanner`, etc.). |
+| 1 | **Spring Boot supprimé** | Le backend Spring Boot a été retiré du projet. L'architecture est désormais 100% Flutter + Supabase. |
+| 2 | **QR Codes** | `qr_flutter` pour l'affichage, `mobile_scanner` (v6.0.11) pour le scan. Les QR codes sont stockés en base Supabase. |
+| 3 | **Paiements Stripe simulés** | Aucune intégration réelle du SDK Stripe. `createPaymentIntent()` insère juste une ligne en DB avec status `pending`. `confirmPayment()` met à jour le statut en DB. Pas de vrai PaymentIntent Stripe. |
+| 4 | **Tests** | ~97 tests. Bonne couverture pour Core (27) et Auth (25). Admin (10), Events (12), Bookings (3). **0 test** pour Payments, Notifications, Profile, Tickets. |
+| 5 | **CI/CD** | Pipeline GitHub Actions (`.github/workflows/ci.yml`) : Flutter 3.29.0 stable, `flutter analyze` + `flutter test`. Pas de cache SDK, pas de rapport de couverture, pas de matrix strategy (uniquement ubuntu-latest). |
+| 6 | **Thème/Langue** | Persistés localement via `SharedPreferences`. Pas de synchro backend. |
+| 7 | **Dashboard organisateur** | Statistiques calculées dynamiquement depuis les événements chargés côté client. |
+| 8 | **Admin feature** | Panneau d'administration complet avec 6 pages. 7 méthodes du repository admin appelées directement depuis le BLoC (sans use case). |
+| 9 | **Favoris** | Table `favorites` dans Supabase avec RLS. Toggle favori implémenté mais erreur silencieuse (failure → `null`, pas d'état d'erreur émis). |
+| 10 | **Flux réservation → ticket cassé** | Aucune création de ticket après réservation/paiement. Pas de `CreateTicketUseCase`, pas de trigger DB. L'utilisateur verra une page tickets vide. |
+| 11 | **Bugs connus** | Double `@override` dans `forgot_password_page.dart:33` (erreur de compilation). Paiements simulés. Validation email faible (`contains('@')`). |
+| 12 | **Dead code** | `TokenManager` et `NetworkInfo` enregistrés dans DI mais jamais injectés dans les repositories. `GetUserFavoriteIdsUseCase` enregistré mais pas passé à `EventBloc`. |
+| 13 | **Contournements architecture** | `AuthBloc._onCheckAuth` appelle Supabase directement (contourne le repository). `EventDetailPage` appelle Supabase directement pour les favoris (contourne le BLoC). |
+| 14 | **Localisation** | Messages de validation dans les pages auth en dur en anglais (pas via l10n). 45+ clés par langue (EN/FR/AR). |
+| 15 | **ApiConstants obsolète** | La classe `ApiConstants` dans le diagramme UML (section 5) est un vestige de l'ancienne architecture REST. Le projet utilise désormais le SDK Supabase direct. Les constantes réelles sont dans `app_constants.dart` et `supabase_constants.dart`. |

@@ -403,4 +403,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get status => 'الحالة';
+
+  @override
+  String get publish => 'نشر';
+
+  @override
+  String get unpublish => 'إلغاء النشر';
+
+  @override
+  String get eventPublished => 'تم نشر الفعالية بنجاح';
+
+  @override
+  String get eventUnpublished => 'تم إلغاء نشر الفعالية بنجاح';
 }

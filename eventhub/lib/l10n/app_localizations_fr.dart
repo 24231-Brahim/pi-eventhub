@@ -403,4 +403,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get status => 'Statut';
+
+  @override
+  String get publish => 'Publier';
+
+  @override
+  String get unpublish => 'Dépublier';
+
+  @override
+  String get eventPublished => 'Événement publié avec succès';
+
+  @override
+  String get eventUnpublished => 'Événement dépublié avec succès';
 }

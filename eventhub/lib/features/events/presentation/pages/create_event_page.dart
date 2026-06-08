@@ -114,6 +114,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         price: _isFree ? 0 : double.parse(_priceController.text),
         maxParticipants: int.parse(_maxParticipantsController.text),
         category: _selectedCategory,
+        status: _isEditing ? widget.event!.status : EventStatus.published,
         organizerId: Supabase.instance.client.auth.currentUser?.id ?? '',
       );
       if (_isEditing) {

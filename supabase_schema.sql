@@ -182,6 +182,18 @@ CREATE POLICY "users can read own payments"
         SELECT user_id FROM public.bookings WHERE id = booking_id
     ));
 
+CREATE POLICY "users can insert own payments"
+    ON public.payments FOR INSERT
+    WITH CHECK (auth.uid() IN (
+        SELECT user_id FROM public.bookings WHERE id = booking_id
+    ));
+
+CREATE POLICY "users can update own payments"
+    ON public.payments FOR UPDATE
+    USING (auth.uid() IN (
+        SELECT user_id FROM public.bookings WHERE id = booking_id
+    ));
+
 -- Notifications: users can read/update own
 CREATE POLICY "users can read own notifications"
     ON public.notifications FOR SELECT
@@ -258,6 +270,14 @@ CREATE POLICY "admins can delete tickets"
 
 CREATE POLICY "admins can read all payments"
     ON public.payments FOR SELECT
+    USING (public.is_admin());
+
+CREATE POLICY "admins can insert payments"
+    ON public.payments FOR INSERT
+    WITH CHECK (public.is_admin());
+
+CREATE POLICY "admins can update payments"
+    ON public.payments FOR UPDATE
     USING (public.is_admin());
 
 CREATE POLICY "admins can read all notifications"

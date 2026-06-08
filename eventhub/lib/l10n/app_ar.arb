@@ -131,5 +131,9 @@
   "manageEvents": "إدارة الفعاليات",
   "role": "الدور",
   "phone": "الهاتف",
-  "status": "الحالة"
+  "status": "الحالة",
+  "publish": "نشر",
+  "unpublish": "إلغاء النشر",
+  "eventPublished": "تم نشر الفعالية بنجاح",
+  "eventUnpublished": "تم إلغاء نشر الفعالية بنجاح"
 }

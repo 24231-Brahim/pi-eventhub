@@ -131,5 +131,9 @@
   "manageEvents": "Manage Events",
   "role": "Role",
   "phone": "Phone",
-  "status": "Status"
+  "status": "Status",
+  "publish": "Publish",
+  "unpublish": "Unpublish",
+  "eventPublished": "Event published successfully",
+  "eventUnpublished": "Event unpublished successfully"
 }

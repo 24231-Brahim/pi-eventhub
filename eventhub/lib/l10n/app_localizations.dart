@@ -888,6 +888,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status'**
   String get status;
+
+  /// No description provided for @publish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get publish;
+
+  /// No description provided for @unpublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish'**
+  String get unpublish;
+
+  /// No description provided for @eventPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Event published successfully'**
+  String get eventPublished;
+
+  /// No description provided for @eventUnpublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Event unpublished successfully'**
+  String get eventUnpublished;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
