@@ -7,7 +7,8 @@ class ConfirmPaymentUseCase {
   final PaymentRepository repository;
   ConfirmPaymentUseCase({required this.repository});
 
-  Future<Either<Failure, Payment>> call(String paymentIntentId) {
-    return repository.confirmPayment(paymentIntentId);
+  Future<Either<Failure, Payment>> call(
+      String paymentIntentId, String bookingId) {
+    return repository.confirmPayment(paymentIntentId, bookingId);
   }
 }

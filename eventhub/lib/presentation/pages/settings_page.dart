@@ -32,16 +32,17 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDarkMode = _themeNotifier.themeMode == ThemeMode.dark;
     final locale = _themeNotifier.locale;
     final languageName = _getLanguageName(locale);
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Appearance',
+          Text(l10n.appearance,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -49,8 +50,8 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 8),
           Card(
             child: SwitchListTile(
-              title: Text(AppLocalizations.of(context)!.darkMode),
-              subtitle: const Text('Toggle dark theme'),
+              title: Text(l10n.darkMode),
+              subtitle: Text(l10n.toggleDarkTheme),
               secondary:
                   Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
               value: isDarkMode,
@@ -60,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const SizedBox(height: 24),
-          Text(AppLocalizations.of(context)!.language,
+          Text(l10n.language,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
@@ -69,26 +70,26 @@ class _SettingsPageState extends State<SettingsPage> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.language),
-              title: Text(AppLocalizations.of(context)!.language),
+              title: Text(l10n.language),
               subtitle: Text(languageName),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _showLanguagePicker(),
             ),
           ),
           const SizedBox(height: 24),
-          Text('About',
+          Text(l10n.about,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          const Card(
+          Card(
             child: Column(
               children: [
                 ListTile(
-                  leading: Icon(Icons.info),
-                  title: Text('Version'),
-                  subtitle: Text('1.0.0'),
+                  leading: const Icon(Icons.info),
+                  title: Text(l10n.version),
+                  subtitle: const Text('1.0.0'),
                 ),
               ],
             ),
@@ -99,25 +100,27 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   String _getLanguageName(Locale locale) {
-    if (locale.languageCode == 'fr') return 'Français';
-    if (locale.languageCode == 'ar') return 'العربية';
-    return 'English';
+    final l10n = AppLocalizations.of(context);
+    if (locale.languageCode == 'fr') return l10n?.french ?? 'Français';
+    if (locale.languageCode == 'ar') return l10n?.arabic ?? 'العربية';
+    return l10n?.english ?? 'English';
   }
 
   void _showLanguagePicker() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Select Language'),
+        title: Text(l10n.selectLanguage),
         children: [
           SimpleDialogOption(
             onPressed: () {
               _themeNotifier.setLocale(const Locale('en'));
               Navigator.pop(context);
             },
-            child: const ListTile(
-              title: Text('English'),
-              trailing: Icon(Icons.check),
+            child: ListTile(
+              leading: Text(l10n.english),
+              trailing: const Icon(Icons.check),
             ),
           ),
           SimpleDialogOption(
@@ -125,9 +128,9 @@ class _SettingsPageState extends State<SettingsPage> {
               _themeNotifier.setLocale(const Locale('fr'));
               Navigator.pop(context);
             },
-            child: const ListTile(
-              title: Text('Français'),
-              trailing: Icon(Icons.check),
+            child: ListTile(
+              leading: Text(l10n.french),
+              trailing: const Icon(Icons.check),
             ),
           ),
           SimpleDialogOption(
@@ -135,9 +138,9 @@ class _SettingsPageState extends State<SettingsPage> {
               _themeNotifier.setLocale(const Locale('ar'));
               Navigator.pop(context);
             },
-            child: const ListTile(
-              title: Text('العربية'),
-              trailing: Icon(Icons.check),
+            child: ListTile(
+              leading: Text(l10n.arabic),
+              trailing: const Icon(Icons.check),
             ),
           ),
         ],

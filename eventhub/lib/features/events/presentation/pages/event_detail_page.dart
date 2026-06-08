@@ -1,13 +1,13 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
-import 'package:eventhub/shared/services/local_storage_service.dart';
-import 'package:eventhub/core/di/injection_container.dart' as di;
 
 class EventDetailPage extends StatefulWidget {
   final String eventId;
@@ -19,6 +19,7 @@ class EventDetailPage extends StatefulWidget {
 
 class _EventDetailPageState extends State<EventDetailPage> {
   bool _isFavorite = false;
+  bool _favoritesLoaded = false;
 
   @override
   void initState() {
@@ -27,52 +28,82 @@ class _EventDetailPageState extends State<EventDetailPage> {
     _checkFavorite();
   }
 
-  void _checkFavorite() {
-    final storage = di.sl<LocalStorageService>();
-    final favs = storage.getString('favorites') ?? '[]';
-    final ids = List<String>.from(jsonDecode(favs));
-    if (mounted) setState(() => _isFavorite = ids.contains(widget.eventId));
+  Future<void> _checkFavorite() async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
+      final data = await Supabase.instance.client
+          .from('favorites')
+          .select('event_id')
+          .eq('user_id', userId);
+      final ids = data.map((e) => e['event_id'] as String).toList();
+      if (mounted) {
+        setState(() {
+          _isFavorite = ids.contains(widget.eventId);
+          _favoritesLoaded = true;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _favoritesLoaded = true);
+    }
   }
 
-  void _toggleFavorite(String eventId) {
-    final storage = di.sl<LocalStorageService>();
-    final favs = storage.getString('favorites') ?? '[]';
-    final ids = List<String>.from(jsonDecode(favs));
-    if (_isFavorite) {
-      ids.remove(eventId);
-    } else {
-      ids.add(eventId);
-    }
-    storage.setString('favorites', jsonEncode(ids));
+  void _toggleFavorite() {
+    context.read<EventBloc>().add(ToggleFavoriteEvent(eventId: widget.eventId));
     setState(() => _isFavorite = !_isFavorite);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isFavorite ? 'Added to favorites' : 'Removed from favorites'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Event Details'),
+        title: Text(l10n.eventDetails),
         actions: [
-          IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.red : null,
+          if (_favoritesLoaded)
+            IconButton(
+              icon: Icon(
+                _isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: _isFavorite ? Colors.red : null,
+              ),
+              onPressed: _toggleFavorite,
             ),
-            onPressed: () => _toggleFavorite(widget.eventId),
-          ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {},
+          Builder(
+            builder: (context) {
+              final l10n = AppLocalizations.of(context)!;
+              final state = context.watch<EventBloc>().state;
+              if (state is EventDetailLoaded) {
+                final event = state.event;
+                return IconButton(
+                  icon: const Icon(Icons.share),
+                  onPressed: () {
+                    final text = [
+                      event.title,
+                      '',
+                      event.description,
+                      '',
+                      DateFormat('EEEE, MMM d, yyyy HH:mm').format(event.date),
+                      '${event.location}${event.city != null ? ', ${event.city}' : ''}',
+                      event.isFree ? l10n.free : '${event.price.toStringAsFixed(2)} TND',
+                      '',
+                      l10n.discoverAndBook,
+                    ].join('\n');
+                    SharePlus.instance.share(ShareParams(text: text));
+                  },
+                );
+              }
+              return const SizedBox();
+            },
           ),
         ],
       ),
-      body: BlocBuilder<EventBloc, EventState>(
+      body: BlocListener<EventBloc, EventState>(
+        listenWhen: (_, state) => state is FavoriteToggled,
+        listener: (context, state) {
+          if (state is FavoriteToggled) {
+            setState(() => _isFavorite = state.isFavorite);
+          }
+        },
+        child: BlocBuilder<EventBloc, EventState>(
         builder: (context, state) {
           if (state is EventLoading) {
             return const LoadingWidget();
@@ -91,6 +122,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
           return const LoadingWidget();
         },
       ),
+      ),
     );
   }
 }
@@ -101,6 +133,7 @@ class _EventDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -142,7 +175,7 @@ class _EventDetailContent extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      event.isFree ? 'FREE' : '${event.price.toStringAsFixed(2)} TND',
+                      event.isFree ? l10n.free : '${event.price.toStringAsFixed(2)} TND',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: event.isFree
                                 ? Colors.green
@@ -161,7 +194,7 @@ class _EventDetailContent extends StatelessWidget {
                 if (event.endDate != null)
                   _InfoRow(
                     icon: Icons.event,
-                    text: 'Ends: ${DateFormat('MMM d, yyyy HH:mm').format(event.endDate!)}',
+                    text: '${l10n.completed}: ${DateFormat('MMM d, yyyy HH:mm').format(event.endDate!)}',
                   ),
                 _InfoRow(icon: Icons.location_on, text: event.location),
                 if (event.city != null)
@@ -169,16 +202,16 @@ class _EventDetailContent extends StatelessWidget {
                 _InfoRow(
                   icon: Icons.people,
                   text:
-                      '${event.currentParticipants}/${event.maxParticipants} participants',
+                      '${event.currentParticipants}/${event.maxParticipants} ${l10n.participants}',
                 ),
                 if (event.organizerName != null)
                   _InfoRow(
                     icon: Icons.person,
-                    text: 'Organized by ${event.organizerName}',
+                    text: '${l10n.organizeEvents} ${event.organizerName}',
                   ),
                 const SizedBox(height: 16),
                 Text(
-                  'Description',
+                  l10n.description,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

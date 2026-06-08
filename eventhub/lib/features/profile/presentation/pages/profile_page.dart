@@ -6,6 +6,7 @@ import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -23,9 +24,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(l10n.profile),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -52,6 +54,8 @@ class _ProfilePageState extends State<ProfilePage> {
             final authState = context.watch<AuthBloc>().state;
             final isAdmin =
                 authState is Authenticated && authState.user.role == UserRole.admin;
+            final isOrganizer =
+                authState is Authenticated && authState.user.role == UserRole.organizer;
             return ListView(
               padding: const EdgeInsets.all(24),
               children: [
@@ -63,7 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         backgroundColor:
                             Theme.of(context).colorScheme.primaryContainer,
                         child: Text(
-                          profile.name[0].toUpperCase(),
+                          profile.name.isNotEmpty ? profile.name[0].toUpperCase() : '?',
                           style: Theme.of(context)
                               .textTheme
                               .headlineLarge
@@ -86,13 +90,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       const SizedBox(height: 24),
                       _ProfileInfoTile(
                         icon: Icons.person,
-                        label: 'Role',
+                        label: l10n.role,
                         value: _roleDisplayName(profile.role),
                       ),
                       if (profile.phone != null)
                         _ProfileInfoTile(
                           icon: Icons.phone,
-                          label: 'Phone',
+                          label: l10n.phone,
                           value: profile.phone!,
                         ),
                     ],
@@ -102,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 OutlinedButton.icon(
                   onPressed: () => context.push('/edit-profile'),
                   icon: const Icon(Icons.edit),
-                  label: const Text('Edit Profile'),
+                  label: Text(l10n.editProfile),
                 ),
                 if (isAdmin) ...[
                   const SizedBox(height: 16),
@@ -110,10 +114,32 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () => context.push('/admin'),
                     icon: const Icon(Icons.admin_panel_settings,
                         color: Colors.red),
-                    label: const Text('Admin Panel',
-                        style: TextStyle(color: Colors.red)),
+                    label: Text(l10n.adminPanel,
+                        style: const TextStyle(color: Colors.red)),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.red),
+                    ),
+                  ),
+                ],
+                if (isOrganizer) ...[
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/organizer-dashboard'),
+                    icon: const Icon(Icons.dashboard, color: Colors.blue),
+                    label: Text(l10n.dashboard,
+                        style: const TextStyle(color: Colors.blue)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.blue),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/create-event'),
+                    icon: const Icon(Icons.add, color: Colors.green),
+                    label: Text(l10n.createEvent,
+                        style: const TextStyle(color: Colors.green)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.green),
                     ),
                   ),
                 ],
@@ -122,7 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: () =>
                       context.read<AuthBloc>().add(const LogoutEvent()),
                   icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text('Logout', style: TextStyle(color: Colors.red)),
+                  label: Text(l10n.logout, style: const TextStyle(color: Colors.red)),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
                   ),

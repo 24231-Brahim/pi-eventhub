@@ -22,18 +22,20 @@ class TicketSupabaseDataSourceImpl implements TicketSupabaseDataSource {
 
   @override
   Future<Map<String, dynamic>> validateTicket(String qrData) async {
-    final response = await supabase
+    final ticket = await supabase
         .from('tickets')
         .select()
         .eq('qr_code', qrData)
         .single();
-    final ticket = response;
 
     if (ticket['status'] == 'active') {
-      await supabase
+      final updated = await supabase
           .from('tickets')
           .update({'status': 'used'})
-          .eq('id', ticket['id']);
+          .eq('id', ticket['id'])
+          .select()
+          .single();
+      return _toCamelCase(updated);
     }
 
     return _toCamelCase(ticket);

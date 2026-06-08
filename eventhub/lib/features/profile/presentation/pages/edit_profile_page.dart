@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventhub/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -37,14 +38,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Profile')),
+      appBar: AppBar(title: Text(l10n.editProfile)),
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (state is ProfileUpdated) {
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Profile updated successfully')),
+              SnackBar(content: Text(l10n.profileUpdated)),
             );
           }
           if (state is ProfileError) {
@@ -81,9 +83,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 const SizedBox(height: 32),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person),
+                  decoration: InputDecoration(
+                    labelText: l10n.fullName,
+                    prefixIcon: const Icon(Icons.person),
                   ),
                   validator: (v) =>
                       v == null || v.isEmpty ? 'Name is required' : null,
@@ -105,7 +107,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     }
                     return ElevatedButton(
                       onPressed: _onSave,
-                      child: const Text('Save Changes'),
+                      child: Text(l10n.saveChanges),
                     );
                   },
                 ),

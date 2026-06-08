@@ -10,6 +10,7 @@ enum NotificationType {
 
 class AppNotification extends Equatable {
   final String id;
+  final String userId;
   final String title;
   final String body;
   final NotificationType type;
@@ -19,6 +20,7 @@ class AppNotification extends Equatable {
 
   const AppNotification({
     required this.id,
+    required this.userId,
     required this.title,
     required this.body,
     this.type = NotificationType.general,
@@ -29,5 +31,5 @@ class AppNotification extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, title, body, type, data, isRead, createdAt];
+      [id, userId, title, body, type, data, isRead, createdAt];
 }

@@ -11,6 +11,7 @@ void main() {
   late MockCreateEventUseCase mockCreateEventUseCase;
   late MockUpdateEventUseCase mockUpdateEventUseCase;
   late MockDeleteEventUseCase mockDeleteEventUseCase;
+  late MockToggleFavoriteUseCase mockToggleFavoriteUseCase;
 
   setUp(() {
     mockGetEventsUseCase = MockGetEventsUseCase();
@@ -18,6 +19,7 @@ void main() {
     mockCreateEventUseCase = MockCreateEventUseCase();
     mockUpdateEventUseCase = MockUpdateEventUseCase();
     mockDeleteEventUseCase = MockDeleteEventUseCase();
+    mockToggleFavoriteUseCase = MockToggleFavoriteUseCase();
   });
 
   EventBloc createBloc() => EventBloc(
@@ -26,6 +28,7 @@ void main() {
         createEventUseCase: mockCreateEventUseCase,
         updateEventUseCase: mockUpdateEventUseCase,
         deleteEventUseCase: mockDeleteEventUseCase,
+        toggleFavoriteUseCase: mockToggleFavoriteUseCase,
       );
 
   group('EventBloc', () {

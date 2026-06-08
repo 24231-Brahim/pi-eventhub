@@ -6,6 +6,7 @@ import 'package:eventhub/features/events/domain/usecases/get_event_by_id_usecase
 import 'package:eventhub/features/events/domain/usecases/create_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/update_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/delete_event_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/toggle_favorite_usecase.dart';
 
 part 'event_event.dart';
 part 'event_state.dart';
@@ -16,6 +17,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   final CreateEventUseCase createEventUseCase;
   final UpdateEventUseCase updateEventUseCase;
   final DeleteEventUseCase deleteEventUseCase;
+  final ToggleFavoriteUseCase toggleFavoriteUseCase;
 
   EventBloc({
     required this.getEventsUseCase,
@@ -23,12 +25,14 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     required this.createEventUseCase,
     required this.updateEventUseCase,
     required this.deleteEventUseCase,
+    required this.toggleFavoriteUseCase,
   }) : super(const EventInitial()) {
     on<GetEventsEvent>(_onGetEvents);
     on<GetEventByIdEvent>(_onGetEventById);
     on<CreateEventEvent>(_onCreateEvent);
     on<UpdateEventEvent>(_onUpdateEvent);
     on<DeleteEventEvent>(_onDeleteEvent);
+    on<ToggleFavoriteEvent>(_onToggleFavorite);
   }
 
   Future<void> _onGetEvents(GetEventsEvent event, Emitter<EventState> emit) async {
@@ -41,6 +45,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       minPrice: event.minPrice,
       maxPrice: event.maxPrice,
       date: event.date,
+      organizerId: event.organizerId,
     );
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
@@ -85,6 +90,18 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
       (_) => emit(const EventDeleted()),
+    );
+  }
+
+  Future<void> _onToggleFavorite(
+      ToggleFavoriteEvent event, Emitter<EventState> emit) async {
+    final result = await toggleFavoriteUseCase.call(event.eventId);
+    result.fold(
+      (failure) => null,
+      (isFavorited) => emit(FavoriteToggled(
+        isFavorite: isFavorited,
+        eventId: event.eventId,
+      )),
     );
   }
 }

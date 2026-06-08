@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventhub/features/admin/presentation/bloc/admin_bloc.dart';
+import 'package:eventhub/shared/widgets/loading_widget.dart';
+import 'package:eventhub/shared/widgets/error_widget.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class AdminTicketsPage extends StatefulWidget {
   const AdminTicketsPage({super.key});
@@ -9,68 +13,74 @@ class AdminTicketsPage extends StatefulWidget {
 }
 
 class _AdminTicketsPageState extends State<AdminTicketsPage> {
-  List<Map<String, dynamic>> _tickets = [];
-  bool _loading = true;
-  String? _error;
-
   @override
   void initState() {
     super.initState();
-    _loadTickets();
-  }
-
-  Future<void> _loadTickets() async {
-    setState(() => _loading = true);
-    try {
-      final data = await Supabase.instance.client
-          .from('tickets')
-          .select()
-          .order('created_at', ascending: false);
-      setState(() {
-        _tickets = List<Map<String, dynamic>>.from(data);
-        _loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _loading = false;
-      });
-    }
+    context.read<AdminBloc>().add(const GetAdminTicketsEvent());
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Manage Tickets')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text('Error: $_error'))
-              : RefreshIndicator(
-                  onRefresh: _loadTickets,
-                  child: _tickets.isEmpty
-                      ? const Center(child: Text('No tickets'))
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _tickets.length,
-                          itemBuilder: (context, index) {
-                            final ticket = _tickets[index];
-                            return Card(
-                              child: ListTile(
-                                title: Text(
-                                    ticket['event_title'] as String? ?? 'Event'),
-                                subtitle: Text(
-                                  'Status: ${ticket['status'] as String? ?? ''}',
-                                ),
-                                trailing: Text(
-                                  ticket['qr_code'] as String? ?? '',
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              ),
-                            );
-                          },
+      appBar: AppBar(title: Text(l10n.manageTickets)),
+      body: BlocBuilder<AdminBloc, AdminState>(
+        builder: (context, state) {
+          if (state is AdminLoading) {
+            return const LoadingWidget();
+          }
+          if (state is AdminError) {
+            return AppErrorWidget(
+              message: state.message,
+              onRetry: () =>
+                  context.read<AdminBloc>().add(const GetAdminTicketsEvent()),
+            );
+          }
+          if (state is AdminTicketsLoaded) {
+            final tickets = state.tickets;
+            if (tickets.isEmpty) {
+              return Center(child: Text(l10n.noTickets));
+            }
+            return RefreshIndicator(
+              onRefresh: () async =>
+                  context.read<AdminBloc>().add(const GetAdminTicketsEvent()),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: tickets.length,
+                itemBuilder: (context, index) {
+                  final ticket = tickets[index];
+                  final status = ticket['status'] as String? ?? '';
+                  return Card(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: status == 'active'
+                            ? Colors.green.withAlpha(30)
+                            : Colors.grey.withAlpha(30),
+                        child: Icon(
+                          status == 'active'
+                              ? Icons.confirmation_number
+                              : Icons.confirmation_number_outlined,
+                          color: status == 'active'
+                              ? Colors.green
+                              : Colors.grey,
                         ),
-                ),
+                      ),
+                      title: Text(
+                          ticket['event_title'] as String? ?? l10n.eventTicket),
+                      subtitle: Text('${l10n.status}: $status'),
+                      trailing: Text(
+                        ticket['qr_code'] as String? ?? '',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+          return const SizedBox();
+        },
+      ),
     );
   }
 }

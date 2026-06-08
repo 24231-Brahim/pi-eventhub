@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventhub/features/admin/presentation/bloc/admin_bloc.dart';
+import 'package:eventhub/shared/widgets/loading_widget.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class AdminAnalyticsPage extends StatefulWidget {
   const AdminAnalyticsPage({super.key});
@@ -9,69 +12,120 @@ class AdminAnalyticsPage extends StatefulWidget {
 }
 
 class _AdminAnalyticsPageState extends State<AdminAnalyticsPage> {
-  int _users = 0;
-  int _events = 0;
-  int _bookings = 0;
-  bool _loading = true;
-
   @override
   void initState() {
     super.initState();
-    _loadStats();
-  }
-
-  Future<void> _loadStats() async {
-    setState(() => _loading = true);
-    try {
-      final results = await Future.wait([
-        Supabase.instance.client.from('profiles').select('id'),
-        Supabase.instance.client.from('events').select('id'),
-        Supabase.instance.client.from('bookings').select('id'),
-      ]);
-      setState(() {
-        _users = (results[0] as List).length;
-        _events = (results[1] as List).length;
-        _bookings = (results[2] as List).length;
-        _loading = false;
-      });
-    } catch (_) {
-      setState(() => _loading = false);
-    }
+    context.read<AdminBloc>().add(const GetDashboardStatsEvent());
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Analytics')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16),
+      appBar: AppBar(title: Text(l10n.analytics)),
+      body: BlocBuilder<AdminBloc, AdminState>(
+        builder: (context, state) {
+          if (state is AdminLoading) {
+            return const LoadingWidget();
+          }
+          if (state is AdminError) {
+            return Center(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _StatCard(
-                    title: 'Total Users',
-                    value: '$_users',
-                    icon: Icons.people,
-                    color: Colors.blue,
-                  ),
+                  Text('Error: ${state.message}'),
                   const SizedBox(height: 12),
-                  _StatCard(
-                    title: 'Total Events',
-                    value: '$_events',
-                    icon: Icons.event,
-                    color: Colors.green,
-                  ),
-                  const SizedBox(height: 12),
-                  _StatCard(
-                    title: 'Total Bookings',
-                    value: '$_bookings',
-                    icon: Icons.book_online,
-                    color: Colors.orange,
+                  ElevatedButton(
+                    onPressed: () => context
+                        .read<AdminBloc>()
+                        .add(const GetDashboardStatsEvent()),
+                    child: Text(l10n.retry),
                   ),
                 ],
               ),
-            ),
+            );
+          }
+          if (state is DashboardStatsLoaded) {
+            final s = state.stats;
+            return RefreshIndicator(
+              onRefresh: () async => context
+                  .read<AdminBloc>()
+                  .add(const GetDashboardStatsEvent()),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _SectionTitle(title: l10n.users),
+                    const SizedBox(height: 8),
+                    _StatCard(
+                      title: l10n.users,
+                      value: '${s.totalUsers}',
+                      subtitle:
+                          '${s.totalAdmins} admin(s), ${s.totalOrganizers} organizer(s), ${s.totalParticipants} participant(s)',
+                      icon: Icons.people,
+                      color: Colors.blue,
+                    ),
+                    const SizedBox(height: 12),
+                    _SectionTitle(title: l10n.events),
+                    const SizedBox(height: 8),
+                    _StatCard(
+                      title: l10n.totalEvents,
+                      value: '${s.totalEvents}',
+                      subtitle:
+                          '${s.activeEvents} active, ${s.pendingEvents} pending, ${s.completedEvents} completed',
+                      icon: Icons.event,
+                      color: Colors.green,
+                    ),
+                    const SizedBox(height: 12),
+                    _SectionTitle(title: l10n.totalAmount),
+                    const SizedBox(height: 8),
+                    _StatCard(
+                      title: l10n.totalBookings,
+                      value: '${s.totalBookings}',
+                      icon: Icons.book_online,
+                      color: Colors.orange,
+                    ),
+                    const SizedBox(height: 12),
+                    _StatCard(
+                      title: l10n.revenue,
+                      value: '${s.totalRevenue.toStringAsFixed(2)} TND',
+                      icon: Icons.attach_money,
+                      color: Colors.purple,
+                    ),
+                    const SizedBox(height: 12),
+                    _StatCard(
+                      title: l10n.tickets,
+                      value: '${s.totalTickets}',
+                      icon: Icons.confirmation_number,
+                      color: Colors.teal,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          return const SizedBox();
+        },
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        style: Theme.of(context)
+            .textTheme
+            .titleMedium
+            ?.copyWith(fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
@@ -79,12 +133,14 @@ class _AdminAnalyticsPageState extends State<AdminAnalyticsPage> {
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
+  final String? subtitle;
   final IconData icon;
   final Color color;
 
   const _StatCard({
     required this.title,
     required this.value,
+    this.subtitle,
     required this.icon,
     required this.color,
   });
@@ -102,18 +158,32 @@ class _StatCard extends StatelessWidget {
               child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        )),
-                Text(value,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        )),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  Text(title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: Colors.grey[600])),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(subtitle!,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.grey[500])),
+                  ],
+                ],
+              ),
             ),
           ],
         ),

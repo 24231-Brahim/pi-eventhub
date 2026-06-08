@@ -9,6 +9,7 @@ class ProfileModel extends Profile {
     super.phone,
     super.photoUrl,
     super.role,
+    super.isActive,
     super.createdAt,
   });
 
@@ -20,6 +21,7 @@ class ProfileModel extends Profile {
       phone: json['phone'] as String?,
       photoUrl: json['photoUrl'] as String?,
       role: parseRole(json['role'] as String?),
+      isActive: json['isActive'] as bool? ?? true,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -34,6 +36,7 @@ class ProfileModel extends Profile {
       'phone': phone,
       'photoUrl': photoUrl,
       'role': _roleToString(role),
+      'isActive': isActive,
       'createdAt': createdAt?.toIso8601String(),
     };
   }

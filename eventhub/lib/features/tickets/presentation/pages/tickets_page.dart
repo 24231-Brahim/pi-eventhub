@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventhub/features/tickets/presentation/bloc/ticket_bloc.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
 import 'package:eventhub/shared/widgets/empty_widget.dart';
@@ -21,9 +22,10 @@ class _TicketsPageState extends State<TicketsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Tickets'),
+        title: Text(l10n.myTickets),
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
@@ -45,7 +47,7 @@ class _TicketsPageState extends State<TicketsPage> {
           }
           if (state is UserTicketsLoaded) {
             if (state.tickets.isEmpty) {
-              return const EmptyWidget(message: 'No tickets yet');
+              return EmptyWidget(message: l10n.noTickets);
             }
             return ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -56,17 +58,21 @@ class _TicketsPageState extends State<TicketsPage> {
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     leading: const Icon(Icons.confirmation_number, size: 40),
-                    title: Text(ticket.eventTitle ?? 'Event Ticket'),
+                    title: Text(ticket.eventTitle ?? l10n.eventTicket),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (ticket.eventDate != null)
                           Text(ticket.eventDate!),
-                        Text('Status: ${ticket.status.name}'),
+                        Text('${l10n.status}: ${ticket.status.name}'),
                       ],
                     ),
                     trailing: const Icon(Icons.qr_code),
-                    onTap: () => Navigator.pushNamed(context, '/qr-code'),
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      '/qr-code',
+                      arguments: ticket,
+                    ),
                   ),
                 );
               },

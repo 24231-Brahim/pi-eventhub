@@ -6,7 +6,8 @@ class CreatePaymentIntentUseCase {
   final PaymentRepository repository;
   CreatePaymentIntentUseCase({required this.repository});
 
-  Future<Either<Failure, String>> call(double amount, String currency) {
-    return repository.createPaymentIntent(amount, currency);
+  Future<Either<Failure, String>> call(
+      double amount, String currency, String bookingId) {
+    return repository.createPaymentIntent(amount, currency, bookingId);
   }
 }

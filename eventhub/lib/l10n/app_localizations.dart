@@ -354,6 +354,540 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No internet connection'**
   String get noConnection;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @getStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get getStarted;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Reset Link'**
+  String get sendResetLink;
+
+  /// No description provided for @emailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Sent'**
+  String get emailSent;
+
+  /// No description provided for @resetInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account with this email exists, you will receive password reset instructions.'**
+  String get resetInstructions;
+
+  /// No description provided for @resetYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get resetYourPassword;
+
+  /// No description provided for @enterEmailInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we will send you instructions to reset your password.'**
+  String get enterEmailInstructions;
+
+  /// No description provided for @iWantTo.
+  ///
+  /// In en, this message translates to:
+  /// **'I want to:'**
+  String get iWantTo;
+
+  /// No description provided for @eventDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Details'**
+  String get eventDetails;
+
+  /// No description provided for @addedToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get addedToFavorites;
+
+  /// No description provided for @removedFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get removedFromFavorites;
+
+  /// No description provided for @editEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Event'**
+  String get editEvent;
+
+  /// No description provided for @createEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Event'**
+  String get createEvent;
+
+  /// No description provided for @updateEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Event'**
+  String get updateEvent;
+
+  /// No description provided for @addEventImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Event Image'**
+  String get addEventImage;
+
+  /// No description provided for @freeEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Event'**
+  String get freeEvent;
+
+  /// No description provided for @eventTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Title'**
+  String get eventTitle;
+
+  /// No description provided for @time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get time;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @maxParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Participants'**
+  String get maxParticipants;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price (TND)'**
+  String get price;
+
+  /// No description provided for @filterByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by category'**
+  String get filterByCategory;
+
+  /// No description provided for @myEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'My Events'**
+  String get myEvents;
+
+  /// No description provided for @overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// No description provided for @eventStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Status'**
+  String get eventStatus;
+
+  /// No description provided for @participationRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Participation Rate'**
+  String get participationRate;
+
+  /// No description provided for @quickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get quickActions;
+
+  /// No description provided for @totalEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Events'**
+  String get totalEvents;
+
+  /// No description provided for @allEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'All Events'**
+  String get allEvents;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @bookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings'**
+  String get bookings;
+
+  /// No description provided for @revenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get revenue;
+
+  /// No description provided for @draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get draft;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @myTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'My Tickets'**
+  String get myTickets;
+
+  /// No description provided for @myQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'My QR Code'**
+  String get myQRCode;
+
+  /// No description provided for @ticketID.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket ID'**
+  String get ticketID;
+
+  /// No description provided for @showQRAtEntrance.
+  ///
+  /// In en, this message translates to:
+  /// **'Show this QR code at the entrance'**
+  String get showQRAtEntrance;
+
+  /// No description provided for @scanQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get scanQRCode;
+
+  /// No description provided for @failedToSaveQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save QR code'**
+  String get failedToSaveQRCode;
+
+  /// No description provided for @eventTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Ticket'**
+  String get eventTicket;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdated;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @toggleDarkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle dark theme'**
+  String get toggleDarkTheme;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// No description provided for @french.
+  ///
+  /// In en, this message translates to:
+  /// **'Français'**
+  String get french;
+
+  /// No description provided for @arabic.
+  ///
+  /// In en, this message translates to:
+  /// **'العربية'**
+  String get arabic;
+
+  /// No description provided for @selectImageSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Image Source'**
+  String get selectImageSource;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @discoverAndBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover & book amazing events'**
+  String get discoverAndBook;
+
+  /// No description provided for @bookTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Tickets'**
+  String get bookTickets;
+
+  /// No description provided for @bookTicketsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserve your spot with just a few taps'**
+  String get bookTicketsDesc;
+
+  /// No description provided for @easyCheckin.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy Check-in'**
+  String get easyCheckin;
+
+  /// No description provided for @easyCheckinDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use QR codes for quick and easy entry'**
+  String get easyCheckinDesc;
+
+  /// No description provided for @discoverEventsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Find amazing events happening near you'**
+  String get discoverEventsDesc;
+
+  /// No description provided for @adminDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Dashboard'**
+  String get adminDashboard;
+
+  /// No description provided for @welcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get welcome;
+
+  /// No description provided for @adminPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Panel'**
+  String get adminPanel;
+
+  /// No description provided for @management.
+  ///
+  /// In en, this message translates to:
+  /// **'Management'**
+  String get management;
+
+  /// No description provided for @manageUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage all users'**
+  String get manageUsers;
+
+  /// No description provided for @manageAllEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage all events'**
+  String get manageAllEvents;
+
+  /// No description provided for @viewAllBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'View all bookings'**
+  String get viewAllBookings;
+
+  /// No description provided for @viewAllTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'View all tickets'**
+  String get viewAllTickets;
+
+  /// No description provided for @platformStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform statistics'**
+  String get platformStatistics;
+
+  /// No description provided for @analytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get analytics;
+
+  /// No description provided for @deleteEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Event'**
+  String get deleteEvent;
+
+  /// No description provided for @deleteConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure? This action cannot be undone.'**
+  String get deleteConfirmation;
+
+  /// No description provided for @manageTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Tickets'**
+  String get manageTickets;
+
+  /// No description provided for @manageBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Bookings'**
+  String get manageBookings;
+
+  /// No description provided for @manageUsersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Users'**
+  String get manageUsersTitle;
+
+  /// No description provided for @noName.
+  ///
+  /// In en, this message translates to:
+  /// **'No name'**
+  String get noName;
+
+  /// No description provided for @disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabled;
+
+  /// No description provided for @users.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users;
+
+  /// No description provided for @totalBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Bookings'**
+  String get totalBookings;
+
+  /// No description provided for @dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboard;
+
+  /// No description provided for @manageEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Events'**
+  String get manageEvents;
+
+  /// No description provided for @role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get role;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

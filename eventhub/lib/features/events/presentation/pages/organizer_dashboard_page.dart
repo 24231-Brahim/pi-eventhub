@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
+import 'package:eventhub/features/events/domain/entities/event.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
 
@@ -16,14 +19,20 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
   @override
   void initState() {
     super.initState();
-    context.read<EventBloc>().add(const GetEventsEvent());
+    _loadEvents();
+  }
+
+  void _loadEvents() {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    context.read<EventBloc>().add(GetEventsEvent(organizerId: userId));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: Text(l10n.dashboard),
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
@@ -46,12 +55,18 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
           if (state is EventsLoaded) {
             final events = state.events;
             final total = events.length;
-            final active =
-                events.where((e) => e.status.name == 'published').length;
+            final active = events.where((e) => e.status == EventStatus.published).length;
+            final draft = events.where((e) => e.status == EventStatus.draft).length;
+            final completed = events.where((e) => e.status == EventStatus.completed).length;
             final totalBookings = events.fold<int>(
                 0, (sum, e) => sum + e.currentParticipants);
             final totalRevenue = events.fold<double>(
                 0, (sum, e) => sum + e.price * e.currentParticipants);
+            final totalCapacity = events.fold<int>(
+                0, (sum, e) => sum + e.maxParticipants);
+            final participationRate = totalCapacity > 0
+                ? (totalBookings / totalCapacity * 100).toStringAsFixed(1)
+                : '0.0';
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -75,25 +90,25 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                     childAspectRatio: 1.5,
                     children: [
                       _DashboardCard(
-                        title: 'Total Events',
+                        title: l10n.totalEvents,
                         value: '$total',
                         icon: Icons.event,
                         color: Colors.blue,
                       ),
                       _DashboardCard(
-                        title: 'Active',
+                        title: l10n.active,
                         value: '$active',
                         icon: Icons.play_circle,
                         color: Colors.green,
                       ),
                       _DashboardCard(
-                        title: 'Bookings',
+                        title: l10n.bookings,
                         value: '$totalBookings',
                         icon: Icons.people,
                         color: Colors.orange,
                       ),
                       _DashboardCard(
-                        title: 'Revenue',
+                        title: l10n.revenue,
                         value: '${totalRevenue.toStringAsFixed(2)} TND',
                         icon: Icons.attach_money,
                         color: Colors.purple,
@@ -102,7 +117,95 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Quick Actions',
+                    l10n.eventStatus,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _StatusIndicator(
+                        label: l10n.draft,
+                        value: draft,
+                        total: total,
+                        color: Colors.orange,
+                      ),
+                      const SizedBox(width: 12),
+                      _StatusIndicator(
+                        label: l10n.active,
+                        value: active,
+                        total: total,
+                        color: Colors.green,
+                      ),
+                      const SizedBox(width: 12),
+                      _StatusIndicator(
+                        label: l10n.completed,
+                        value: completed,
+                        total: total,
+                        color: Colors.blue,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.participationRate,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Text(
+                                '$participationRate%',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary,
+                                    ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: LinearProgressIndicator(
+                                    value: totalCapacity > 0
+                                        ? totalBookings / totalCapacity
+                                        : 0,
+                                    minHeight: 12,
+                                    backgroundColor: Colors.grey[200],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '$totalBookings / $totalCapacity ${l10n.participants}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.quickActions,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -113,7 +216,7 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                       Expanded(
                         child: ActionChip(
                           avatar: const Icon(Icons.add),
-                          label: const Text('Create Event'),
+                          label: Text(l10n.createEvent),
                           onPressed: () =>
                               Navigator.pushNamed(context, '/create-event'),
                         ),
@@ -122,7 +225,7 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                       Expanded(
                         child: ActionChip(
                           avatar: const Icon(Icons.list),
-                          label: const Text('Manage Events'),
+                          label: Text(l10n.manageEvents),
                           onPressed: () =>
                               Navigator.pushNamed(context, '/manage-events'),
                         ),
@@ -131,7 +234,7 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                       Expanded(
                         child: ActionChip(
                           avatar: const Icon(Icons.qr_code_scanner),
-                          label: const Text('Scan QR'),
+                          label: Text(l10n.scanQR),
                           onPressed: () =>
                               Navigator.pushNamed(context, '/qr-scanner'),
                         ),
@@ -188,6 +291,65 @@ class _DashboardCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                   ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusIndicator extends StatelessWidget {
+  final String label;
+  final int value;
+  final int total;
+  final Color color;
+
+  const _StatusIndicator({
+    required this.label,
+    required this.value,
+    required this.total,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = total > 0 ? value / total : 0.0;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color.withAlpha(20),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withAlpha(60)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              '$value',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 4),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: pct,
+                minHeight: 4,
+                backgroundColor: Colors.grey[200],
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
             ),
           ],
         ),

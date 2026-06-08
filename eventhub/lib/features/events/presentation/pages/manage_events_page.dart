@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/presentation/widgets/event_card.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
 import 'package:eventhub/shared/widgets/empty_widget.dart';
@@ -17,14 +19,20 @@ class _ManageEventsPageState extends State<ManageEventsPage> {
   @override
   void initState() {
     super.initState();
-    context.read<EventBloc>().add(const GetEventsEvent());
+    _loadEvents();
+  }
+
+  void _loadEvents() {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    context.read<EventBloc>().add(GetEventsEvent(organizerId: userId));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Events'),
+        title: Text(l10n.myEvents),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -46,8 +54,8 @@ class _ManageEventsPageState extends State<ManageEventsPage> {
           }
           if (state is EventsLoaded) {
             if (state.events.isEmpty) {
-              return const EmptyWidget(
-                message: 'No events yet. Create your first event!',
+              return EmptyWidget(
+                message: l10n.noEvents,
                 icon: Icons.add_circle_outline,
               );
             }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class HomeShell extends StatelessWidget {
   final Widget child;
@@ -7,31 +8,32 @@ class HomeShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _getSelectedIndex(context),
         onDestinationSelected: (index) => _onItemTapped(context, index),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
-            label: 'Events',
+            icon: const Icon(Icons.explore_outlined),
+            selectedIcon: const Icon(Icons.explore),
+            label: l10n.events,
           ),
           NavigationDestination(
-            icon: Icon(Icons.confirmation_number_outlined),
-            selectedIcon: Icon(Icons.confirmation_number),
-            label: 'Tickets',
+            icon: const Icon(Icons.confirmation_number_outlined),
+            selectedIcon: const Icon(Icons.confirmation_number),
+            label: l10n.tickets,
           ),
           NavigationDestination(
-            icon: Icon(Icons.notifications_outlined),
-            selectedIcon: Icon(Icons.notifications),
-            label: 'Notifications',
+            icon: const Icon(Icons.notifications_outlined),
+            selectedIcon: const Icon(Icons.notifications),
+            label: l10n.notifications,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outlined),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outlined),
+            selectedIcon: const Icon(Icons.person),
+            label: l10n.profile,
           ),
         ],
       ),

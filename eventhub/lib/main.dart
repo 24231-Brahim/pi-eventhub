@@ -11,6 +11,7 @@ import 'package:eventhub/features/tickets/presentation/bloc/ticket_bloc.dart';
 import 'package:eventhub/features/payments/presentation/bloc/payment_bloc.dart';
 import 'package:eventhub/features/notifications/presentation/bloc/notification_bloc.dart';
 import 'package:eventhub/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:eventhub/features/admin/presentation/bloc/admin_bloc.dart';
 import 'package:eventhub/shared/themes/app_theme.dart';
 import 'package:eventhub/shared/services/local_storage_service.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
@@ -71,6 +72,7 @@ class _EventHubAppState extends State<EventHubApp> {
         BlocProvider.value(value: di.sl<PaymentBloc>()),
         BlocProvider.value(value: di.sl<NotificationBloc>()),
         BlocProvider.value(value: di.sl<ProfileBloc>()),
+        BlocProvider.value(value: di.sl<AdminBloc>()),
       ],
       child: MaterialApp.router(
         title: 'EventHub',

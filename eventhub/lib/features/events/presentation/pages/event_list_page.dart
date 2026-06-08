@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/presentation/widgets/event_card.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
 import 'package:eventhub/shared/widgets/empty_widget.dart';
@@ -31,9 +32,10 @@ class _EventListPageState extends State<EventListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EventHub'),
+        title: Text(l10n.appName),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -70,7 +72,7 @@ class _EventListPageState extends State<EventListPage> {
                 }
                 if (state is EventsLoaded) {
                   if (state.events.isEmpty) {
-                    return const EmptyWidget(message: 'No events found');
+                    return EmptyWidget(message: l10n.noEvents);
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -102,6 +104,7 @@ class _EventListPageState extends State<EventListPage> {
   }
 
   void _showFilters(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (context) => Padding(
@@ -109,7 +112,7 @@ class _EventListPageState extends State<EventListPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Filter by category',
+            Text(l10n.filterByCategory,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             Wrap(
@@ -158,8 +161,9 @@ class _EventSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (query.isEmpty) {
-      return const EmptyWidget(message: 'Search events...');
+      return EmptyWidget(message: l10n.search);
     }
     return BlocBuilder<EventBloc, EventState>(
       builder: (context, state) {
@@ -171,7 +175,7 @@ class _EventSearchDelegate extends SearchDelegate {
             e.description.toLowerCase().contains(query.toLowerCase()) ||
             (e.city?.toLowerCase().contains(query.toLowerCase()) ?? false));
         if (filtered.isEmpty) {
-          return const EmptyWidget(message: 'No events found');
+          return EmptyWidget(message: l10n.noEvents);
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16),

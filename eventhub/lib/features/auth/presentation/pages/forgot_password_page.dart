@@ -30,9 +30,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.forgotPassword)),
+      appBar: AppBar(title: Text(l10n.forgotPassword)),
       body: SafeArea(
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
@@ -40,14 +42,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Email Sent'),
-                  content: const Text(
-                    'If an account with this email exists, you will receive password reset instructions.',
-                  ),
+                  title: Text(l10n.emailSent),
+                  content: Text(l10n.resetInstructions),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'),
+                      child: Text(l10n.ok),
                     ),
                   ],
                 ),
@@ -73,13 +73,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   const Icon(Icons.lock_reset, size: 80),
                   const SizedBox(height: 24),
                   Text(
-                    'Reset your password',
+                    l10n.resetYourPassword,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Enter your email and we will send you instructions to reset your password.',
+                    l10n.enterEmailInstructions,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
@@ -90,7 +90,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.email,
+                      labelText: l10n.email,
                       prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (value) {
@@ -108,7 +108,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       }
                       return ElevatedButton(
                         onPressed: _onSubmit,
-                        child: const Text('Send Reset Link'),
+                        child: Text(l10n.sendResetLink),
                       );
                     },
                   ),

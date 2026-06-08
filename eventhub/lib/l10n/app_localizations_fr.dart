@@ -136,4 +136,271 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noConnection => 'Pas de connexion internet';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get delete => 'Supprimer';
+
+  @override
+  String get next => 'Suivant';
+
+  @override
+  String get skip => 'Passer';
+
+  @override
+  String get getStarted => 'Commencer';
+
+  @override
+  String get saveChanges => 'Enregistrer';
+
+  @override
+  String get sendResetLink => 'Envoyer le lien';
+
+  @override
+  String get emailSent => 'Email envoyé';
+
+  @override
+  String get resetInstructions => 'Si un compte avec cet email existe, vous recevrez des instructions pour réinitialiser votre mot de passe.';
+
+  @override
+  String get resetYourPassword => 'Réinitialiser votre mot de passe';
+
+  @override
+  String get enterEmailInstructions => 'Entrez votre email et nous vous enverrons des instructions pour réinitialiser votre mot de passe.';
+
+  @override
+  String get iWantTo => 'Je veux :';
+
+  @override
+  String get eventDetails => 'Détails de l\'événement';
+
+  @override
+  String get addedToFavorites => 'Ajouté aux favoris';
+
+  @override
+  String get removedFromFavorites => 'Retiré des favoris';
+
+  @override
+  String get editEvent => 'Modifier l\'événement';
+
+  @override
+  String get createEvent => 'Créer un événement';
+
+  @override
+  String get updateEvent => 'Mettre à jour';
+
+  @override
+  String get addEventImage => 'Ajouter une image';
+
+  @override
+  String get freeEvent => 'Événement gratuit';
+
+  @override
+  String get eventTitle => 'Titre de l\'événement';
+
+  @override
+  String get time => 'Heure';
+
+  @override
+  String get city => 'Ville';
+
+  @override
+  String get maxParticipants => 'Participants max';
+
+  @override
+  String get price => 'Prix (TND)';
+
+  @override
+  String get filterByCategory => 'Filtrer par catégorie';
+
+  @override
+  String get myEvents => 'Mes événements';
+
+  @override
+  String get overview => 'Aperçu';
+
+  @override
+  String get eventStatus => 'Statut des événements';
+
+  @override
+  String get participationRate => 'Taux de participation';
+
+  @override
+  String get quickActions => 'Actions rapides';
+
+  @override
+  String get totalEvents => 'Total événements';
+
+  @override
+  String get allEvents => 'Tous les événements';
+
+  @override
+  String get active => 'Actif';
+
+  @override
+  String get bookings => 'Réservations';
+
+  @override
+  String get revenue => 'Revenus';
+
+  @override
+  String get draft => 'Brouillon';
+
+  @override
+  String get completed => 'Terminé';
+
+  @override
+  String get myTickets => 'Mes billets';
+
+  @override
+  String get myQRCode => 'Mon code QR';
+
+  @override
+  String get ticketID => 'ID du billet';
+
+  @override
+  String get showQRAtEntrance => 'Montrez ce code QR à l\'entrée';
+
+  @override
+  String get scanQRCode => 'Scanner un code QR';
+
+  @override
+  String get failedToSaveQRCode => 'Échec de la sauvegarde du QR code';
+
+  @override
+  String get eventTicket => 'Billet d\'entrée';
+
+  @override
+  String get editProfile => 'Modifier le profil';
+
+  @override
+  String get profileUpdated => 'Profil mis à jour avec succès';
+
+  @override
+  String get appearance => 'Apparence';
+
+  @override
+  String get toggleDarkTheme => 'Activer le thème sombre';
+
+  @override
+  String get about => 'À propos';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get selectLanguage => 'Choisir la langue';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get french => 'Français';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get selectImageSource => 'Choisir la source';
+
+  @override
+  String get camera => 'Appareil photo';
+
+  @override
+  String get gallery => 'Galerie';
+
+  @override
+  String get discoverAndBook => 'Découvrez et réservez des événements';
+
+  @override
+  String get bookTickets => 'Réserver des billets';
+
+  @override
+  String get bookTicketsDesc => 'Réservez votre place en quelques clics';
+
+  @override
+  String get easyCheckin => 'Enregistrement facile';
+
+  @override
+  String get easyCheckinDesc => 'Utilisez les QR codes pour une entrée rapide';
+
+  @override
+  String get discoverEventsDesc => 'Trouvez des événements près de chez vous';
+
+  @override
+  String get adminDashboard => 'Tableau de bord admin';
+
+  @override
+  String get welcome => 'Bienvenue';
+
+  @override
+  String get adminPanel => 'Panneau d\'administration';
+
+  @override
+  String get management => 'Gestion';
+
+  @override
+  String get manageUsers => 'Gérer les utilisateurs';
+
+  @override
+  String get manageAllEvents => 'Gérer tous les événements';
+
+  @override
+  String get viewAllBookings => 'Voir toutes les réservations';
+
+  @override
+  String get viewAllTickets => 'Voir tous les billets';
+
+  @override
+  String get platformStatistics => 'Statistiques de la plateforme';
+
+  @override
+  String get analytics => 'Analytiques';
+
+  @override
+  String get deleteEvent => 'Supprimer l\'événement';
+
+  @override
+  String get deleteConfirmation => 'Êtes-vous sûr ? Cette action est irréversible.';
+
+  @override
+  String get manageTickets => 'Gérer les billets';
+
+  @override
+  String get manageBookings => 'Gérer les réservations';
+
+  @override
+  String get manageUsersTitle => 'Gérer les utilisateurs';
+
+  @override
+  String get noName => 'Sans nom';
+
+  @override
+  String get disabled => 'Désactivé';
+
+  @override
+  String get users => 'Utilisateurs';
+
+  @override
+  String get totalBookings => 'Total réservations';
+
+  @override
+  String get dashboard => 'Tableau de bord';
+
+  @override
+  String get manageEvents => 'Gérer les événements';
+
+  @override
+  String get role => 'Rôle';
+
+  @override
+  String get phone => 'Téléphone';
+
+  @override
+  String get status => 'Statut';
 }

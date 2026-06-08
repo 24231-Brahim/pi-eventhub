@@ -30,6 +30,8 @@ class Event extends Equatable {
   final EventStatus status;
   final String organizerId;
   final String? organizerName;
+  final bool isFeatured;
+  final String? rejectionReason;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -51,6 +53,8 @@ class Event extends Equatable {
     this.status = EventStatus.draft,
     required this.organizerId,
     this.organizerName,
+    this.isFeatured = false,
+    this.rejectionReason,
     this.createdAt,
     this.updatedAt,
   });
@@ -64,6 +68,6 @@ class Event extends Equatable {
         id, title, description, imageUrl, date, endDate, location,
         city, latitude, longitude, price, maxParticipants,
         currentParticipants, category, status, organizerId,
-        organizerName, createdAt, updatedAt,
+        organizerName, isFeatured, rejectionReason, createdAt, updatedAt,
       ];
 }

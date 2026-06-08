@@ -19,6 +19,8 @@ class EventModel extends Event {
     super.status,
     required super.organizerId,
     super.organizerName,
+    super.isFeatured,
+    super.rejectionReason,
     super.createdAt,
     super.updatedAt,
   });
@@ -44,6 +46,8 @@ class EventModel extends Event {
       status: _parseStatus(json['status'] as String? ?? 'draft'),
       organizerId: json['organizerId'] as String,
       organizerName: json['organizerName'] as String?,
+      isFeatured: json['isFeatured'] as bool? ?? false,
+      rejectionReason: json['rejectionReason'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -72,6 +76,8 @@ class EventModel extends Event {
       'status': status.name,
       'organizerId': organizerId,
       'organizerName': organizerName,
+      'isFeatured': isFeatured,
+      'rejectionReason': rejectionReason,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };

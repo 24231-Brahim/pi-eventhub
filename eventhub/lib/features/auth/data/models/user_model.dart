@@ -8,6 +8,7 @@ class UserModel extends User {
     super.phone,
     super.photoUrl,
     super.role,
+    super.isActive,
     super.createdAt,
   });
 
@@ -19,6 +20,7 @@ class UserModel extends User {
       phone: json['phone'] as String?,
       photoUrl: json['photoUrl'] as String?,
       role: parseRole(json['role'] as String?),
+      isActive: json['isActive'] as bool? ?? true,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -33,6 +35,7 @@ class UserModel extends User {
       phone: profile['phone'] as String?,
       photoUrl: profile['photo_url'] as String?,
       role: parseRole(profile['role'] as String?),
+      isActive: profile['is_active'] as bool? ?? true,
       createdAt: profile['created_at'] != null
           ? DateTime.parse(profile['created_at'] as String)
           : null,
@@ -47,6 +50,7 @@ class UserModel extends User {
       'phone': phone,
       'photoUrl': photoUrl,
       'role': _roleToString(role),
+      'isActive': isActive,
       'createdAt': createdAt?.toIso8601String(),
     };
   }

@@ -10,19 +10,25 @@ abstract class PaymentEvent extends Equatable {
 class CreatePaymentIntentEvent extends PaymentEvent {
   final double amount;
   final String currency;
+  final String bookingId;
   const CreatePaymentIntentEvent({
     required this.amount,
+    required this.bookingId,
     this.currency = 'TND',
   });
 
   @override
-  List<Object?> get props => [amount, currency];
+  List<Object?> get props => [amount, currency, bookingId];
 }
 
 class ConfirmPaymentEvent extends PaymentEvent {
   final String paymentIntentId;
-  const ConfirmPaymentEvent({required this.paymentIntentId});
+  final String bookingId;
+  const ConfirmPaymentEvent({
+    required this.paymentIntentId,
+    required this.bookingId,
+  });
 
   @override
-  List<Object?> get props => [paymentIntentId];
+  List<Object?> get props => [paymentIntentId, bookingId];
 }

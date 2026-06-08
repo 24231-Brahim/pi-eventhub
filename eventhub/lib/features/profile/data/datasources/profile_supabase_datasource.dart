@@ -65,6 +65,7 @@ class ProfileSupabaseDataSourceImpl implements ProfileSupabaseDataSource {
         data['id'] = userId;
         data['email'] = email;
         data['role'] = meta['role'] as String? ?? 'participant';
+        data['is_active'] = true;
         final newProfile = await supabase
             .from('profiles')
             .insert(data)
@@ -84,6 +85,7 @@ class ProfileSupabaseDataSourceImpl implements ProfileSupabaseDataSource {
       'phone': snake['phone'],
       'photoUrl': snake['photo_url'],
       'role': snake['role'],
+      'isActive': snake['is_active'],
       'createdAt': snake['created_at'],
     };
   }

@@ -4,6 +4,7 @@ import 'package:eventhub/features/payments/domain/entities/payment.dart';
 
 abstract class PaymentRepository {
   Future<Either<Failure, String>> createPaymentIntent(
-      double amount, String currency);
-  Future<Either<Failure, Payment>> confirmPayment(String paymentIntentId);
+      double amount, String currency, String bookingId);
+  Future<Either<Failure, Payment>> confirmPayment(
+      String paymentIntentId, String bookingId);
 }

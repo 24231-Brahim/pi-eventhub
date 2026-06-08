@@ -22,8 +22,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   Future<void> _onCreatePaymentIntent(
       CreatePaymentIntentEvent event, Emitter<PaymentState> emit) async {
     emit(const PaymentLoading());
-    final result =
-        await createPaymentIntentUseCase.call(event.amount, event.currency);
+    final result = await createPaymentIntentUseCase.call(
+        event.amount, event.currency, event.bookingId);
     result.fold(
       (failure) => emit(PaymentError(message: failure.message)),
       (clientSecret) =>
@@ -34,7 +34,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   Future<void> _onConfirmPayment(
       ConfirmPaymentEvent event, Emitter<PaymentState> emit) async {
     emit(const PaymentLoading());
-    final result = await confirmPaymentUseCase.call(event.paymentIntentId);
+    final result = await confirmPaymentUseCase.call(
+        event.paymentIntentId, event.bookingId);
     result.fold(
       (failure) => emit(PaymentError(message: failure.message)),
       (payment) => emit(PaymentConfirmed(payment: payment)),

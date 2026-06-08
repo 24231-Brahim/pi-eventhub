@@ -151,7 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     },
                   ),
                   const SizedBox(height: 24),
-                  Text('I want to:', style: Theme.of(context).textTheme.titleMedium),
+                  Text(l10n.iWantTo, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Row(
                     children: [

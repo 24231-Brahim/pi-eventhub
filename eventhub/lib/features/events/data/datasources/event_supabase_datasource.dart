@@ -9,11 +9,14 @@ abstract class EventSupabaseDataSource {
     double? minPrice,
     double? maxPrice,
     DateTime? date,
+    String? organizerId,
   });
   Future<Map<String, dynamic>> getEventById(String id);
   Future<Map<String, dynamic>> createEvent(Map<String, dynamic> event);
   Future<Map<String, dynamic>> updateEvent(Map<String, dynamic> event);
   Future<void> deleteEvent(String id);
+  Future<bool> toggleFavorite(String eventId, String userId);
+  Future<List<String>> getUserFavoriteIds(String userId);
 }
 
 class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
@@ -30,6 +33,7 @@ class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
     double? minPrice,
     double? maxPrice,
     DateTime? date,
+    String? organizerId,
   }) async {
     var query = supabase.from('events').select();
 
@@ -47,6 +51,9 @@ class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
     }
     if (date != null) {
       query = query.gte('date', date.toIso8601String());
+    }
+    if (organizerId != null) {
+      query = query.eq('organizer_id', organizerId);
     }
 
     final paginated = query.order('date', ascending: true).range(
@@ -99,6 +106,39 @@ class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
     await supabase.from('events').delete().eq('id', id);
   }
 
+  @override
+  Future<bool> toggleFavorite(String eventId, String userId) async {
+    final existing = await supabase
+        .from('favorites')
+        .select()
+        .eq('event_id', eventId)
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (existing != null) {
+      await supabase
+          .from('favorites')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('user_id', userId);
+      return false;
+    } else {
+      await supabase.from('favorites').insert({
+        'event_id': eventId,
+        'user_id': userId,
+      });
+      return true;
+    }
+  }
+
+  @override
+  Future<List<String>> getUserFavoriteIds(String userId) async {
+    final data = await supabase
+        .from('favorites')
+        .select('event_id')
+        .eq('user_id', userId);
+    return data.map((e) => e['event_id'] as String).toList();
+  }
+
   Map<String, dynamic> _toCamelCase(Map<String, dynamic> snake) {
     return {
       'id': snake['id'],
@@ -118,32 +158,38 @@ class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
       'status': snake['status'],
       'organizerId': snake['organizer_id'],
       'organizerName': snake['organizer_name'],
+      'isFeatured': snake['is_featured'],
+      'rejectionReason': snake['rejection_reason'],
       'createdAt': snake['created_at'],
       'updatedAt': snake['updated_at'],
     };
   }
 
   Map<String, dynamic> _toSnakeCase(Map<String, dynamic> camel) {
-    final result = <String, dynamic>{
-      'title': camel['title'],
-      'description': camel['description'],
-      'image_url': camel['imageUrl'],
-      'date': camel['date'],
-      'end_date': camel['endDate'],
-      'location': camel['location'],
-      'city': camel['city'],
-      'latitude': camel['latitude'],
-      'longitude': camel['longitude'],
-      'price': camel['price'],
-      'max_participants': camel['maxParticipants'],
-      'current_participants': camel['currentParticipants'],
-      'category': camel['category'],
-      'status': camel['status'],
-      'organizer_id': camel['organizerId'],
-      'organizer_name': camel['organizerName'],
-      'created_at': camel['createdAt'],
-      'updated_at': camel['updatedAt'],
-    };
+    final result = <String, dynamic>{};
+    void addIfPresent(String key, dynamic value) {
+      if (value != null) result[key] = value;
+    }
+    addIfPresent('title', camel['title']);
+    addIfPresent('description', camel['description']);
+    addIfPresent('image_url', camel['imageUrl']);
+    addIfPresent('date', camel['date']);
+    addIfPresent('end_date', camel['endDate']);
+    addIfPresent('location', camel['location']);
+    addIfPresent('city', camel['city']);
+    addIfPresent('latitude', camel['latitude']);
+    addIfPresent('longitude', camel['longitude']);
+    addIfPresent('price', camel['price']);
+    addIfPresent('max_participants', camel['maxParticipants']);
+    addIfPresent('current_participants', camel['currentParticipants']);
+    addIfPresent('category', camel['category']);
+    addIfPresent('status', camel['status']);
+    addIfPresent('organizer_id', camel['organizerId']);
+    addIfPresent('organizer_name', camel['organizerName']);
+    addIfPresent('is_featured', camel['isFeatured']);
+    addIfPresent('rejection_reason', camel['rejectionReason']);
+    addIfPresent('created_at', camel['createdAt']);
+    addIfPresent('updated_at', camel['updatedAt']);
     final id = camel['id'];
     if (id != null && id is String && id.isNotEmpty) {
       result['id'] = id;

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
+import 'package:eventhub/shared/services/local_storage_service.dart';
+import 'package:eventhub/core/di/injection_container.dart' as di;
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -11,49 +15,56 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final _pageController = PageController();
   int _currentPage = 0;
 
-  final _pages = const [
-    _OnboardingContent(
-      icon: Icons.event,
-      title: 'Discover Events',
-      description: 'Find amazing events happening near you',
-    ),
-    _OnboardingContent(
-      icon: Icons.book_online,
-      title: 'Book Tickets',
-      description: 'Reserve your spot with just a few taps',
-    ),
-    _OnboardingContent(
-      icon: Icons.qr_code_scanner,
-      title: 'Easy Check-in',
-      description: 'Use QR codes for quick and easy entry',
-    ),
-  ];
-
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
 
+  List<_OnboardingContent> _buildPages(AppLocalizations l10n) => [
+    _OnboardingContent(
+      key: const ValueKey(0),
+      icon: Icons.event,
+      title: l10n.discoverEvents,
+      description: l10n.discoverEventsDesc,
+    ),
+    _OnboardingContent(
+      key: const ValueKey(1),
+      icon: Icons.book_online,
+      title: l10n.bookTickets,
+      description: l10n.bookTicketsDesc,
+    ),
+    _OnboardingContent(
+      key: const ValueKey(2),
+      icon: Icons.qr_code_scanner,
+      title: l10n.easyCheckin,
+      description: l10n.easyCheckinDesc,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final pages = _buildPages(l10n);
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) =>
-                    setState(() => _currentPage = index),
-                itemCount: _pages.length,
-                itemBuilder: (context, index) => _pages[index],
+              child: ClipRect(
+                child: PageView(
+                  key: const ValueKey('onboarding_pages'),
+                  controller: _pageController,
+                  onPageChanged: (index) =>
+                      setState(() => _currentPage = index),
+                  children: pages,
+                ),
               ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
-                _pages.length,
+                pages.length,
                 (index) => AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -75,13 +86,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                    child: const Text('Skip'),
+                    onPressed: () {
+                      di.sl<LocalStorageService>()
+                          .setBool('onboarding_completed', true);
+                      context.go('/login');
+                    },
+                    child: Text(l10n.skip),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      if (_currentPage == _pages.length - 1) {
-                        Navigator.pushReplacementNamed(context, '/login');
+                      if (_currentPage == pages.length - 1) {
+                        di.sl<LocalStorageService>()
+                            .setBool('onboarding_completed', true);
+                        context.go('/login');
                       } else {
                         _pageController.nextPage(
                           duration: const Duration(milliseconds: 300),
@@ -90,7 +107,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       }
                     },
                     child: Text(
-                      _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
+                      _currentPage == pages.length - 1 ? l10n.getStarted : l10n.next,
                     ),
                   ),
                 ],
@@ -107,7 +124,9 @@ class _OnboardingContent extends StatelessWidget {
   final IconData icon;
   final String title;
   final String description;
+
   const _OnboardingContent({
+    super.key,
     required this.icon,
     required this.title,
     required this.description,

@@ -147,7 +147,10 @@ class AppRouter {
       ),
       GoRoute(
         path: '/qr-code',
-        builder: (context, state) => const QrCodePage(),
+        builder: (context, state) {
+          final ticket = state.extra as dynamic;
+          return QrCodePage(ticket: ticket);
+        },
       ),
       GoRoute(
         path: '/qr-scanner',

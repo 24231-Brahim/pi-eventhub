@@ -17,9 +17,8 @@ class PaymentRepositoryImpl implements PaymentRepository {
 
   @override
   Future<Either<Failure, String>> createPaymentIntent(
-      double amount, String currency) async {
+      double amount, String currency, String bookingId) async {
     try {
-      const bookingId = ''; // In a real flow, this comes from creating a booking first
       final data =
           await dataSource.createPaymentIntent(amount, currency, bookingId);
       final payment = PaymentModel.fromJson(data);
@@ -31,9 +30,8 @@ class PaymentRepositoryImpl implements PaymentRepository {
 
   @override
   Future<Either<Failure, Payment>> confirmPayment(
-      String paymentIntentId) async {
+      String paymentIntentId, String bookingId) async {
     try {
-      const bookingId = ''; // In a real flow, this comes from the booking
       final data =
           await dataSource.confirmPayment(paymentIntentId, bookingId);
       return Right(PaymentModel.fromJson(data));

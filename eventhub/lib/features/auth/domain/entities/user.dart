@@ -9,6 +9,7 @@ class User extends Equatable {
   final String? phone;
   final String? photoUrl;
   final UserRole role;
+  final bool isActive;
   final DateTime? createdAt;
 
   const User({
@@ -18,9 +19,10 @@ class User extends Equatable {
     this.phone,
     this.photoUrl,
     this.role = UserRole.participant,
+    this.isActive = true,
     this.createdAt,
   });
 
   @override
-  List<Object?> get props => [id, email, name, phone, photoUrl, role, createdAt];
+  List<Object?> get props => [id, email, name, phone, photoUrl, role, isActive, createdAt];
 }

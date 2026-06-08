@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:eventhub/features/admin/presentation/bloc/admin_bloc.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class AdminDashboardPage extends StatelessWidget {
   const AdminDashboardPage({super.key});
@@ -10,11 +12,17 @@ class AdminDashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final authState = context.watch<AuthBloc>().state;
     final user = authState is Authenticated ? authState.user : null;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Dashboard'),
+        title: Text(l10n.adminDashboard),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () =>
+                context.read<AdminBloc>().add(const GetDashboardStatsEvent()),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () =>
@@ -28,20 +36,20 @@ class AdminDashboardPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Welcome, ${user?.name ?? 'Admin'}',
+              '${l10n.welcome}, ${user?.name ?? l10n.users}',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             Text(
-              'Admin Panel',
+              l10n.adminPanel,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],
                   ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Management',
+              l10n.management,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -49,40 +57,40 @@ class AdminDashboardPage extends StatelessWidget {
             const SizedBox(height: 12),
             _AdminCard(
               icon: Icons.people,
-              title: 'Users',
-              subtitle: 'Manage all users',
+              title: l10n.users,
+              subtitle: l10n.manageUsers,
               color: Colors.blue,
               onTap: () => context.push('/admin/users'),
             ),
             const SizedBox(height: 8),
             _AdminCard(
               icon: Icons.event,
-              title: 'Events',
-              subtitle: 'Manage all events',
+              title: l10n.events,
+              subtitle: l10n.manageAllEvents,
               color: Colors.green,
               onTap: () => context.push('/admin/events'),
             ),
             const SizedBox(height: 8),
             _AdminCard(
               icon: Icons.book_online,
-              title: 'Bookings',
-              subtitle: 'View all bookings',
+              title: l10n.bookings,
+              subtitle: l10n.viewAllBookings,
               color: Colors.orange,
               onTap: () => context.push('/admin/bookings'),
             ),
             const SizedBox(height: 8),
             _AdminCard(
               icon: Icons.confirmation_number,
-              title: 'Tickets',
-              subtitle: 'View all tickets',
+              title: l10n.tickets,
+              subtitle: l10n.viewAllTickets,
               color: Colors.purple,
               onTap: () => context.push('/admin/tickets'),
             ),
             const SizedBox(height: 8),
             _AdminCard(
               icon: Icons.analytics,
-              title: 'Analytics',
-              subtitle: 'Platform statistics',
+              title: l10n.analytics,
+              subtitle: l10n.platformStatistics,
               color: Colors.teal,
               onTap: () => context.push('/admin/analytics'),
             ),

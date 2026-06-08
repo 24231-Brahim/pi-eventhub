@@ -58,3 +58,12 @@ class EventError extends EventState {
   @override
   List<Object?> get props => [message];
 }
+
+class FavoriteToggled extends EventState {
+  final bool isFavorite;
+  final String eventId;
+  const FavoriteToggled({required this.isFavorite, required this.eventId});
+
+  @override
+  List<Object?> get props => [isFavorite, eventId];
+}

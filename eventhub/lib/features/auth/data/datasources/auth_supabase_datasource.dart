@@ -117,7 +117,7 @@ class AuthSupabaseDataSourceImpl implements AuthSupabaseDataSource {
     }
 
     throw Exception(
-      'Email confirmation required. Please check your inbox or disable email confirmation in Supabase dashboard.',
+      'Inscription réussie ! Veuillez vérifier votre boîte email pour confirmer votre compte avant de vous connecter.',
     );
   }
 

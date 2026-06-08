@@ -24,6 +24,7 @@ class EventRepositoryImpl implements EventRepository {
     double? minPrice,
     double? maxPrice,
     DateTime? date,
+    String? organizerId,
   }) async {
     try {
       final data = await dataSource.getEvents(
@@ -34,6 +35,7 @@ class EventRepositoryImpl implements EventRepository {
         minPrice: minPrice,
         maxPrice: maxPrice,
         date: date,
+        organizerId: organizerId,
       );
       final events = data.map((e) => EventModel.fromJson(e)).toList();
       return Right(events);
@@ -74,6 +76,8 @@ class EventRepositoryImpl implements EventRepository {
         status: event.status,
         organizerId: userId,
         organizerName: event.organizerName,
+        isFeatured: event.isFeatured,
+        rejectionReason: event.rejectionReason,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
       );
@@ -105,6 +109,8 @@ class EventRepositoryImpl implements EventRepository {
         status: event.status,
         organizerId: event.organizerId,
         organizerName: event.organizerName,
+        isFeatured: event.isFeatured,
+        rejectionReason: event.rejectionReason,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
       );
@@ -120,6 +126,28 @@ class EventRepositoryImpl implements EventRepository {
     try {
       await dataSource.deleteEvent(id);
       return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> toggleFavorite(String eventId) async {
+    try {
+      final userId = supabase.auth.currentUser?.id ?? '';
+      final isFavorited = await dataSource.toggleFavorite(eventId, userId);
+      return Right(isFavorited);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getUserFavoriteIds() async {
+    try {
+      final userId = supabase.auth.currentUser?.id ?? '';
+      final ids = await dataSource.getUserFavoriteIds(userId);
+      return Right(ids);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

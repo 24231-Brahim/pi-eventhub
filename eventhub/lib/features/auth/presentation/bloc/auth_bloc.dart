@@ -90,11 +90,35 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               phone: profile['phone'] as String?,
               photoUrl: profile['photo_url'] as String?,
               role: UserModel.parseRole(profile['role'] as String?),
+              isActive: profile['is_active'] as bool? ?? true,
               createdAt: DateTime.tryParse(user.createdAt),
             ),
           ));
         } catch (_) {
-          emit(const Unauthenticated());
+          try {
+            final newProfile = await Supabase.instance.client
+                .from('profiles')
+                .insert({
+                  'id': user.id,
+                  'email': user.email,
+                  'name': user.userMetadata?['name'] ?? '',
+                  'role': user.userMetadata?['role'] ?? 'participant',
+                })
+                .select()
+                .single();
+            emit(Authenticated(
+              user: User(
+                id: user.id,
+                email: newProfile['email'] as String? ?? user.email ?? '',
+                name: newProfile['name'] as String? ?? '',
+                role: UserModel.parseRole(newProfile['role'] as String?),
+                isActive: newProfile['is_active'] as bool? ?? true,
+                createdAt: DateTime.tryParse(user.createdAt),
+              ),
+            ));
+          } catch (_) {
+            emit(const Unauthenticated());
+          }
         }
       } else {
         emit(const Unauthenticated());

@@ -15,6 +15,7 @@ class GetEventsUseCase {
     double? minPrice,
     double? maxPrice,
     DateTime? date,
+    String? organizerId,
   }) {
     return repository.getEvents(
       page: page,
@@ -24,6 +25,7 @@ class GetEventsUseCase {
       minPrice: minPrice,
       maxPrice: maxPrice,
       date: date,
+      organizerId: organizerId,
     );
   }
 }

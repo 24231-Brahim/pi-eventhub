@@ -23,6 +23,7 @@ class NotificationSupabaseDataSourceImpl
   Map<String, dynamic> _toCamelCase(Map<String, dynamic> snake) {
     return {
       'id': snake['id'],
+      'userId': snake['user_id'],
       'title': snake['title'],
       'body': snake['body'],
       'type': snake['type'],

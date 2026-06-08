@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 
 class CreateEventPage extends StatefulWidget {
@@ -60,23 +62,24 @@ class _CreateEventPageState extends State<CreateEventPage> {
   }
 
   Future<void> _pickImage() async {
+    final l10n = AppLocalizations.of(context)!;
     final source = await showDialog<ImageSource>(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Select Image Source'),
+        title: Text(l10n.selectImageSource),
         children: [
           SimpleDialogOption(
             onPressed: () => Navigator.pop(context, ImageSource.camera),
-            child: const ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text('Camera'),
+            child: ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(l10n.camera),
             ),
           ),
           SimpleDialogOption(
             onPressed: () => Navigator.pop(context, ImageSource.gallery),
-            child: const ListTile(
-              leading: Icon(Icons.photo_library),
-              title: Text('Gallery'),
+            child: ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(l10n.gallery),
             ),
           ),
         ],
@@ -111,7 +114,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         price: _isFree ? 0 : double.parse(_priceController.text),
         maxParticipants: int.parse(_maxParticipantsController.text),
         category: _selectedCategory,
-        organizerId: '',
+        organizerId: Supabase.instance.client.auth.currentUser?.id ?? '',
       );
       if (_isEditing) {
         context.read<EventBloc>().add(UpdateEventEvent(event: event));
@@ -123,9 +126,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Event' : 'Create Event'),
+        title: Text(_isEditing ? l10n.editEvent : l10n.createEvent),
       ),
       body: BlocListener<EventBloc, EventState>(
         listener: (context, state) {
@@ -174,13 +178,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                     width: double.infinity,
                                   ),
                                 )
-                              : const Column(
+                              : Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.add_photo_alternate,
+                                    const Icon(Icons.add_photo_alternate,
                                         size: 48),
-                                    SizedBox(height: 8),
-                                    Text('Add Event Image'),
+                                    const SizedBox(height: 8),
+                                    Text(l10n.addEventImage),
                                   ],
                                 ),
                     ),
@@ -188,9 +192,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   const SizedBox(height: 16),
                   TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Event Title',
-                    prefixIcon: Icon(Icons.event),
+                  decoration: InputDecoration(
+                    labelText: l10n.eventTitle,
+                    prefixIcon: const Icon(Icons.event),
                   ),
                   validator: (v) =>
                       v == null || v.isEmpty ? 'Title is required' : null,
@@ -199,9 +203,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    prefixIcon: Icon(Icons.description),
+                  decoration: InputDecoration(
+                    labelText: l10n.description,
+                    prefixIcon: const Icon(Icons.description),
                     alignLabelWithHint: true,
                   ),
                   validator: (v) =>
@@ -210,9 +214,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 const SizedBox(height: 16),
                 DropdownButtonFormField<EventCategory>(
                   initialValue: _selectedCategory,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    prefixIcon: Icon(Icons.category),
+                  decoration: InputDecoration(
+                    labelText: l10n.category,
+                    prefixIcon: const Icon(Icons.category),
                   ),
                   items: EventCategory.values
                       .map((cat) => DropdownMenuItem(
@@ -241,9 +245,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           }
                         },
                         child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Date',
-                            prefixIcon: Icon(Icons.calendar_today),
+                          decoration: InputDecoration(
+                            labelText: l10n.date,
+                            prefixIcon: const Icon(Icons.calendar_today),
                           ),
                           child: Text(
                             '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
@@ -264,9 +268,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           }
                         },
                         child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Time',
-                            prefixIcon: Icon(Icons.access_time),
+                          decoration: InputDecoration(
+                            labelText: l10n.time,
+                            prefixIcon: const Icon(Icons.access_time),
                           ),
                           child: Text(_selectedTime.format(context)),
                         ),
@@ -277,9 +281,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _locationController,
-                  decoration: const InputDecoration(
-                    labelText: 'Location',
-                    prefixIcon: Icon(Icons.location_on),
+                  decoration: InputDecoration(
+                    labelText: l10n.location,
+                    prefixIcon: const Icon(Icons.location_on),
                   ),
                   validator: (v) =>
                       v == null || v.isEmpty ? 'Location is required' : null,
@@ -287,25 +291,25 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _cityController,
-                  decoration: const InputDecoration(
-                    labelText: 'City',
-                    prefixIcon: Icon(Icons.map),
+                  decoration: InputDecoration(
+                    labelText: l10n.city,
+                    prefixIcon: const Icon(Icons.map),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _maxParticipantsController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Max Participants',
-                    prefixIcon: Icon(Icons.people),
+                  decoration: InputDecoration(
+                    labelText: l10n.maxParticipants,
+                    prefixIcon: const Icon(Icons.people),
                   ),
                   validator: (v) =>
                       v == null || v.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 16),
                 SwitchListTile(
-                  title: const Text('Free Event'),
+                  title: Text(l10n.freeEvent),
                   value: _isFree,
                   onChanged: (value) =>
                       setState(() => _isFree = value),
@@ -315,9 +319,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   TextFormField(
                     controller: _priceController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Price (TND)',
-                      prefixIcon: Icon(Icons.attach_money),
+                    decoration: InputDecoration(
+                      labelText: l10n.price,
+                      prefixIcon: const Icon(Icons.attach_money),
                     ),
                     validator: (v) =>
                         _isFree || (v != null && v.isNotEmpty)
@@ -333,7 +337,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                     }
                     return ElevatedButton(
                       onPressed: _onSubmit,
-                      child: Text(_isEditing ? 'Update Event' : 'Create Event'),
+                      child: Text(_isEditing ? l10n.updateEvent : l10n.createEvent),
                     );
                   },
                 ),

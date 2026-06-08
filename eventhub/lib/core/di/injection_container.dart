@@ -22,6 +22,8 @@ import 'package:eventhub/features/events/domain/usecases/create_event_usecase.da
 import 'package:eventhub/features/events/domain/usecases/update_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/delete_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/get_event_by_id_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/toggle_favorite_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/get_user_favorite_ids_usecase.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/bookings/data/datasources/booking_supabase_datasource.dart';
 import 'package:eventhub/features/bookings/data/repositories/booking_repository_impl.dart';
@@ -52,6 +54,13 @@ import 'package:eventhub/features/profile/domain/repositories/profile_repository
 import 'package:eventhub/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:eventhub/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:eventhub/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:eventhub/features/admin/data/datasources/admin_supabase_datasource.dart';
+import 'package:eventhub/features/admin/data/repositories/admin_repository_impl.dart';
+import 'package:eventhub/features/admin/domain/repositories/admin_repository.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_dashboard_stats_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_all_events_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_users_usecase.dart';
+import 'package:eventhub/features/admin/presentation/bloc/admin_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -64,6 +73,7 @@ Future<void> initDependencies() async {
   _initPayments();
   _initNotifications();
   _initProfile();
+  _initAdmin();
 }
 
 Future<void> _initCore() async {
@@ -95,7 +105,7 @@ void _initAuth() {
   sl.registerLazySingleton(() => RegisterUseCase(repository: sl()));
   sl.registerLazySingleton(() => ForgotPasswordUseCase(repository: sl()));
   sl.registerLazySingleton(() => LogoutUseCase(repository: sl()));
-  sl.registerFactory(() => AuthBloc(
+  sl.registerLazySingleton(() => AuthBloc(
         loginUseCase: sl(),
         registerUseCase: sl(),
         forgotPasswordUseCase: sl(),
@@ -118,12 +128,15 @@ void _initEvents() {
   sl.registerLazySingleton(() => CreateEventUseCase(repository: sl()));
   sl.registerLazySingleton(() => UpdateEventUseCase(repository: sl()));
   sl.registerLazySingleton(() => DeleteEventUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ToggleFavoriteUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetUserFavoriteIdsUseCase(repository: sl()));
   sl.registerFactory(() => EventBloc(
         getEventsUseCase: sl(),
         getEventByIdUseCase: sl(),
         createEventUseCase: sl(),
         updateEventUseCase: sl(),
         deleteEventUseCase: sl(),
+        toggleFavoriteUseCase: sl(),
       ));
 }
 
@@ -212,5 +225,23 @@ void _initProfile() {
   sl.registerFactory(() => ProfileBloc(
         getProfileUseCase: sl(),
         updateProfileUseCase: sl(),
+      ));
+}
+
+void _initAdmin() {
+  sl.registerLazySingleton<AdminSupabaseDataSource>(
+    () => AdminSupabaseDataSourceImpl(supabase: Supabase.instance.client),
+  );
+  sl.registerLazySingleton<AdminRepository>(
+    () => AdminRepositoryImpl(dataSource: sl()),
+  );
+  sl.registerLazySingleton(() => GetDashboardStatsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetAllEventsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetUsersUseCase(repository: sl()));
+  sl.registerFactory(() => AdminBloc(
+        getDashboardStatsUseCase: sl(),
+        getAllEventsUseCase: sl(),
+        getUsersUseCase: sl(),
+        adminRepository: sl(),
       ));
 }

@@ -1,3 +1,7 @@
+import 'package:eventhub/features/admin/domain/repositories/admin_repository.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_dashboard_stats_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_all_events_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_users_usecase.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:eventhub/core/network/network_info.dart';
 import 'package:eventhub/core/errors/failures.dart';
@@ -18,6 +22,7 @@ import 'package:eventhub/features/events/domain/usecases/get_event_by_id_usecase
 import 'package:eventhub/features/events/domain/usecases/create_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/update_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/delete_event_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/toggle_favorite_usecase.dart';
 import 'package:eventhub/features/bookings/domain/entities/booking.dart';
 import 'package:eventhub/features/bookings/domain/repositories/booking_repository.dart';
 import 'package:eventhub/features/bookings/domain/usecases/create_booking_usecase.dart';
@@ -41,12 +46,18 @@ class MockGetEventByIdUseCase extends Mock implements GetEventByIdUseCase {}
 class MockCreateEventUseCase extends Mock implements CreateEventUseCase {}
 class MockUpdateEventUseCase extends Mock implements UpdateEventUseCase {}
 class MockDeleteEventUseCase extends Mock implements DeleteEventUseCase {}
+class MockToggleFavoriteUseCase extends Mock implements ToggleFavoriteUseCase {}
 
 class MockBookingRepository extends Mock implements BookingRepository {}
 class MockCreateBookingUseCase extends Mock implements CreateBookingUseCase {}
 class MockGetUserBookingsUseCase extends Mock implements GetUserBookingsUseCase {}
 
 class MockConnectivity extends Mock implements Connectivity {}
+
+class MockAdminRepository extends Mock implements AdminRepository {}
+class MockGetDashboardStatsUseCase extends Mock implements GetDashboardStatsUseCase {}
+class MockGetAllEventsUseCase extends Mock implements GetAllEventsUseCase {}
+class MockGetUsersUseCase extends Mock implements GetUsersUseCase {}
 
 const tUser = User(
   id: '1',

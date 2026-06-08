@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eventhub/features/admin/presentation/bloc/admin_bloc.dart';
+import 'package:eventhub/shared/widgets/loading_widget.dart';
+import 'package:eventhub/shared/widgets/error_widget.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class AdminUsersPage extends StatefulWidget {
   const AdminUsersPage({super.key});
@@ -9,100 +13,103 @@ class AdminUsersPage extends StatefulWidget {
 }
 
 class _AdminUsersPageState extends State<AdminUsersPage> {
-  List<Map<String, dynamic>> _users = [];
-  bool _loading = true;
-  String? _error;
-
   @override
   void initState() {
     super.initState();
-    _loadUsers();
-  }
-
-  Future<void> _loadUsers() async {
-    setState(() => _loading = true);
-    try {
-      final data = await Supabase.instance.client
-          .from('profiles')
-          .select()
-          .order('created_at', ascending: false);
-      setState(() {
-        _users = List<Map<String, dynamic>>.from(data);
-        _loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _loading = false;
-      });
-    }
-  }
-
-  Future<void> _toggleRole(String userId, String currentRole) async {
-    final newRole = switch (currentRole) {
-      'admin' => 'participant',
-      'organizer' => 'participant',
-      _ => 'organizer',
-    };
-    try {
-      await Supabase.instance.client
-          .from('profiles')
-          .update({'role': newRole}).eq('id', userId);
-      _loadUsers();
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating role: $e')),
-      );
-    }
+    context.read<AdminBloc>().add(const GetAdminUsersEvent());
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Manage Users')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text('Error: $_error'))
-              : RefreshIndicator(
-                  onRefresh: _loadUsers,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _users.length,
-                    itemBuilder: (context, index) {
-                      final user = _users[index];
-                      final role = user['role'] as String? ?? 'participant';
-                      return Card(
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            child: Text(
-                              (user['name'] as String? ?? '?')
-                                  .substring(0, 1)
-                                  .toUpperCase(),
-                            ),
-                          ),
-                          title: Text(user['name'] as String? ?? 'No name'),
-                          subtitle: Text(user['email'] as String? ?? ''),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _RoleBadge(role: role),
-                              const SizedBox(width: 8),
-                              if (role != 'admin')
-                                IconButton(
-                                  icon: const Icon(Icons.swap_horiz),
-                                  tooltip: 'Toggle role (organizer/participant)',
-                                  onPressed: () =>
-                                      _toggleRole(user['id'] as String, role),
-                                ),
-                            ],
-                          ),
+      appBar: AppBar(title: Text(l10n.manageUsersTitle)),
+      body: BlocBuilder<AdminBloc, AdminState>(
+        builder: (context, state) {
+          if (state is AdminLoading) {
+            return const LoadingWidget();
+          }
+          if (state is AdminError) {
+            return AppErrorWidget(
+              message: state.message,
+              onRetry: () =>
+                  context.read<AdminBloc>().add(const GetAdminUsersEvent()),
+            );
+          }
+          if (state is AdminUsersLoaded) {
+            final users = state.users;
+            return RefreshIndicator(
+              onRefresh: () async =>
+                  context.read<AdminBloc>().add(const GetAdminUsersEvent()),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  final user = users[index];
+                  final role = user['role'] as String? ?? 'participant';
+                  final isActive = user['is_active'] as bool? ?? true;
+                  return Card(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        child: Text(
+                          (user['name'] as String? ?? '?')
+                              .substring(0, 1)
+                              .toUpperCase(),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      ),
+                      title: Text(user['name'] as String? ?? l10n.noName),
+                      subtitle: Text(
+                        '${user['email'] as String? ?? ''}${!isActive ? ' (${l10n.disabled})' : ''}',
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _RoleBadge(role: role),
+                          const SizedBox(width: 8),
+                          if (role != 'admin')
+                            IconButton(
+                              icon: const Icon(Icons.swap_horiz),
+                              tooltip:
+                                  'Toggle role (organizer/participant)',
+                              onPressed: () {
+                                final newRole =
+                                    role == 'organizer' ? 'participant' : 'organizer';
+                                context.read<AdminBloc>().add(
+                                      UpdateUserRoleEvent(
+                                        userId: user['id'] as String,
+                                        newRole: newRole,
+                                      ),
+                                    );
+                              },
+                            ),
+                          IconButton(
+                            icon: Icon(
+                              isActive
+                                  ? Icons.check_circle
+                                  : Icons.cancel,
+                              color: isActive ? Colors.green : Colors.red,
+                            ),
+                            tooltip: isActive
+                                ? 'Deactivate user'
+                                : 'Activate user',
+                            onPressed: () {
+                              context.read<AdminBloc>().add(
+                                    ToggleUserActiveEvent(
+                                        userId: user['id'] as String),
+                                  );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+          return const SizedBox();
+        },
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:eventhub/features/notifications/presentation/bloc/notification_b
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
 import 'package:eventhub/shared/widgets/empty_widget.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -21,8 +22,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
+      appBar: AppBar(title: Text(l10n.notifications)),
       body: BlocBuilder<NotificationBloc, NotificationState>(
         builder: (context, state) {
           if (state is NotificationLoading) {
@@ -37,7 +39,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           }
           if (state is NotificationsLoaded) {
             if (state.notifications.isEmpty) {
-              return const EmptyWidget(message: 'No notifications');
+              return EmptyWidget(message: l10n.noNotifications);
             }
             return ListView.builder(
               itemCount: state.notifications.length,
