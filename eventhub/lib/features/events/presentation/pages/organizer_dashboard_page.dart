@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
@@ -36,7 +37,7 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
-            onPressed: () => Navigator.pushNamed(context, '/qr-scanner'),
+            onPressed: () => context.push('/qr-scanner'),
           ),
         ],
       ),
@@ -218,7 +219,7 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                           avatar: const Icon(Icons.add),
                           label: Text(l10n.createEvent),
                           onPressed: () =>
-                              Navigator.pushNamed(context, '/create-event'),
+                              context.push('/create-event'),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -227,7 +228,7 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                           avatar: const Icon(Icons.list),
                           label: Text(l10n.manageEvents),
                           onPressed: () =>
-                              Navigator.pushNamed(context, '/manage-events'),
+                              context.push('/manage-events'),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -236,7 +237,7 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                           avatar: const Icon(Icons.qr_code_scanner),
                           label: Text(l10n.scanQR),
                           onPressed: () =>
-                              Navigator.pushNamed(context, '/qr-scanner'),
+                              context.push('/qr-scanner'),
                         ),
                       ),
                     ],

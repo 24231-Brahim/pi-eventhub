@@ -175,6 +175,10 @@ CREATE POLICY "users can read own tickets"
     ON public.tickets FOR SELECT
     USING (auth.uid() = user_id);
 
+CREATE POLICY "users can insert own tickets"
+    ON public.tickets FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
 -- Payments: users can read own
 CREATE POLICY "users can read own payments"
     ON public.payments FOR SELECT

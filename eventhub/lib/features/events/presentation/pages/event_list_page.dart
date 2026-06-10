@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/presentation/widgets/event_card.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
@@ -79,10 +80,9 @@ class _EventListPageState extends State<EventListPage> {
                     itemCount: state.events.length,
                     itemBuilder: (context, index) => EventCard(
                       event: state.events[index],
-                      onTap: () => Navigator.pushNamed(
-                        context,
+                      onTap: () => context.push(
                         '/event-details',
-                        arguments: state.events[index].id,
+                        extra: state.events[index].id,
                       ),
                     ),
                   );
@@ -184,10 +184,9 @@ class _EventSearchDelegate extends SearchDelegate {
             event: filtered.elementAt(index),
             onTap: () {
               close(context, null);
-              Navigator.pushNamed(
-                context,
+              context.push(
                 '/event-details',
-                arguments: filtered.elementAt(index).id,
+                extra: filtered.elementAt(index).id,
               );
             },
           ),

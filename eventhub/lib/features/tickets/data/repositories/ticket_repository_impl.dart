@@ -36,4 +36,30 @@ class TicketRepositoryImpl implements TicketRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Ticket>> createTicket({
+    required String eventId,
+    required String bookingId,
+    String? eventTitle,
+    String? eventDate,
+    String? eventLocation,
+    required String qrCode,
+  }) async {
+    try {
+      final userId = supabase.auth.currentUser?.id ?? '';
+      final data = await dataSource.createTicket(
+        eventId: eventId,
+        userId: userId,
+        bookingId: bookingId,
+        eventTitle: eventTitle,
+        eventDate: eventDate,
+        eventLocation: eventLocation,
+        qrCode: qrCode,
+      );
+      return Right(TicketModel.fromJson(data));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

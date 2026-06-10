@@ -3,6 +3,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 abstract class TicketSupabaseDataSource {
   Future<List<Map<String, dynamic>>> getUserTickets(String userId);
   Future<Map<String, dynamic>> validateTicket(String qrData);
+  Future<Map<String, dynamic>> createTicket({
+    required String eventId,
+    required String userId,
+    required String bookingId,
+    String? eventTitle,
+    String? eventDate,
+    String? eventLocation,
+    required String qrCode,
+  });
 }
 
 class TicketSupabaseDataSourceImpl implements TicketSupabaseDataSource {
@@ -39,6 +48,29 @@ class TicketSupabaseDataSourceImpl implements TicketSupabaseDataSource {
     }
 
     return _toCamelCase(ticket);
+  }
+
+  @override
+  Future<Map<String, dynamic>> createTicket({
+    required String eventId,
+    required String userId,
+    required String bookingId,
+    String? eventTitle,
+    String? eventDate,
+    String? eventLocation,
+    required String qrCode,
+  }) async {
+    final response = await supabase.from('tickets').insert({
+      'event_id': eventId,
+      'user_id': userId,
+      'booking_id': bookingId,
+      'event_title': eventTitle,
+      'event_date': eventDate,
+      'event_location': eventLocation,
+      'qr_code': qrCode,
+      'status': 'active',
+    }).select().single();
+    return _toCamelCase(response);
   }
 
   Map<String, dynamic> _toCamelCase(Map<String, dynamic> snake) {

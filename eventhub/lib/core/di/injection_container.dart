@@ -34,6 +34,7 @@ import 'package:eventhub/features/bookings/presentation/bloc/booking_bloc.dart';
 import 'package:eventhub/features/tickets/data/datasources/ticket_supabase_datasource.dart';
 import 'package:eventhub/features/tickets/data/repositories/ticket_repository_impl.dart';
 import 'package:eventhub/features/tickets/domain/repositories/ticket_repository.dart';
+import 'package:eventhub/features/tickets/domain/usecases/create_ticket_usecase.dart';
 import 'package:eventhub/features/tickets/domain/usecases/get_user_tickets_usecase.dart';
 import 'package:eventhub/features/tickets/domain/usecases/validate_ticket_usecase.dart';
 import 'package:eventhub/features/tickets/presentation/bloc/ticket_bloc.dart';
@@ -170,6 +171,7 @@ void _initTickets() {
   );
   sl.registerLazySingleton(() => GetUserTicketsUseCase(repository: sl()));
   sl.registerLazySingleton(() => ValidateTicketUseCase(repository: sl()));
+  sl.registerLazySingleton(() => CreateTicketUseCase(repository: sl()));
   sl.registerFactory(() => TicketBloc(
         getUserTicketsUseCase: sl(),
         validateTicketUseCase: sl(),

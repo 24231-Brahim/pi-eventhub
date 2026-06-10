@@ -1,7 +1,7 @@
 # EventHub — État d'avancement du projet
 
 > Projet Flutter (Clean Architecture + BLoC) + Supabase (Backend as a Service)
-> Date : 08/06/2026
+> Date : 09/06/2026
 
 ---
 
@@ -33,7 +33,7 @@
 - Validation email faible (`value.contains('@')`) dans login/register
 
 ### 🐛 Bugs
-- **`ForgotPasswordPage` ligne 33 :** double annotation `@override` → erreur de compilation Dart
+- ~~**`ForgotPasswordPage` ligne 33 :** double annotation `@override` → erreur de compilation Dart~~ ✅ **Corrigé**
 - Validation email du `ForgotPasswordPage` : ne vérifie que la non-vacuité (pas de `@`)
 
 ### ❌ Manquant
@@ -61,7 +61,7 @@
 - `CreateEventPage` → image pickée jamais uploadée ni attachée à l'événement
 - `EventListPage` → seulement 4 catégories sur 8 affichées dans les filtres
 - `EventState` → pas de métadonnées de pagination (`hasReachedMax`)
-- `manage_events_page.dart` → navigation mixte (`go_router` + `Navigator.pushNamed`)
+- ~~`manage_events_page.dart` → navigation mixte (`go_router` + `Navigator.pushNamed`)~~ ✅ **Corrigé**
 - `create_event_page.dart` → `initialValue` déprécié sur `DropdownButtonFormField`
 - Pas de champ `endDate` dans le formulaire de création
 
@@ -93,23 +93,17 @@
 ## 4. TICKETS (Billets / QR Code)
 
 ### ✅ Terminé
-- **Domain :** `Ticket` entity, `TicketRepository` interface, `GetUserTicketsUseCase`, `ValidateTicketUseCase`
+- **Domain :** `Ticket` entity, `TicketRepository` interface, `GetUserTicketsUseCase`, `ValidateTicketUseCase`, `CreateTicketUseCase`
 - **Data :** `TicketModel`, `TicketSupabaseDataSourceImpl`, `TicketRepositoryImpl`
 - **Presentation :** BLoC complet, `TicketsPage`, `QrCodePage`, `QrScannerPage`
+- **Création de tickets après réservation/paiement** : flux booking → payment → ticket complet ✅
+- **Navigation** : `Navigator.pushNamed` → `context.push()` (GoRouter) dans `tickets_page.dart` ✅
+- **Tests :** 10 tests (bloc, use cases, repository)
 
 ### 🟡 Partiel / Problèmes
 - `QrScannerPage` → `MobileScanner` pas de débounce → scans multiples possibles
 - `QrScannerPage` → pas d'indicateur de chargement (`TicketLoading` émis mais pas affiché)
 - `validateTicket()` → retourne succès même pour tickets déjà `used` ou `cancelled`
-
-### ❌ Manquant / 🐛 Critique
-- **Aucune création de tickets après réservation/paiement** :
-  - Pas de `CreateTicketUseCase`
-  - Pas de `createTicket()` dans le repository
-  - Pas de trigger DB dans `supabase_schema.sql` pour auto-création
-  - Pas d'appel dans `BookingBloc` ou `PaymentBloc` pour créer le ticket
-  - → Le flux réservation → ticket est **cassé**, l'utilisateur verra une page tickets vide
-- Tests : 0 test pour toute la feature tickets
 
 ---
 
@@ -119,6 +113,7 @@
 - **Domain :** `Payment` entity, `PaymentRepository` interface, `CreatePaymentIntentUseCase`, `ConfirmPaymentUseCase`
 - **Data :** `PaymentModel`, `PaymentSupabaseDataSourceImpl`, `PaymentRepositoryImpl`
 - **Presentation :** BLoC complet, `BookingPage`
+- **Tests :** 8 tests (bloc, use cases, repository)
 
 ### 🐛 Problèmes critiques
 - **Aucune intégration Stripe réelle** : pas de dépendance `flutter_stripe`, pas d'appels API Stripe
@@ -131,7 +126,6 @@
 - `getUserPayments` → pas de méthode dans le repository
 - Page historique des paiements
 - Gestion des remboursements / échecs de paiement
-- Tests : 0 test pour toute la feature payments
 
 ---
 
@@ -282,16 +276,16 @@
 | Admin | 10 tests (bloc uniquement) | 🟡 Partiel |
 | Events | 12 tests (bloc + event_card) | 🟡 Partiel |
 | Bookings | 3 tests (bloc uniquement) | 🟡 Minimal |
-| Payments | 0 test | ❌ Manquant |
+| Payments | 8 tests (bloc, use cases, repository) | ✅ Nouveau |
 | Profile | 0 test | ❌ Manquant |
 | Notifications | 0 test | ❌ Manquant |
-| Tickets | 0 test | ❌ Manquant |
-| **Total** | **~97 tests** | |
+| Tickets | 10 tests (bloc, use cases, repository) | ✅ Nouveau |
+| **Total** | **~125 tests** | |
 
 ### ❌ Gaps critiques dans les tests
-- **0 test** pour 4 features entières (Payments, Profile, Notifications, Tickets)
-- **Repository implementations** : seul `auth_repository_impl` est testé (6/7 manquants)
-- **Use cases** : testés pour Auth seulement (17 use cases non testés dans les autres features)
+- **0 test** pour 2 features entières (Profile, Notifications)
+- **Repository implementations** : seuls `auth_repository_impl`, `ticket_repository_impl`, `payment_repository_impl` sont testés (4/7 manquants)
+- **Use cases** : testés pour Auth + Tickets + Payments (gaps réduits)
 - **~20 pages** sans test (seules les pages auth + event_card sont testées)
 - **Data sources** : 0 test pour toutes
 - **Smoke test** : `widget_test.dart` = placeholder trivial (`expect(1+1, 2)`)
@@ -300,10 +294,10 @@
 
 ## 16. BUGS CRITIQUES (Blocage)
 
-| # | Bug | Fichier |
-|---|-----|---------|
-| 1 | Double `@override` → erreur de compilation | `lib/features/auth/presentation/pages/forgot_password_page.dart:33` |
-| 2 | Flux réservation → ticket cassé (aucune création de ticket après booking) | Cross-feature : bookings → tickets |
+| # | Bug | Fichier | Statut |
+|---|-----|---------|--------|
+| 1 | Double `@override` → erreur de compilation | `lib/features/auth/presentation/pages/forgot_password_page.dart:33` | ✅ **Corrigé** |
+| 2 | Flux réservation → ticket cassé (aucune création de ticket après booking) | Cross-feature : bookings → tickets | ✅ **Corrigé** |
 
 ---
 

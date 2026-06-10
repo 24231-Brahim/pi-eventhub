@@ -9,7 +9,7 @@
 
 EventHub est une application Flutter de gestion d'événements avec Supabase en backend. L'architecture est **Clean Architecture + BLoC + GetIt DI**. 8 features sont implémentées : Auth, Events, Bookings, Tickets, Payments, Notifications, Profile, Admin.
 
-**~97 tests** existants. L'app compile et tourne.
+**~125 tests** existants. L'app compile et tourne.
 
 ---
 
@@ -17,10 +17,11 @@ EventHub est une application Flutter de gestion d'événements avec Supabase en 
 
 ### 1. Bugs bloquants à corriger en priorité
 
-| # | Bug | Fichier |
-|---|-----|---------|
-| 🔴 | Double `@override` → erreur de compilation | `lib/features/auth/presentation/pages/forgot_password_page.dart:33` |
-| 🔴 | Flux réservation → ticket cassé (aucune création de ticket après booking) | Cross-feature : bookings → tickets manque `CreateTicketUseCase` |
+*Pas de bugs bloquants connus pour le moment.* ✅
+
+* Dernière session (09/06/2026) : **2 bugs bloquants corrigés** — double `@override` dans `forgot_password_page.dart`, flux booking→ticket complété (`CreateTicketUseCase`, datasource, repository, DI, RLS policy, intégration booking_page).
+* **11 appels `Navigator.pushNamed()`** remplacés par `context.push()` (GoRouter) dans 4 fichiers.
+* **28 nouveaux tests** écrits (Tickets: 10, Payments: 8, Bookings: 7, Auth: 2, Core: 1).
 
 ### 2. Ce qui manque (par feature)
 
@@ -29,8 +30,8 @@ EventHub est une application Flutter de gestion d'événements avec Supabase en 
 | **Auth** | Login, Register, Forgot Password, Logout, 25 tests | Navigation post-auth, écoute `onAuthStateChange`, `ChangePasswordUseCase` |
 | **Events** | CRUD complet, filtres, favoris, dashboard organisateur | Pagination (`hasReachedMax`), upload image réel, `endDate` dans formulaire, handler `FavoriteIdsLoaded` |
 | **Bookings** | Création, historique, 3 tests | `cancelBooking()`, page UI dans `bookings/` (actuellement dans `payments/`) |
-| **Tickets** | QR display, scanner, validation | ⚠️ **Aucune création de tickets** après réservation/paiement. 0 test. |
-| **Payments** | Structure préparée | ⚠️ **Pas de vrai Stripe**. Paiements simulés (insertion DB directe). 0 test. |
+| **Tickets** | QR display, scanner, validation, création après booking | ✅ Création de tickets après réservation/paiement complète. 10 tests. |
+| **Payments** | Structure préparée | ⚠️ **Pas de vrai Stripe**. Paiements simulés (insertion DB directe). 8 tests. |
 | **Notifications** | Liste + lecture | `markAsRead()`, `onTap` handler, swipe-to-dismiss. 0 test. |
 | **Profile** | Affichage + édition | Upload photo, pré-remplissage formulaire. 0 test. |
 | **Admin** | Dashboard + 6 pages, 10 tests | Use cases manquants pour 7 méthodes, bouton "Rejeter" événement |
@@ -44,14 +45,12 @@ EventHub est une application Flutter de gestion d'événements avec Supabase en 
 
 ### 4. Tests à écrire (0 test actuellement)
 
-- Payments ❌
 - Notifications ❌
 - Profile ❌
-- Tickets ❌
 - Pages Events ❌
 - Pages Admin ❌
-- Use cases (17 non testés)
-- Repository implementations (6/7 manquants)
+- Use cases (reste ~10 non testés)
+- Repository implementations (4/7 manquants)
 - Data sources (0 test)
 
 ### 5. Pour lancer le projet
@@ -73,8 +72,9 @@ flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
 ---
 
 **Priorités suggérées :**
-1. Corriger les 2 bugs bloquants
-2. Implémenter la création de tickets (flux booking → payment → ticket)
-3. Écrire les tests manquants (commencer par Tickets et Payments)
+1. ✅ ~~Corriger les 2 bugs bloquants~~
+2. ✅ ~~Implémenter la création de tickets (flux booking → payment → ticket)~~
+3. ✅ ~~Écrire les tests Tickets et Payments~~
 4. Nettoyer la dette technique (dead code, contournements)
-5. Intégration Stripe réelle
+5. Tests à continuer (Notifications, Profile, pages Events/Admin)
+6. Intégration Stripe réelle

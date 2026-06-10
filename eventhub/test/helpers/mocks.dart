@@ -29,6 +29,16 @@ import 'package:eventhub/features/bookings/domain/usecases/create_booking_usecas
 import 'package:eventhub/features/bookings/domain/usecases/get_user_bookings_usecase.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
+import 'package:eventhub/features/tickets/domain/repositories/ticket_repository.dart';
+import 'package:eventhub/features/tickets/domain/usecases/create_ticket_usecase.dart';
+import 'package:eventhub/features/tickets/domain/usecases/get_user_tickets_usecase.dart';
+import 'package:eventhub/features/tickets/domain/usecases/validate_ticket_usecase.dart';
+import 'package:eventhub/features/payments/domain/entities/payment.dart';
+import 'package:eventhub/features/payments/domain/repositories/payment_repository.dart';
+import 'package:eventhub/features/payments/domain/usecases/create_payment_intent_usecase.dart';
+import 'package:eventhub/features/payments/domain/usecases/confirm_payment_usecase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 
 class MockAuthSupabaseDataSource extends Mock implements AuthSupabaseDataSource {}
 class MockAuthRepository extends Mock implements AuthRepository {}
@@ -59,6 +69,22 @@ class MockGetDashboardStatsUseCase extends Mock implements GetDashboardStatsUseC
 class MockGetAllEventsUseCase extends Mock implements GetAllEventsUseCase {}
 class MockGetUsersUseCase extends Mock implements GetUsersUseCase {}
 
+class MockTicketRepository extends Mock implements TicketRepository {}
+class MockCreateTicketUseCase extends Mock implements CreateTicketUseCase {}
+class MockGetUserTicketsUseCase extends Mock implements GetUserTicketsUseCase {}
+class MockValidateTicketUseCase extends Mock implements ValidateTicketUseCase {}
+
+class MockPaymentRepository extends Mock implements PaymentRepository {}
+class MockCreatePaymentIntentUseCase extends Mock implements CreatePaymentIntentUseCase {}
+class MockConfirmPaymentUseCase extends Mock implements ConfirmPaymentUseCase {}
+
+class SupabaseMock extends Mock implements SupabaseClient {
+  @override
+  GoTrueClient get auth => MockGoTrueClient();
+}
+
+class MockGoTrueClient extends Mock implements GoTrueClient {}
+
 const tUser = User(
   id: '1',
   email: 'test@test.com',
@@ -88,6 +114,26 @@ const tBooking = Booking(
   quantity: 2,
   totalAmount: 50.0,
   status: BookingStatus.confirmed,
+);
+
+const tTicket = Ticket(
+  id: '1',
+  eventId: '1',
+  userId: '1',
+  bookingId: '1',
+  eventTitle: 'Test Event',
+  eventDate: '2026-12-25',
+  eventLocation: 'Test Location',
+  qrCode: 'qr-test-123',
+  status: TicketStatus.active,
+);
+
+const tPayment = Payment(
+  id: '1',
+  bookingId: '1',
+  amount: 50.0,
+  currency: 'TND',
+  status: PaymentStatus.completed,
 );
 
 const tFailure = ServerFailure(message: 'Server error');

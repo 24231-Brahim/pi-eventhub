@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:eventhub/features/tickets/presentation/bloc/ticket_bloc.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
@@ -29,7 +30,7 @@ class _TicketsPageState extends State<TicketsPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code_scanner),
-            onPressed: () => Navigator.pushNamed(context, '/qr-scanner'),
+            onPressed: () => context.push('/qr-scanner'),
           ),
         ],
       ),
@@ -68,10 +69,9 @@ class _TicketsPageState extends State<TicketsPage> {
                       ],
                     ),
                     trailing: const Icon(Icons.qr_code),
-                    onTap: () => Navigator.pushNamed(
-                      context,
+                    onTap: () => context.push(
                       '/qr-code',
-                      arguments: ticket,
+                      extra: ticket,
                     ),
                   ),
                 );

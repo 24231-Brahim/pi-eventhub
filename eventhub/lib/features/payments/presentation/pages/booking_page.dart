@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:eventhub/core/di/injection_container.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/bookings/presentation/bloc/booking_bloc.dart';
 import 'package:eventhub/features/payments/presentation/bloc/payment_bloc.dart';
+import 'package:eventhub/features/tickets/domain/usecases/create_ticket_usecase.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
 
@@ -34,6 +38,24 @@ class _BookingPageState extends State<BookingPage> {
         .read<BookingBloc>()
         .add(CreateBookingEvent(
             eventId: widget.eventId, quantity: _quantity, amount: total));
+  }
+
+  void _createTicketForBooking(BuildContext context) {
+    final eventState = context.read<EventBloc>().state;
+    if (eventState is EventDetailLoaded) {
+      final event = eventState.event;
+      final rand = Random();
+      final qrCode =
+          '${widget.eventId}-$_bookingId-${DateTime.now().millisecondsSinceEpoch}-${rand.nextInt(999999)}';
+      sl<CreateTicketUseCase>().call(
+            eventId: widget.eventId,
+            bookingId: _bookingId,
+            eventTitle: event.title,
+            eventDate: event.date.toIso8601String(),
+            eventLocation: event.location,
+            qrCode: qrCode,
+          );
+    }
   }
 
   @override
@@ -69,6 +91,7 @@ class _BookingPageState extends State<BookingPage> {
           BlocListener<PaymentBloc, PaymentState>(
             listenWhen: (_, state) => state is PaymentConfirmed,
             listener: (context, state) {
+              _createTicketForBooking(context);
               setState(() => _isProcessing = false);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

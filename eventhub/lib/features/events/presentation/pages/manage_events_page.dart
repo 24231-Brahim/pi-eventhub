@@ -68,7 +68,7 @@ class _ManageEventsPageState extends State<ManageEventsPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => Navigator.pushNamed(context, '/create-event'),
+            onPressed: () => context.push('/create-event'),
           ),
         ],
       ),
@@ -154,10 +154,9 @@ class _ManageEventsPageState extends State<ManageEventsPage> {
                         children: [
                           EventCard(
                             event: event,
-                            onTap: () => Navigator.pushNamed(
-                              context,
+                            onTap: () => context.push(
                               '/event-details',
-                              arguments: event.id,
+                              extra: event.id,
                             ),
                           ),
                           Positioned(
@@ -204,7 +203,7 @@ class _ManageEventsPageState extends State<ManageEventsPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/create-event'),
+        onPressed: () => context.push('/create-event'),
         child: const Icon(Icons.add),
       ),
     );
