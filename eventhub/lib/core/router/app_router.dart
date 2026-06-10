@@ -5,6 +5,7 @@ import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/auth/presentation/pages/login_page.dart';
 import 'package:eventhub/features/auth/presentation/pages/register_page.dart';
 import 'package:eventhub/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/features/events/presentation/pages/event_list_page.dart';
 import 'package:eventhub/features/events/presentation/pages/event_detail_page.dart';
 import 'package:eventhub/features/events/presentation/pages/create_event_page.dart';
@@ -14,6 +15,7 @@ import 'package:eventhub/features/profile/presentation/pages/edit_profile_page.d
 import 'package:eventhub/features/tickets/presentation/pages/tickets_page.dart';
 import 'package:eventhub/features/tickets/presentation/pages/qr_code_page.dart';
 import 'package:eventhub/features/tickets/presentation/pages/qr_scanner_page.dart';
+import 'package:eventhub/features/bookings/presentation/pages/my_bookings_page.dart';
 import 'package:eventhub/features/payments/presentation/pages/booking_page.dart';
 import 'package:eventhub/features/events/presentation/pages/organizer_dashboard_page.dart';
 import 'package:eventhub/features/events/presentation/pages/manage_events_page.dart';
@@ -127,8 +129,8 @@ class AppRouter {
       GoRoute(
         path: '/event-details',
         builder: (context, state) {
-          final eventId = state.extra as String;
-          return EventDetailPage(eventId: eventId);
+          final event = state.extra as Event;
+          return EventDetailPage(event: event);
         },
       ),
       GoRoute(
@@ -144,6 +146,10 @@ class AppRouter {
         path: '/booking',
         builder: (context, state) =>
             BookingPage(eventId: state.extra as String),
+      ),
+      GoRoute(
+        path: '/my-bookings',
+        builder: (context, state) => const MyBookingsPage(),
       ),
       GoRoute(
         path: '/qr-code',

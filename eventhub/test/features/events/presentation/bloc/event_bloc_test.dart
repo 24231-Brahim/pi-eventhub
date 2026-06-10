@@ -12,6 +12,7 @@ void main() {
   late MockUpdateEventUseCase mockUpdateEventUseCase;
   late MockDeleteEventUseCase mockDeleteEventUseCase;
   late MockToggleFavoriteUseCase mockToggleFavoriteUseCase;
+  late MockGetUserFavoriteIdsUseCase mockGetUserFavoriteIdsUseCase;
 
   setUp(() {
     mockGetEventsUseCase = MockGetEventsUseCase();
@@ -20,6 +21,7 @@ void main() {
     mockUpdateEventUseCase = MockUpdateEventUseCase();
     mockDeleteEventUseCase = MockDeleteEventUseCase();
     mockToggleFavoriteUseCase = MockToggleFavoriteUseCase();
+    mockGetUserFavoriteIdsUseCase = MockGetUserFavoriteIdsUseCase();
   });
 
   EventBloc createBloc() => EventBloc(
@@ -29,6 +31,7 @@ void main() {
         updateEventUseCase: mockUpdateEventUseCase,
         deleteEventUseCase: mockDeleteEventUseCase,
         toggleFavoriteUseCase: mockToggleFavoriteUseCase,
+        getUserFavoriteIdsUseCase: mockGetUserFavoriteIdsUseCase,
       );
 
   group('EventBloc', () {
@@ -89,6 +92,74 @@ void main() {
         bloc.add(const DeleteEventEvent(id: '1'));
       },
       expect: () => [isA<EventLoading>(), isA<EventDeleted>()],
+    );
+
+    blocTest<EventBloc, EventState>(
+      'emits [EventLoading, EventUpdated] when updateEvent succeeds',
+      build: createBloc,
+      act: (bloc) {
+        when(() => mockUpdateEventUseCase.call(tEvent))
+            .thenAnswer((_) async => Right(tEvent));
+        bloc.add(UpdateEventEvent(event: tEvent));
+      },
+      expect: () => [isA<EventLoading>(), isA<EventUpdated>()],
+    );
+
+    blocTest<EventBloc, EventState>(
+      'emits [FavoriteToggled] when toggleFavorite succeeds',
+      build: createBloc,
+      act: (bloc) {
+        when(() => mockToggleFavoriteUseCase.call('1'))
+            .thenAnswer((_) async => const Right(true));
+        bloc.add(const ToggleFavoriteEvent(eventId: '1'));
+      },
+      expect: () => [isA<FavoriteToggled>()],
+    );
+
+    blocTest<EventBloc, EventState>(
+      'emits [FavoriteIdsLoadedState] when getUserFavoriteIds succeeds',
+      build: createBloc,
+      act: (bloc) {
+        when(() => mockGetUserFavoriteIdsUseCase.call())
+            .thenAnswer((_) async => const Right(['1', '2']));
+        bloc.add(const GetUserFavoriteIdsEvent());
+      },
+      expect: () => [isA<FavoriteIdsLoadedState>()],
+    );
+
+    blocTest<EventBloc, EventState>(
+      'emits EventsLoaded with hasReachedMax=true when fewer results than page size',
+      build: createBloc,
+      act: (bloc) {
+        when(() => mockGetEventsUseCase.call(
+              page: any(named: 'page'),
+              size: any(named: 'size'),
+            )).thenAnswer((_) async => Right([tEvent]));
+        bloc.add(const GetEventsEvent(size: 20));
+      },
+      expect: () => [isA<EventLoading>(), isA<EventsLoaded>()],
+      verify: (bloc) {
+        final state = bloc.state as EventsLoaded;
+        expect(state.hasReachedMax, isTrue);
+      },
+    );
+
+    blocTest<EventBloc, EventState>(
+      'emits EventsLoaded with hasReachedMax=false when results equal page size',
+      build: createBloc,
+      act: (bloc) {
+        final events = List.generate(20, (i) => tEvent);
+        when(() => mockGetEventsUseCase.call(
+              page: any(named: 'page'),
+              size: any(named: 'size'),
+            )).thenAnswer((_) async => Right(events));
+        bloc.add(const GetEventsEvent(size: 20));
+      },
+      expect: () => [isA<EventLoading>(), isA<EventsLoaded>()],
+      verify: (bloc) {
+        final state = bloc.state as EventsLoaded;
+        expect(state.hasReachedMax, isFalse);
+      },
     );
   });
 }

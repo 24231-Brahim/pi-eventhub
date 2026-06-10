@@ -31,6 +31,7 @@ class Event extends Equatable {
   final String organizerId;
   final String? organizerName;
   final bool isFeatured;
+  final bool isPrivate;
   final String? rejectionReason;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -54,6 +55,7 @@ class Event extends Equatable {
     required this.organizerId,
     this.organizerName,
     this.isFeatured = false,
+    this.isPrivate = false,
     this.rejectionReason,
     this.createdAt,
     this.updatedAt,
@@ -68,6 +70,6 @@ class Event extends Equatable {
         id, title, description, imageUrl, date, endDate, location,
         city, latitude, longitude, price, maxParticipants,
         currentParticipants, category, status, organizerId,
-        organizerName, isFeatured, rejectionReason, createdAt, updatedAt,
+        organizerName, isFeatured, isPrivate, rejectionReason, createdAt, updatedAt,
       ];
 }

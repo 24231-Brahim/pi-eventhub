@@ -415,4 +415,70 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get eventUnpublished => 'تم إلغاء نشر الفعالية بنجاح';
+
+  @override
+  String get titleRequired => 'العنوان مطلوب';
+
+  @override
+  String get descriptionRequired => 'الوصف مطلوب';
+
+  @override
+  String get locationRequired => 'الموقع مطلوب';
+
+  @override
+  String get nameRequired => 'الاسم مطلوب';
+
+  @override
+  String get required => 'مطلوب';
+
+  @override
+  String get publicEvent => 'فعالية عامة';
+
+  @override
+  String get privateEvent => 'فعالية خاصة';
+
+  @override
+  String get eventVisibility => 'رؤية الفعالية';
+
+  @override
+  String get invitePeople => 'دعوة أشخاص';
+
+  @override
+  String get invitedPeople => 'الأشخاص المدعوون';
+
+  @override
+  String get noInvitations => 'لا توجد دعوات';
+
+  @override
+  String get addInviteByEmail => 'إضافة عبر البريد الإلكتروني';
+
+  @override
+  String get importFromFile => 'استيراد من ملف';
+
+  @override
+  String get importSuccess => 'تم استيراد {count} دعوة بنجاح';
+
+  @override
+  String get importErrors => 'تم العثور على {count} خطأ في الملف';
+
+  @override
+  String get emailHint => 'email@example.com';
+
+  @override
+  String get nameHint => 'الاسم (اختياري)';
+
+  @override
+  String get invite => 'دعوة';
+
+  @override
+  String get remove => 'إزالة';
+
+  @override
+  String get importInvitations => 'استيراد الدعوات';
+
+  @override
+  String get invitationsImported => 'تم استيراد الدعوات بنجاح';
+
+  @override
+  String get onlyInvitedCanBook => 'يمكن للأشخاص المدعوين فقط الحجز';
 }

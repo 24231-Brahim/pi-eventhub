@@ -24,6 +24,7 @@ void main() {
   late MockRegisterUseCase mockRegisterUseCase;
   late MockForgotPasswordUseCase mockForgotPasswordUseCase;
   late MockLogoutUseCase mockLogoutUseCase;
+  late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
   late AuthBloc authBloc;
 
   setUp(() {
@@ -31,11 +32,13 @@ void main() {
     mockRegisterUseCase = MockRegisterUseCase();
     mockForgotPasswordUseCase = MockForgotPasswordUseCase();
     mockLogoutUseCase = MockLogoutUseCase();
+    mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
     authBloc = AuthBloc(
       loginUseCase: mockLoginUseCase,
       registerUseCase: mockRegisterUseCase,
       forgotPasswordUseCase: mockForgotPasswordUseCase,
       logoutUseCase: mockLogoutUseCase,
+      getCurrentUserUseCase: mockGetCurrentUserUseCase,
     );
   });
 

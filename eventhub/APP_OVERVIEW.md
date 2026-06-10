@@ -34,6 +34,8 @@ EventHub is a **Flutter mobile app** for event management with Supabase backend.
 | **Statuses** | draft, published, cancelled, completed |
 | **Favorites** | Toggle + list user's favorite IDs |
 | **Organizer Tools** | Create/Edit/Delete events, dashboard, manage events list |
+| **Event Visibility** | Public (anyone can book) or Private (only invited people can book) |
+| **Invitations** | Add by email, bulk import from CSV file |
 | **Admin Review** | Events require approval (rejectionReason field) |
 
 ---

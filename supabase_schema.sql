@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS public.events (
     organizer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     organizer_name TEXT,
     is_featured BOOLEAN NOT NULL DEFAULT false,
+    is_private BOOLEAN NOT NULL DEFAULT false,
     rejection_reason TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
@@ -111,7 +112,18 @@ CREATE TABLE IF NOT EXISTS public.notifications (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 7. Favorites
+-- 7. Event Invitations
+CREATE TABLE IF NOT EXISTS public.event_invitations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_id UUID NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    name TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'declined')),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE(event_id, email)
+);
+
+-- 8. Favorites
 CREATE TABLE IF NOT EXISTS public.favorites (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -133,6 +145,7 @@ ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.event_invitations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: users can read/update their own
@@ -144,10 +157,27 @@ CREATE POLICY "users can update own profile"
     ON public.profiles FOR UPDATE
     USING (auth.uid() = id);
 
--- Events: anyone can read published, organizer can write
+-- ===== Helper function: check if user is invited to a private event =====
+CREATE OR REPLACE FUNCTION public.is_invited_to_event(event_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.event_invitations ei
+    INNER JOIN public.profiles p ON p.email = ei.email
+    WHERE ei.event_id = is_invited_to_event.event_id
+    AND p.id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Events: anyone can read published, organizer can write, invited users can read private
 CREATE POLICY "anyone can read published events"
     ON public.events FOR SELECT
-    USING (status = 'published' OR auth.uid() = organizer_id);
+    USING (
+        status = 'published' 
+        OR auth.uid() = organizer_id
+        OR (is_private = true AND public.is_invited_to_event(id))
+    );
 
 CREATE POLICY "organizers can insert events"
     ON public.events FOR INSERT
@@ -286,6 +316,27 @@ CREATE POLICY "admins can update payments"
 
 CREATE POLICY "admins can read all notifications"
     ON public.notifications FOR SELECT
+    USING (public.is_admin());
+
+-- ===== Helper function: check if user is organizer of an event =====
+CREATE OR REPLACE FUNCTION public.is_organizer_of_event(event_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.events e
+    WHERE e.id = is_organizer_of_event.event_id
+    AND e.organizer_id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ===== Event Invitations RLS =====
+CREATE POLICY "organizers can manage invitations for own events"
+    ON public.event_invitations FOR ALL
+    USING (public.is_organizer_of_event(event_id));
+
+CREATE POLICY "admins can manage all invitations"
+    ON public.event_invitations FOR ALL
     USING (public.is_admin());
 
 -- ===== Favorites RLS =====

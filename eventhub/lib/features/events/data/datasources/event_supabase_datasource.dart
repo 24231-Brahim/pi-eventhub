@@ -17,6 +17,11 @@ abstract class EventSupabaseDataSource {
   Future<void> deleteEvent(String id);
   Future<bool> toggleFavorite(String eventId, String userId);
   Future<List<String>> getUserFavoriteIds(String userId);
+
+  Future<List<Map<String, dynamic>>> getInvitations(String eventId);
+  Future<Map<String, dynamic>> createInvitation(Map<String, dynamic> invitation);
+  Future<void> deleteInvitation(String id);
+  Future<void> createInvitationsBulk(List<Map<String, dynamic>> invitations);
 }
 
 class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
@@ -139,6 +144,60 @@ class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
     return data.map((e) => e['event_id'] as String).toList();
   }
 
+  @override
+  Future<List<Map<String, dynamic>>> getInvitations(String eventId) async {
+    final response = await supabase
+        .from('event_invitations')
+        .select()
+        .eq('event_id', eventId)
+        .order('created_at', ascending: true);
+    return response.map((e) => _invitationToCamelCase(e)).toList();
+  }
+
+  @override
+  Future<Map<String, dynamic>> createInvitation(
+      Map<String, dynamic> invitation) async {
+    final response = await supabase
+        .from('event_invitations')
+        .insert(_invitationToSnakeCase(invitation))
+        .select()
+        .single();
+    return _invitationToCamelCase(response);
+  }
+
+  @override
+  Future<void> deleteInvitation(String id) async {
+    await supabase.from('event_invitations').delete().eq('id', id);
+  }
+
+  @override
+  Future<void> createInvitationsBulk(
+      List<Map<String, dynamic>> invitations) async {
+    final snakeCase = invitations.map(_invitationToSnakeCase).toList();
+    await supabase.from('event_invitations').insert(snakeCase);
+  }
+
+  Map<String, dynamic> _invitationToCamelCase(Map<String, dynamic> snake) {
+    return {
+      'id': snake['id'],
+      'eventId': snake['event_id'],
+      'email': snake['email'],
+      'name': snake['name'],
+      'status': snake['status'],
+      'createdAt': snake['created_at'],
+    };
+  }
+
+  Map<String, dynamic> _invitationToSnakeCase(Map<String, dynamic> camel) {
+    return {
+      if (camel['id'] != null) 'id': camel['id'],
+      'event_id': camel['eventId'],
+      'email': camel['email'],
+      if (camel['name'] != null) 'name': camel['name'],
+      if (camel['status'] != null) 'status': camel['status'],
+    };
+  }
+
   Map<String, dynamic> _toCamelCase(Map<String, dynamic> snake) {
     return {
       'id': snake['id'],
@@ -159,6 +218,7 @@ class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
       'organizerId': snake['organizer_id'],
       'organizerName': snake['organizer_name'],
       'isFeatured': snake['is_featured'],
+      'isPrivate': snake['is_private'],
       'rejectionReason': snake['rejection_reason'],
       'createdAt': snake['created_at'],
       'updatedAt': snake['updated_at'],
@@ -187,6 +247,7 @@ class EventSupabaseDataSourceImpl implements EventSupabaseDataSource {
     addIfPresent('organizer_id', camel['organizerId']);
     addIfPresent('organizer_name', camel['organizerName']);
     addIfPresent('is_featured', camel['isFeatured']);
+    addIfPresent('is_private', camel['isPrivate']);
     addIfPresent('rejection_reason', camel['rejectionReason']);
     addIfPresent('created_at', camel['createdAt']);
     addIfPresent('updated_at', camel['updatedAt']);

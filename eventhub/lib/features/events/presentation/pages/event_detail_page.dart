@@ -2,53 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
-import 'package:eventhub/shared/widgets/loading_widget.dart';
-import 'package:eventhub/shared/widgets/error_widget.dart';
 
 class EventDetailPage extends StatefulWidget {
-  final String eventId;
-  const EventDetailPage({super.key, required this.eventId});
+  final Event event;
+  const EventDetailPage({super.key, required this.event});
 
   @override
   State<EventDetailPage> createState() => _EventDetailPageState();
 }
 
 class _EventDetailPageState extends State<EventDetailPage> {
+  late Event _event;
   bool _isFavorite = false;
   bool _favoritesLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<EventBloc>().add(GetEventByIdEvent(id: widget.eventId));
-    _checkFavorite();
-  }
-
-  Future<void> _checkFavorite() async {
-    try {
-      final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
-      final data = await Supabase.instance.client
-          .from('favorites')
-          .select('event_id')
-          .eq('user_id', userId);
-      final ids = data.map((e) => e['event_id'] as String).toList();
-      if (mounted) {
-        setState(() {
-          _isFavorite = ids.contains(widget.eventId);
-          _favoritesLoaded = true;
-        });
-      }
-    } catch (_) {
-      if (mounted) setState(() => _favoritesLoaded = true);
-    }
+    _event = widget.event;
+    context.read<EventBloc>().add(GetEventByIdEvent(id: _event.id));
+    context.read<EventBloc>().add(const GetUserFavoriteIdsEvent());
   }
 
   void _toggleFavorite() {
-    context.read<EventBloc>().add(ToggleFavoriteEvent(eventId: widget.eventId));
+    context.read<EventBloc>().add(ToggleFavoriteEvent(eventId: _event.id));
     setState(() => _isFavorite = !_isFavorite);
   }
 
@@ -67,61 +47,48 @@ class _EventDetailPageState extends State<EventDetailPage> {
               ),
               onPressed: _toggleFavorite,
             ),
-          Builder(
-            builder: (context) {
-              final l10n = AppLocalizations.of(context)!;
-              final state = context.watch<EventBloc>().state;
-              if (state is EventDetailLoaded) {
-                final event = state.event;
-                return IconButton(
-                  icon: const Icon(Icons.share),
-                  onPressed: () {
-                    final text = [
-                      event.title,
-                      '',
-                      event.description,
-                      '',
-                      DateFormat('EEEE, MMM d, yyyy HH:mm').format(event.date),
-                      '${event.location}${event.city != null ? ', ${event.city}' : ''}',
-                      event.isFree ? l10n.free : '${event.price.toStringAsFixed(2)} TND',
-                      '',
-                      l10n.discoverAndBook,
-                    ].join('\n');
-                    SharePlus.instance.share(ShareParams(text: text));
-                  },
-                );
-              }
-              return const SizedBox();
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              final text = [
+                _event.title,
+                '',
+                _event.description,
+                '',
+                DateFormat('EEEE, MMM d, yyyy HH:mm').format(_event.date),
+                '${_event.location}${_event.city != null ? ', ${_event.city}' : ''}',
+                _event.isFree ? l10n.free : '${_event.price.toStringAsFixed(2)} TND',
+                '',
+                l10n.discoverAndBook,
+              ].join('\n');
+              SharePlus.instance.share(ShareParams(text: text));
             },
           ),
         ],
       ),
       body: BlocListener<EventBloc, EventState>(
-        listenWhen: (_, state) => state is FavoriteToggled,
+        listenWhen: (_, state) =>
+            state is EventDetailLoaded ||
+            state is FavoriteToggled ||
+            state is FavoriteIdsLoadedState ||
+            state is EventError,
         listener: (context, state) {
-          if (state is FavoriteToggled) {
+          if (state is EventDetailLoaded) {
+            setState(() => _event = state.event);
+          } else if (state is FavoriteToggled) {
             setState(() => _isFavorite = state.isFavorite);
-          }
-        },
-        child: BlocBuilder<EventBloc, EventState>(
-        builder: (context, state) {
-          if (state is EventLoading) {
-            return const LoadingWidget();
-          }
-          if (state is EventError) {
-            return AppErrorWidget(
-              message: state.message,
-              onRetry: () => context
-                  .read<EventBloc>()
-                  .add(GetEventByIdEvent(id: widget.eventId)),
+          } else if (state is FavoriteIdsLoadedState) {
+            setState(() {
+              _isFavorite = state.ids.contains(_event.id);
+              _favoritesLoaded = true;
+            });
+          } else if (state is EventError && _event.id == widget.event.id) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
             );
           }
-          if (state is EventDetailLoaded) {
-            return _EventDetailContent(event: state.event);
-          }
-          return const LoadingWidget();
         },
-      ),
+        child: _EventDetailContent(event: _event),
       ),
     );
   }

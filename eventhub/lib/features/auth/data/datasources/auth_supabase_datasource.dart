@@ -43,6 +43,7 @@ abstract class AuthSupabaseDataSource {
       String name, String email, String password, String role);
   Future<void> forgotPassword(String email);
   Future<void> logout();
+  Future<AuthResponse?> getCurrentUser();
 }
 
 class AuthSupabaseDataSourceImpl implements AuthSupabaseDataSource {
@@ -129,5 +130,48 @@ class AuthSupabaseDataSourceImpl implements AuthSupabaseDataSource {
   @override
   Future<void> logout() async {
     await auth.signOut();
+  }
+
+  @override
+  Future<AuthResponse?> getCurrentUser() async {
+    final session = auth.currentSession;
+    if (session == null) return null;
+
+    final user = session.user;
+    Map<String, dynamic> profile = {};
+    try {
+      profile = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .single();
+    } catch (_) {
+      try {
+        await supabase.from('profiles').insert({
+          'id': user.id,
+          'email': user.email,
+          'name': user.userMetadata?['name'] ?? '',
+          'role': user.userMetadata?['role'] ?? 'participant',
+        });
+        profile = await supabase
+            .from('profiles')
+            .select()
+            .eq('id', user.id)
+            .single();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    return AuthResponse(
+      id: user.id,
+      email: profile['email'] as String? ?? user.email ?? '',
+      name: profile['name'] as String? ?? '',
+      role: profile['role'] as String? ?? 'participant',
+      photoUrl: profile['photo_url'] as String?,
+      phone: profile['phone'] as String?,
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+    );
   }
 }

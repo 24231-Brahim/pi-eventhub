@@ -1,11 +1,7 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eventhub/shared/services/local_storage_service.dart';
-import 'package:eventhub/core/network/network_info.dart';
-import 'package:eventhub/core/utils/token_manager.dart';
 import 'package:eventhub/features/auth/data/datasources/auth_supabase_datasource.dart';
 import 'package:eventhub/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:eventhub/features/auth/domain/repositories/auth_repository.dart';
@@ -13,6 +9,7 @@ import 'package:eventhub/features/auth/domain/usecases/login_usecase.dart';
 import 'package:eventhub/features/auth/domain/usecases/register_usecase.dart';
 import 'package:eventhub/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:eventhub/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:eventhub/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/events/data/datasources/event_supabase_datasource.dart';
 import 'package:eventhub/features/events/data/repositories/event_repository_impl.dart';
@@ -30,6 +27,7 @@ import 'package:eventhub/features/bookings/data/repositories/booking_repository_
 import 'package:eventhub/features/bookings/domain/repositories/booking_repository.dart';
 import 'package:eventhub/features/bookings/domain/usecases/create_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/get_user_bookings_usecase.dart';
+import 'package:eventhub/features/bookings/domain/usecases/cancel_booking_usecase.dart';
 import 'package:eventhub/features/bookings/presentation/bloc/booking_bloc.dart';
 import 'package:eventhub/features/tickets/data/datasources/ticket_supabase_datasource.dart';
 import 'package:eventhub/features/tickets/data/repositories/ticket_repository_impl.dart';
@@ -48,6 +46,7 @@ import 'package:eventhub/features/notifications/data/datasources/notification_su
 import 'package:eventhub/features/notifications/data/repositories/notification_repository_impl.dart';
 import 'package:eventhub/features/notifications/domain/repositories/notification_repository.dart';
 import 'package:eventhub/features/notifications/domain/usecases/get_notifications_usecase.dart';
+import 'package:eventhub/features/notifications/domain/usecases/mark_notification_as_read_usecase.dart';
 import 'package:eventhub/features/notifications/presentation/bloc/notification_bloc.dart';
 import 'package:eventhub/features/profile/data/datasources/profile_supabase_datasource.dart';
 import 'package:eventhub/features/profile/data/repositories/profile_repository_impl.dart';
@@ -61,6 +60,13 @@ import 'package:eventhub/features/admin/domain/repositories/admin_repository.dar
 import 'package:eventhub/features/admin/domain/usecases/get_dashboard_stats_usecase.dart';
 import 'package:eventhub/features/admin/domain/usecases/get_all_events_usecase.dart';
 import 'package:eventhub/features/admin/domain/usecases/get_users_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/update_user_role_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/toggle_user_active_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/approve_event_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/toggle_event_featured_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/delete_admin_event_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_admin_bookings_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_admin_tickets_usecase.dart';
 import 'package:eventhub/features/admin/presentation/bloc/admin_bloc.dart';
 
 final sl = GetIt.instance;
@@ -81,13 +87,6 @@ Future<void> _initCore() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => prefs);
   sl.registerLazySingleton(() => LocalStorageService(prefs: sl()));
-  sl.registerLazySingleton(() => const FlutterSecureStorage());
-  sl.registerLazySingleton<TokenManager>(
-    () => TokenManager(storage: sl()),
-  );
-  sl.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoImpl(connectivity: Connectivity()),
-  );
 }
 
 void _initAuth() {
@@ -106,11 +105,13 @@ void _initAuth() {
   sl.registerLazySingleton(() => RegisterUseCase(repository: sl()));
   sl.registerLazySingleton(() => ForgotPasswordUseCase(repository: sl()));
   sl.registerLazySingleton(() => LogoutUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetCurrentUserUseCase(repository: sl()));
   sl.registerLazySingleton(() => AuthBloc(
         loginUseCase: sl(),
         registerUseCase: sl(),
         forgotPasswordUseCase: sl(),
         logoutUseCase: sl(),
+        getCurrentUserUseCase: sl(),
       ));
 }
 
@@ -138,6 +139,7 @@ void _initEvents() {
         updateEventUseCase: sl(),
         deleteEventUseCase: sl(),
         toggleFavoriteUseCase: sl(),
+        getUserFavoriteIdsUseCase: sl(),
       ));
 }
 
@@ -153,9 +155,11 @@ void _initBookings() {
   );
   sl.registerLazySingleton(() => CreateBookingUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetUserBookingsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => CancelBookingUseCase(repository: sl()));
   sl.registerFactory(() => BookingBloc(
         createBookingUseCase: sl(),
         getUserBookingsUseCase: sl(),
+        cancelBookingUseCase: sl(),
       ));
 }
 
@@ -207,8 +211,10 @@ void _initNotifications() {
     ),
   );
   sl.registerLazySingleton(() => GetNotificationsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => MarkNotificationAsReadUseCase(repository: sl()));
   sl.registerFactory(() => NotificationBloc(
         getNotificationsUseCase: sl(),
+        markNotificationAsReadUseCase: sl(),
       ));
 }
 
@@ -240,10 +246,23 @@ void _initAdmin() {
   sl.registerLazySingleton(() => GetDashboardStatsUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetAllEventsUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetUsersUseCase(repository: sl()));
+  sl.registerLazySingleton(() => UpdateUserRoleUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ToggleUserActiveUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ApproveEventUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ToggleEventFeaturedUseCase(repository: sl()));
+  sl.registerLazySingleton(() => DeleteAdminEventUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetAdminBookingsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetAdminTicketsUseCase(repository: sl()));
   sl.registerFactory(() => AdminBloc(
         getDashboardStatsUseCase: sl(),
         getAllEventsUseCase: sl(),
         getUsersUseCase: sl(),
-        adminRepository: sl(),
+        updateUserRoleUseCase: sl(),
+        toggleUserActiveUseCase: sl(),
+        approveEventUseCase: sl(),
+        toggleEventFeaturedUseCase: sl(),
+        deleteAdminEventUseCase: sl(),
+        getAdminBookingsUseCase: sl(),
+        getAdminTicketsUseCase: sl(),
       ));
 }

@@ -20,6 +20,7 @@ class EventModel extends Event {
     required super.organizerId,
     super.organizerName,
     super.isFeatured,
+    super.isPrivate,
     super.rejectionReason,
     super.createdAt,
     super.updatedAt,
@@ -47,6 +48,7 @@ class EventModel extends Event {
       organizerId: json['organizerId'] as String,
       organizerName: json['organizerName'] as String?,
       isFeatured: json['isFeatured'] as bool? ?? false,
+      isPrivate: json['isPrivate'] as bool? ?? false,
       rejectionReason: json['rejectionReason'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
@@ -77,6 +79,7 @@ class EventModel extends Event {
       'organizerId': organizerId,
       'organizerName': organizerName,
       'isFeatured': isFeatured,
+      'isPrivate': isPrivate,
       'rejectionReason': rejectionReason,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),

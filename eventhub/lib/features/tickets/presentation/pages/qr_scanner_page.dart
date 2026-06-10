@@ -3,17 +3,33 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:eventhub/features/tickets/presentation/bloc/ticket_bloc.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
+import 'package:eventhub/shared/widgets/loading_widget.dart';
 
-class QrScannerPage extends StatelessWidget {
+class QrScannerPage extends StatefulWidget {
   const QrScannerPage({super.key});
+
+  @override
+  State<QrScannerPage> createState() => _QrScannerPageState();
+}
+
+class _QrScannerPageState extends State<QrScannerPage> {
+  DateTime _lastScan = DateTime.now();
+  static const Duration _debounceDuration = Duration(seconds: 2);
+
+  void _onDetect(BarcodeCapture capture, TicketBloc bloc) {
+    final barcode = capture.barcodes.firstOrNull;
+    if (barcode?.rawValue == null) return;
+    final now = DateTime.now();
+    if (now.difference(_lastScan) < _debounceDuration) return;
+    _lastScan = now;
+    bloc.add(ValidateTicketEvent(qrData: barcode!.rawValue!));
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.scanQRCode),
-      ),
+      appBar: AppBar(title: Text(l10n.scanQRCode)),
       body: BlocListener<TicketBloc, TicketState>(
         listener: (context, state) {
           if (state is TicketValidated) {
@@ -47,14 +63,23 @@ class QrScannerPage extends StatelessWidget {
             );
           }
         },
-        child: MobileScanner(
-          onDetect: (capture) {
-            final barcode = capture.barcodes.firstOrNull;
-            if (barcode?.rawValue != null) {
-              context
-                  .read<TicketBloc>()
-                  .add(ValidateTicketEvent(qrData: barcode!.rawValue!));
-            }
+        child: BlocBuilder<TicketBloc, TicketState>(
+          builder: (context, state) {
+            return Stack(
+              children: [
+                MobileScanner(
+                  onDetect: (capture) =>
+                      _onDetect(capture, context.read<TicketBloc>()),
+                ),
+                if (state is TicketLoading)
+                  const Positioned.fill(
+                    child: ColoredBox(
+                      color: Colors.black54,
+                      child: Center(child: LoadingWidget()),
+                    ),
+                  ),
+              ],
+            );
           },
         ),
       ),

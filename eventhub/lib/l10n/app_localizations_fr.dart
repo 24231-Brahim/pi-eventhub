@@ -415,4 +415,70 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get eventUnpublished => 'Événement dépublié avec succès';
+
+  @override
+  String get titleRequired => 'Le titre est requis';
+
+  @override
+  String get descriptionRequired => 'La description est requise';
+
+  @override
+  String get locationRequired => 'L\'emplacement est requis';
+
+  @override
+  String get nameRequired => 'Le nom est requis';
+
+  @override
+  String get required => 'Requis';
+
+  @override
+  String get publicEvent => 'Événement public';
+
+  @override
+  String get privateEvent => 'Événement privé';
+
+  @override
+  String get eventVisibility => 'Visibilité de l\'événement';
+
+  @override
+  String get invitePeople => 'Inviter des personnes';
+
+  @override
+  String get invitedPeople => 'Personnes invitées';
+
+  @override
+  String get noInvitations => 'Aucune invitation';
+
+  @override
+  String get addInviteByEmail => 'Ajouter par email';
+
+  @override
+  String get importFromFile => 'Importer depuis un fichier';
+
+  @override
+  String get importSuccess => '{count} invitations importées avec succès';
+
+  @override
+  String get importErrors => '{count} erreurs trouvées dans le fichier';
+
+  @override
+  String get emailHint => 'email@example.com';
+
+  @override
+  String get nameHint => 'Nom (optionnel)';
+
+  @override
+  String get invite => 'Inviter';
+
+  @override
+  String get remove => 'Retirer';
+
+  @override
+  String get importInvitations => 'Importer des invitations';
+
+  @override
+  String get invitationsImported => 'Invitations importées avec succès';
+
+  @override
+  String get onlyInvitedCanBook => 'Seules les personnes invitées peuvent réserver';
 }

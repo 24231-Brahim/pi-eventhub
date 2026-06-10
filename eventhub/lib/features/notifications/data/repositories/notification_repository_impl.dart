@@ -27,4 +27,14 @@ class NotificationRepositoryImpl implements NotificationRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> markAsRead(String id) async {
+    try {
+      await dataSource.markAsRead(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

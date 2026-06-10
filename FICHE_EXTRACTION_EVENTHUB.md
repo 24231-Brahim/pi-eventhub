@@ -146,9 +146,19 @@ erDiagram
         string organizerId FK
         string organizerName "nullable"
         bool isFeatured
+        bool isPrivate
         string rejectionReason "nullable"
         datetime createdAt
         datetime updatedAt
+    }
+
+    EventInvitation {
+        string id PK
+        string eventId FK
+        string email
+        string name "nullable"
+        enum status "pending | accepted | declined"
+        datetime createdAt
     }
 
     Booking {
@@ -205,6 +215,7 @@ erDiagram
     User ||--o{ Favorite : "saves"
     Event ||--o{ Booking : "has"
     Event ||--o{ Ticket : "generates"
+    Event ||--o{ EventInvitation : "invites"
     Event ||--o{ Favorite : "favorited_by"
     Booking ||--o{ Ticket : "produces"
     Booking ||--o{ Payment : "requires"
@@ -316,11 +327,27 @@ classDiagram
         +EventStatus status
         +String organizerId
         +String? organizerName
+        +bool isFeatured
+        +bool isPrivate
+        +String? rejectionReason
         +DateTime? createdAt
         +DateTime? updatedAt
         +isFree() bool
         +isFull() bool
         +isPast() bool
+    }
+
+    class EventInvitation {
+        +String id
+        +String eventId
+        +String email
+        +String name
+        +InvitationStatus status
+        +DateTime? createdAt
+    }
+    class InvitationStatus {
+        <<enumeration>>
+        pending, accepted, declined
     }
     class EventCategory {
         <<enumeration>>
@@ -592,6 +619,7 @@ erDiagram
     UTILISATEUR ||--o{ FAVORIS : "sauvegarde"
     EVENEMENT ||--o{ RESERVATION : "concerne"
     EVENEMENT ||--o{ TICKET : "génère"
+    EVENEMENT ||--o{ INVITATION : "invite"
     EVENEMENT ||--o{ FAVORIS : "favorisé_par"
     RESERVATION ||--o{ PAIEMENT : "nécessite"
     RESERVATION ||--o{ TICKET : "produit"
@@ -625,9 +653,19 @@ erDiagram
         string organisateur_id FK
         string statut "brouillon | publié | annulé | terminé"
         bool featured
+        bool prive
         string motif_rejet "nullable"
         datetime date_creation
         datetime date_modification
+    }
+
+    INVITATION {
+        string id PK
+        string evenement_id FK
+        string email
+        string nom "nullable"
+        string statut "en_attente | acceptée | refusée"
+        datetime date_creation
     }
 
     RESERVATION {
@@ -708,6 +746,10 @@ erDiagram
 | RG14 | Un **Utilisateur** de rôle `participant` peut réserver et annuler ses réservations |
 | RG15 | Un **Utilisateur** peut ajouter/supprimer des **Favoris** |
 | RG16 | Un **Utilisateur** de rôle `admin` a accès au panneau d'administration complet |
+| RG17 | Un **Événement** peut être **public** (visible par tous) ou **privé** (visible uniquement par les invités) |
+| RG18 | Un **Organisateur** peut inviter des personnes à un événement privé par email |
+| RG19 | Un **Organisateur** peut importer une liste d'invitations depuis un fichier **CSV** |
+| RG20 | Seules les personnes invitées peuvent réserver un événement privé |
 
 ---
 
@@ -907,6 +949,7 @@ Le schéma complet est défini dans `supabase_schema.sql` à la racine du projet
 - `tickets` — billets avec QR codes
 - `payments` — paiements
 - `notifications` — notifications
+- `event_invitations` — invitations aux événements privés
 - `favorites` — favoris utilisateur/événement
 
 Avec politiques Row Level Security (RLS) pour la sécurité au niveau ligne.
@@ -945,6 +988,8 @@ Avec politiques Row Level Security (RLS) pour la sécurité au niveau ligne.
 | `flutter_svg` | `^2.3.0` | SVG rendering |
 | `share_plus` | `^12.0.2` | Partage d'événements |
 | `path_provider` | `^2.1.5` | Chemins de fichiers système |
+| `file_picker` | `^8.1.6` | Sélection de fichiers (import CSV) |
+| `csv` | `^6.0.0` | Parsing de fichiers CSV pour import d'invitations |
 
 ### Backend
 
@@ -1011,7 +1056,7 @@ graph LR
 | `tickets` | Tickets | Billets | التذاكر |
 | `notifications` | Notifications | Notifications | الإشعارات |
 | `profile` | Profile | Profil | الملف الشخصي |
-| *(total: 45 clés par langue)* | | | |
+| *(total: 62+ clés par langue)* | | | |
 
 ---
 
@@ -1179,6 +1224,7 @@ graph TD
         POLICY -->|"payments"| PAY_P["Users read/insert/update own<br/>Admins CRUD all"]
         POLICY -->|"notifications"| NOTIF_P["Users read/update own<br/>Admins read all"]
         POLICY -->|"favorites"| FAV_P["Users manage own<br/>Admins manage all"]
+        POLICY -->|"event_invitations"| INV_P["Organizers manage own event's<br/>Admins manage all"]
     end
 
     DB -->|"Bypass RLS"| ADMIN_FN["is_admin() helper function"]

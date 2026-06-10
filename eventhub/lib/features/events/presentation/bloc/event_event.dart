@@ -77,10 +77,4 @@ class GetUserFavoriteIdsEvent extends EventEvent {
   const GetUserFavoriteIdsEvent();
 }
 
-class FavoriteIdsLoaded extends EventEvent {
-  final List<String> ids;
-  const FavoriteIdsLoaded({required this.ids});
 
-  @override
-  List<Object?> get props => [ids];
-}

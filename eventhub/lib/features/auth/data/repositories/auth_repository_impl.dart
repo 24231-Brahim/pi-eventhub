@@ -54,4 +54,18 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, User>> getCurrentUser() async {
+    try {
+      final data = await remoteDataSource.getCurrentUser();
+      if (data == null) {
+        return const Left(ServerFailure(message: 'No authenticated user'));
+      }
+      final user = UserModel.fromSupabase(data.toMap()['user'] as Map<String, dynamic>);
+      return Right(user);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

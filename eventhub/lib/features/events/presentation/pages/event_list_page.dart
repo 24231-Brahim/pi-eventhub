@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/presentation/widgets/event_card.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
@@ -82,7 +83,7 @@ class _EventListPageState extends State<EventListPage> {
                       event: state.events[index],
                       onTap: () => context.push(
                         '/event-details',
-                        extra: state.events[index].id,
+                        extra: state.events[index],
                       ),
                     ),
                   );
@@ -118,7 +119,9 @@ class _EventListPageState extends State<EventListPage> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: ['Conference', 'Concert', 'Exhibition', 'Workshop']
+              children: EventCategory.values
+                  .map((cat) => cat.name)
+                  .map((name) => name[0].toUpperCase() + name.substring(1))
                   .map((cat) => FilterChip(
                         label: Text(cat),
                         selected: _selectedCategory == cat,
@@ -186,7 +189,7 @@ class _EventSearchDelegate extends SearchDelegate {
               close(context, null);
               context.push(
                 '/event-details',
-                extra: filtered.elementAt(index).id,
+                extra: filtered.elementAt(index),
               );
             },
           ),

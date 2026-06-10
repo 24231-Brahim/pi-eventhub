@@ -912,6 +912,87 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Event unpublished successfully'**
   String get eventUnpublished;
+
+  /// No description provided for @titleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get titleRequired;
+
+  /// No description provided for @descriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Description is required'**
+  String get descriptionRequired;
+
+  /// No description provided for @locationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is required'**
+  String get locationRequired;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get nameRequired;
+
+  /// No description provided for @required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get required;
+
+  /// No description provided for @publicEvent.
+  String get publicEvent;
+
+  /// No description provided for @privateEvent.
+  String get privateEvent;
+
+  /// No description provided for @eventVisibility.
+  String get eventVisibility;
+
+  /// No description provided for @invitePeople.
+  String get invitePeople;
+
+  /// No description provided for @invitedPeople.
+  String get invitedPeople;
+
+  /// No description provided for @noInvitations.
+  String get noInvitations;
+
+  /// No description provided for @addInviteByEmail.
+  String get addInviteByEmail;
+
+  /// No description provided for @importFromFile.
+  String get importFromFile;
+
+  /// No description provided for @importSuccess.
+  String get importSuccess;
+
+  /// No description provided for @importErrors.
+  String get importErrors;
+
+  /// No description provided for @emailHint.
+  String get emailHint;
+
+  /// No description provided for @nameHint.
+  String get nameHint;
+
+  /// No description provided for @invite.
+  String get invite;
+
+  /// No description provided for @remove.
+  String get remove;
+
+  /// No description provided for @importInvitations.
+  String get importInvitations;
+
+  /// No description provided for @invitationsImported.
+  String get invitationsImported;
+
+  /// No description provided for @onlyInvitedCanBook.
+  String get onlyInvitedCanBook;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

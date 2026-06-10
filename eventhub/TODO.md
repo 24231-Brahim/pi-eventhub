@@ -1,7 +1,7 @@
 # EventHub — État d'avancement du projet
 
 > Projet Flutter (Clean Architecture + BLoC) + Supabase (Backend as a Service)
-> Date : 09/06/2026
+> Date : 10/06/2026
 
 ---
 
@@ -57,20 +57,31 @@
 
 ### 🟡 Partiel / Problèmes
 - `ToggleFavoriteEvent` → erreur silencieuse (failure → `null`), pas d'état d'erreur émis
-- `EventDetailPage` → requête Supabase directe pour les favoris (contourne le BLoC)
-- `CreateEventPage` → image pickée jamais uploadée ni attachée à l'événement
+- ~~`EventDetailPage` → requête Supabase directe pour les favoris (contourne le BLoC)~~ ✅ **Corrigé**
+- ~~`CreateEventPage` → image pickée jamais uploadée ni attachée à l'événement~~ ✅ **Corrigé** (upload Supabase Storage)
 - `EventListPage` → seulement 4 catégories sur 8 affichées dans les filtres
-- `EventState` → pas de métadonnées de pagination (`hasReachedMax`)
+- ~~`EventState` → pas de métadonnées de pagination (`hasReachedMax`)~~ ✅ **Corrigé**
 - ~~`manage_events_page.dart` → navigation mixte (`go_router` + `Navigator.pushNamed`)~~ ✅ **Corrigé**
 - `create_event_page.dart` → `initialValue` déprécié sur `DropdownButtonFormField`
-- Pas de champ `endDate` dans le formulaire de création
+- ~~Pas de champ `endDate` dans le formulaire de création~~ ✅ **Corrigé**
 
 ### ❌ Manquant
-- `GetUserFavoriteIdsEvent` / `FavoriteIdsLoaded` → définis dans `event_event.dart` mais **aucun handler** dans le BLoC
-- `GetUserFavoriteIdsUseCase` → enregistré dans DI mais jamais injecté dans `EventBloc`
-- `updateEvent` → pas testé dans `event_bloc_test.dart`
+- ~~`GetUserFavoriteIdsEvent` / `FavoriteIdsLoaded` → définis dans `event_event.dart` mais **aucun handler** dans le BLoC~~ ✅ **Corrigé** (dead code supprimé)
+- ~~`GetUserFavoriteIdsUseCase` → enregistré dans DI mais jamais injecté dans `EventBloc`~~ ✅ **Corrigé**
+- ~~`updateEvent` → pas testé dans `event_bloc_test.dart`~~ ✅ **Corrigé**
 - Tests use cases individuels manquants (7 use cases non testés)
 - Tests pages événements manquants
+
+### ✅ Nouveau — Visibilité privée/publique + Invitations
+- `Event.isPrivate` booléen pour définir la visibilité
+- `EventInvitation` entity + model avec sérialisation JSON
+- Table `event_invitations` dans Supabase avec RLS
+- Interface UI : toggle privé/public dans le formulaire de création d'événement
+- Ajout d'invitations par email + nom
+- Import CSV via `FileImportService` (fichier `file_picker` + parsing `csv`)
+- Fonctions SECURITY DEFINER `is_invited_to_event()` et `is_organizer_of_event()` pour éviter la récursion RLS
+- Politique SELECT sur `events` : les invités peuvent voir les événements privés
+- 17 nouvelles clés de traduction (EN/FR/AR) pour l'UI d'invitation
 
 ---
 
@@ -154,8 +165,8 @@
 - **Presentation :** BLoC complet, `ProfilePage`, `EditProfilePage`
 
 ### 🟡 Partiel / Problèmes
-- `EditProfilePage` → `onTap: () {}` sur l'avatar (photo upload est un stub vide)
-- `EditProfilePage` → champs non pré-remplis avec les valeurs actuelles du profil
+- ~~`EditProfilePage` → `onTap: () {}` sur l'avatar (photo upload est un stub vide)~~ ✅ **Corrigé** (upload Supabase Storage)
+- ~~`EditProfilePage` → champs non pré-remplis avec les valeurs actuelles du profil~~ ✅ **Corrigé**
 
 ### ❌ Manquant
 - `UploadPhotoUseCase` → pas défini
@@ -277,15 +288,16 @@
 | Events | 12 tests (bloc + event_card) | 🟡 Partiel |
 | Bookings | 3 tests (bloc uniquement) | 🟡 Minimal |
 | Payments | 8 tests (bloc, use cases, repository) | ✅ Nouveau |
-| Profile | 0 test | ❌ Manquant |
-| Notifications | 0 test | ❌ Manquant |
+| Profile | 4 tests (bloc) | 🟡 Nouveau |
+| Notifications | 3 tests (bloc) | 🟡 Nouveau |
 | Tickets | 10 tests (bloc, use cases, repository) | ✅ Nouveau |
-| **Total** | **~125 tests** | |
+| Events | 17 tests (bloc + event_card + update/toggle/pagination) | ✅ Renforcé |
+| **Total** | **~137 tests** | |
 
 ### ❌ Gaps critiques dans les tests
-- **0 test** pour 2 features entières (Profile, Notifications)
+- **Profile** (4 tests) ✅ nouveau / **Notifications** (3 tests) ✅ nouveau
 - **Repository implementations** : seuls `auth_repository_impl`, `ticket_repository_impl`, `payment_repository_impl` sont testés (4/7 manquants)
-- **Use cases** : testés pour Auth + Tickets + Payments (gaps réduits)
+- **Use cases** : testés pour Auth + Tickets + Payments + Events (gaps réduits)
 - **~20 pages** sans test (seules les pages auth + event_card sont testées)
 - **Data sources** : 0 test pour toutes
 - **Smoke test** : `widget_test.dart` = placeholder trivial (`expect(1+1, 2)`)
@@ -303,15 +315,15 @@
 
 ## 17. PROBLÈMES ARCHITECTURAUX
 
-| # | Problème | Fichier |
-|---|----------|---------|
-| 1 | `AuthBloc._onCheckAuth` contourne le repository (appelle Supabase directement) | `lib/features/auth/presentation/bloc/auth_bloc.dart:75-128` |
-| 2 | `EventDetailPage` contourne le BLoC pour les favoris (appelle Supabase directement) | `lib/features/events/presentation/pages/event_detail_page.dart:31-48` |
-| 3 | 7 méthodes du repository admin sans use case | `lib/features/admin/presentation/bloc/admin_bloc.dart` |
-| 4 | `TokenManager` et `NetworkInfo` enregistrés dans DI mais jamais utilisés | `lib/core/di/injection_container.dart:84-89` |
-| 5 | `GetUserFavoriteIdsUseCase` enregistré dans DI mais pas utilisé par `EventBloc` | `lib/core/di/injection_container.dart:132` |
-| 6 | Paiements simulés (pas de vrai Stripe) mais nommés comme si Stripe était intégré | `lib/features/payments/` |
-| 7 | `BookingPage` située dans `payments/` au lieu de `bookings/` | `lib/features/payments/presentation/pages/booking_page.dart` |
+| # | Problème | Fichier | Statut |
+|---|----------|---------|--------|
+| 1 | `AuthBloc._onCheckAuth` contourne le repository (appelle Supabase directement) | `lib/features/auth/presentation/bloc/auth_bloc.dart` | ✅ **Corrigé** |
+| 2 | `EventDetailPage` contourne le BLoC pour les favoris (appelle Supabase directement) | `lib/features/events/presentation/pages/event_detail_page.dart:31-48` | ✅ **Corrigé** |
+| 3 | 7 méthodes du repository admin sans use case | `lib/features/admin/presentation/bloc/admin_bloc.dart` | ✅ **Corrigé** |
+| 4 | `TokenManager` et `NetworkInfo` enregistrés dans DI mais jamais utilisés | `lib/core/di/injection_container.dart` | ✅ **Corrigé** |
+| 5 | `GetUserFavoriteIdsUseCase` enregistré dans DI mais pas utilisé par `EventBloc` | `lib/core/di/injection_container.dart:132` | ✅ **Corrigé** |
+| 6 | Paiements simulés (pas de vrai Stripe) mais nommés comme si Stripe était intégré | `lib/features/payments/` | 🟡 Non corrigé |
+| 7 | `BookingPage` située dans `payments/` au lieu de `bookings/` | `lib/features/payments/presentation/pages/booking_page.dart` | 🟡 Non corrigé |
 
 ---
 
@@ -320,12 +332,12 @@
 - Cache Flutter SDK + dépendances dans la CI
 - Rapport de couverture de test (Codecov, Coveralls)
 - `copyWith()` sur l'entité `Event` (évite les copies manuelles)
-- Métadonnées de pagination dans `EventState`
+- ~~Métadonnées de pagination dans `EventState`~~ ✅ **Corrigé**
 - Toutes les 8 catégories dans les filtres de `EventListPage`
-- Champ `endDate` dans le formulaire de création d'événement
-- Upload réel de l'image dans `CreateEventPage`
+- ~~Champ `endDate` dans le formulaire de création d'événement~~ ✅ **Corrigé**
+- ~~Upload réel de l'image dans `CreateEventPage`~~ ✅ **Corrigé**
 - Débounce sur le scanner QR
 - Handler `onTap` sur les notifications
-- Pré-remplissage du formulaire dans `EditProfilePage`
-- Upload photo profil fonctionnel
+- ~~Pré-remplissage du formulaire dans `EditProfilePage`~~ ✅ **Corrigé**
+- ~~Upload photo profil fonctionnel~~ ✅ **Corrigé**
 - Bouton "Rejeter" dans `AdminEventsPage`

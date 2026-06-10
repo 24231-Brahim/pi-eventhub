@@ -10,20 +10,38 @@ void main() {
   late MockGetDashboardStatsUseCase mockGetDashboardStats;
   late MockGetAllEventsUseCase mockGetAllEvents;
   late MockGetUsersUseCase mockGetUsers;
-  late MockAdminRepository mockAdminRepository;
+  late MockUpdateUserRoleUseCase mockUpdateUserRole;
+  late MockToggleUserActiveUseCase mockToggleUserActive;
+  late MockApproveEventUseCase mockApproveEvent;
+  late MockToggleEventFeaturedUseCase mockToggleEventFeatured;
+  late MockDeleteAdminEventUseCase mockDeleteAdminEvent;
+  late MockGetAdminBookingsUseCase mockGetAdminBookings;
+  late MockGetAdminTicketsUseCase mockGetAdminTickets;
 
   setUp(() {
     mockGetDashboardStats = MockGetDashboardStatsUseCase();
     mockGetAllEvents = MockGetAllEventsUseCase();
     mockGetUsers = MockGetUsersUseCase();
-    mockAdminRepository = MockAdminRepository();
+    mockUpdateUserRole = MockUpdateUserRoleUseCase();
+    mockToggleUserActive = MockToggleUserActiveUseCase();
+    mockApproveEvent = MockApproveEventUseCase();
+    mockToggleEventFeatured = MockToggleEventFeaturedUseCase();
+    mockDeleteAdminEvent = MockDeleteAdminEventUseCase();
+    mockGetAdminBookings = MockGetAdminBookingsUseCase();
+    mockGetAdminTickets = MockGetAdminTicketsUseCase();
   });
 
   AdminBloc createBloc() => AdminBloc(
         getDashboardStatsUseCase: mockGetDashboardStats,
         getAllEventsUseCase: mockGetAllEvents,
         getUsersUseCase: mockGetUsers,
-        adminRepository: mockAdminRepository,
+        updateUserRoleUseCase: mockUpdateUserRole,
+        toggleUserActiveUseCase: mockToggleUserActive,
+        approveEventUseCase: mockApproveEvent,
+        toggleEventFeaturedUseCase: mockToggleEventFeatured,
+        deleteAdminEventUseCase: mockDeleteAdminEvent,
+        getAdminBookingsUseCase: mockGetAdminBookings,
+        getAdminTicketsUseCase: mockGetAdminTickets,
       );
 
   group('AdminBloc', () {
@@ -75,7 +93,7 @@ void main() {
       'emits [AdminLoading, AdminBookingsLoaded] when getAllBookings succeeds',
       build: createBloc,
       act: (bloc) {
-        when(() => mockAdminRepository.getAllBookings())
+        when(() => mockGetAdminBookings.call())
             .thenAnswer((_) async => const Right([]));
         bloc.add(const GetAdminBookingsEvent());
       },
@@ -86,7 +104,7 @@ void main() {
       'emits [AdminLoading, AdminTicketsLoaded] when getAllTickets succeeds',
       build: createBloc,
       act: (bloc) {
-        when(() => mockAdminRepository.getAllTickets())
+        when(() => mockGetAdminTickets.call())
             .thenAnswer((_) async => const Right([]));
         bloc.add(const GetAdminTicketsEvent());
       },
@@ -97,7 +115,7 @@ void main() {
       'emits [AdminLoading, AdminUsersLoaded] after updateUserRole succeeds',
       build: createBloc,
       act: (bloc) {
-        when(() => mockAdminRepository.updateUserRole('1', 'organizer'))
+        when(() => mockUpdateUserRole.call('1', 'organizer'))
             .thenAnswer((_) async => const Right(null));
         when(() => mockGetUsers.call())
             .thenAnswer((_) async => const Right([]));
@@ -110,7 +128,7 @@ void main() {
       'emits [AdminLoading, AdminEventsLoaded] after approveEvent succeeds',
       build: createBloc,
       act: (bloc) {
-        when(() => mockAdminRepository.approveEvent('1', approved: true, reason: null))
+        when(() => mockApproveEvent.call('1', approved: true, reason: null))
             .thenAnswer((_) async => const Right(null));
         when(() => mockGetAllEvents.call())
             .thenAnswer((_) async => const Right([]));
@@ -123,7 +141,7 @@ void main() {
       'emits [AdminLoading, AdminEventsLoaded] after toggleEventFeatured succeeds',
       build: createBloc,
       act: (bloc) {
-        when(() => mockAdminRepository.toggleEventFeatured('1'))
+        when(() => mockToggleEventFeatured.call('1'))
             .thenAnswer((_) async => const Right(null));
         when(() => mockGetAllEvents.call())
             .thenAnswer((_) async => const Right([]));
@@ -136,7 +154,7 @@ void main() {
       'emits [AdminLoading, AdminEventsLoaded] after deleteEvent succeeds',
       build: createBloc,
       act: (bloc) {
-        when(() => mockAdminRepository.deleteEvent('1'))
+        when(() => mockDeleteAdminEvent.call('1'))
             .thenAnswer((_) async => const Right(null));
         when(() => mockGetAllEvents.call())
             .thenAnswer((_) async => const Right([]));

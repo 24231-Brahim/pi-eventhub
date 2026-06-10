@@ -52,6 +52,7 @@ class _ManageEventsPageState extends State<ManageEventsPage> {
       organizerId: event.organizerId,
       organizerName: event.organizerName,
       isFeatured: event.isFeatured,
+      isPrivate: event.isPrivate,
       rejectionReason: event.rejectionReason,
       createdAt: event.createdAt,
       updatedAt: event.updatedAt,
@@ -156,7 +157,7 @@ class _ManageEventsPageState extends State<ManageEventsPage> {
                             event: event,
                             onTap: () => context.push(
                               '/event-details',
-                              extra: event.id,
+                              extra: event,
                             ),
                           ),
                           Positioned(

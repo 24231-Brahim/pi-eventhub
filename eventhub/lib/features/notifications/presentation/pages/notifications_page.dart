@@ -45,22 +45,45 @@ class _NotificationsPageState extends State<NotificationsPage> {
               itemCount: state.notifications.length,
               itemBuilder: (context, index) {
                 final notif = state.notifications[index];
-                return ListTile(
-                  leading: Icon(
-                    notif.isRead
-                        ? Icons.notifications_none
-                        : Icons.notifications,
-                    color: notif.isRead ? Colors.grey : null,
+                return Dismissible(
+                  key: Key(notif.id),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (_) {
+                    context.read<NotificationBloc>().add(
+                          MarkNotificationAsReadEvent(id: notif.id),
+                        );
+                  },
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 24),
+                    color: Colors.blue,
+                    child: const Icon(Icons.check, color: Colors.white),
                   ),
-                  title: Text(
-                    notif.title,
-                    style: TextStyle(
-                      fontWeight:
-                          notif.isRead ? FontWeight.normal : FontWeight.bold,
+                  child: ListTile(
+                    leading: Icon(
+                      notif.isRead
+                          ? Icons.notifications_none
+                          : Icons.notifications,
+                      color: notif.isRead ? Colors.grey : null,
                     ),
+                    title: Text(
+                      notif.title,
+                      style: TextStyle(
+                        fontWeight: notif.isRead
+                            ? FontWeight.normal
+                            : FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(notif.body),
+                    trailing: notif.isRead ? null : const _UnreadDot(),
+                    onTap: () {
+                      if (!notif.isRead) {
+                        context.read<NotificationBloc>().add(
+                              MarkNotificationAsReadEvent(id: notif.id),
+                            );
+                      }
+                    },
                   ),
-                  subtitle: Text(notif.body),
-                  trailing: notif.isRead ? null : _UnreadDot(),
                 );
               },
             );
@@ -73,6 +96,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
 }
 
 class _UnreadDot extends StatelessWidget {
+  const _UnreadDot();
+
   @override
   Widget build(BuildContext context) {
     return Container(

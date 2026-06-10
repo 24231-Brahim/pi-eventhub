@@ -7,6 +7,7 @@ import 'package:eventhub/features/events/domain/usecases/create_event_usecase.da
 import 'package:eventhub/features/events/domain/usecases/update_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/delete_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/toggle_favorite_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/get_user_favorite_ids_usecase.dart';
 
 part 'event_event.dart';
 part 'event_state.dart';
@@ -18,6 +19,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   final UpdateEventUseCase updateEventUseCase;
   final DeleteEventUseCase deleteEventUseCase;
   final ToggleFavoriteUseCase toggleFavoriteUseCase;
+  final GetUserFavoriteIdsUseCase getUserFavoriteIdsUseCase;
 
   EventBloc({
     required this.getEventsUseCase,
@@ -26,6 +28,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     required this.updateEventUseCase,
     required this.deleteEventUseCase,
     required this.toggleFavoriteUseCase,
+    required this.getUserFavoriteIdsUseCase,
   }) : super(const EventInitial()) {
     on<GetEventsEvent>(_onGetEvents);
     on<GetEventByIdEvent>(_onGetEventById);
@@ -33,6 +36,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<UpdateEventEvent>(_onUpdateEvent);
     on<DeleteEventEvent>(_onDeleteEvent);
     on<ToggleFavoriteEvent>(_onToggleFavorite);
+    on<GetUserFavoriteIdsEvent>(_onGetUserFavoriteIds);
   }
 
   Future<void> _onGetEvents(GetEventsEvent event, Emitter<EventState> emit) async {
@@ -49,13 +53,15 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
-      (events) => emit(EventsLoaded(events: events)),
+      (events) => emit(EventsLoaded(
+        events: events,
+        hasReachedMax: events.length < event.size,
+      )),
     );
   }
 
   Future<void> _onGetEventById(
       GetEventByIdEvent event, Emitter<EventState> emit) async {
-    emit(const EventLoading());
     final result = await getEventByIdUseCase.call(event.id);
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
@@ -102,6 +108,15 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         isFavorite: isFavorited,
         eventId: event.eventId,
       )),
+    );
+  }
+
+  Future<void> _onGetUserFavoriteIds(
+      GetUserFavoriteIdsEvent event, Emitter<EventState> emit) async {
+    final result = await getUserFavoriteIdsUseCase.call();
+    result.fold(
+      (failure) => null,
+      (ids) => emit(FavoriteIdsLoadedState(ids: ids)),
     );
   }
 }

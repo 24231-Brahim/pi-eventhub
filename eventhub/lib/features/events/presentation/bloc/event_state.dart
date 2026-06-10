@@ -17,10 +17,11 @@ class EventLoading extends EventState {
 
 class EventsLoaded extends EventState {
   final List<Event> events;
-  const EventsLoaded({required this.events});
+  final bool hasReachedMax;
+  const EventsLoaded({required this.events, this.hasReachedMax = false});
 
   @override
-  List<Object?> get props => [events];
+  List<Object?> get props => [events, hasReachedMax];
 }
 
 class EventDetailLoaded extends EventState {
@@ -66,4 +67,12 @@ class FavoriteToggled extends EventState {
 
   @override
   List<Object?> get props => [isFavorite, eventId];
+}
+
+class FavoriteIdsLoadedState extends EventState {
+  final List<String> ids;
+  const FavoriteIdsLoadedState({required this.ids});
+
+  @override
+  List<Object?> get props => [ids];
 }

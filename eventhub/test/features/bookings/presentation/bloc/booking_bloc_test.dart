@@ -8,15 +8,18 @@ import '../../../../helpers/mocks.dart';
 void main() {
   late MockCreateBookingUseCase mockCreateBookingUseCase;
   late MockGetUserBookingsUseCase mockGetUserBookingsUseCase;
+  late MockCancelBookingUseCase mockCancelBookingUseCase;
 
   setUp(() {
     mockCreateBookingUseCase = MockCreateBookingUseCase();
     mockGetUserBookingsUseCase = MockGetUserBookingsUseCase();
+    mockCancelBookingUseCase = MockCancelBookingUseCase();
   });
 
   BookingBloc createBloc() => BookingBloc(
         createBookingUseCase: mockCreateBookingUseCase,
         getUserBookingsUseCase: mockGetUserBookingsUseCase,
+        cancelBookingUseCase: mockCancelBookingUseCase,
       );
 
   group('BookingBloc', () {
@@ -51,6 +54,22 @@ void main() {
         bloc.add(const GetUserBookingsEvent());
       },
       expect: () => [isA<BookingLoading>(), isA<UserBookingsLoaded>()],
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'removes booking from list when cancelBooking succeeds',
+      build: createBloc,
+      seed: () => UserBookingsLoaded(bookings: const [tBooking]),
+      act: (bloc) {
+        when(() => mockCancelBookingUseCase.call('1'))
+            .thenAnswer((_) async => const Right(null));
+        bloc.add(const CancelBookingEvent(bookingId: '1'));
+      },
+      expect: () => [isA<BookingLoading>(), isA<UserBookingsLoaded>()],
+      verify: (bloc) {
+        final state = bloc.state as UserBookingsLoaded;
+        expect(state.bookings.length, 0);
+      },
     );
   });
 }

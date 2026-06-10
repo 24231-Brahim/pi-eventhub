@@ -1,8 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:eventhub/core/errors/failures.dart';
 import 'package:eventhub/features/events/data/datasources/event_supabase_datasource.dart';
+import 'package:eventhub/features/events/data/models/event_invitation_model.dart';
 import 'package:eventhub/features/events/data/models/event_model.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
+import 'package:eventhub/features/events/domain/entities/event_invitation.dart';
 import 'package:eventhub/features/events/domain/repositories/event_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -77,6 +79,7 @@ class EventRepositoryImpl implements EventRepository {
         organizerId: userId,
         organizerName: event.organizerName,
         isFeatured: event.isFeatured,
+        isPrivate: event.isPrivate,
         rejectionReason: event.rejectionReason,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
@@ -110,6 +113,7 @@ class EventRepositoryImpl implements EventRepository {
         organizerId: event.organizerId,
         organizerName: event.organizerName,
         isFeatured: event.isFeatured,
+        isPrivate: event.isPrivate,
         rejectionReason: event.rejectionReason,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
@@ -148,6 +152,62 @@ class EventRepositoryImpl implements EventRepository {
       final userId = supabase.auth.currentUser?.id ?? '';
       final ids = await dataSource.getUserFavoriteIds(userId);
       return Right(ids);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<EventInvitation>>> getInvitations(
+      String eventId) async {
+    try {
+      final data = await dataSource.getInvitations(eventId);
+      final invitations =
+          data.map((e) => EventInvitationModel.fromJson(e)).toList();
+      return Right(invitations);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, EventInvitation>> createInvitation(
+      String eventId, String email, String name) async {
+    try {
+      final data = await dataSource.createInvitation({
+        'eventId': eventId,
+        'email': email,
+        'name': name,
+      });
+      return Right(EventInvitationModel.fromJson(data));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteInvitation(String id) async {
+    try {
+      await dataSource.deleteInvitation(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> createInvitationsBulk(
+      String eventId, List<Map<String, String>> invitations) async {
+    try {
+      final data = invitations
+          .map((inv) => {
+                'eventId': eventId,
+                'email': inv['email'] ?? '',
+                'name': inv['name'] ?? '',
+              })
+          .toList();
+      await dataSource.createInvitationsBulk(data);
+      return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

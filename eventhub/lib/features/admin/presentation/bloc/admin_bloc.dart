@@ -4,7 +4,13 @@ import 'package:eventhub/features/admin/domain/entities/dashboard_stats.dart';
 import 'package:eventhub/features/admin/domain/usecases/get_dashboard_stats_usecase.dart';
 import 'package:eventhub/features/admin/domain/usecases/get_all_events_usecase.dart';
 import 'package:eventhub/features/admin/domain/usecases/get_users_usecase.dart';
-import 'package:eventhub/features/admin/domain/repositories/admin_repository.dart';
+import 'package:eventhub/features/admin/domain/usecases/update_user_role_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/toggle_user_active_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/approve_event_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/toggle_event_featured_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/delete_admin_event_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_admin_bookings_usecase.dart';
+import 'package:eventhub/features/admin/domain/usecases/get_admin_tickets_usecase.dart';
 
 part 'admin_event.dart';
 part 'admin_state.dart';
@@ -13,13 +19,25 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   final GetDashboardStatsUseCase getDashboardStatsUseCase;
   final GetAllEventsUseCase getAllEventsUseCase;
   final GetUsersUseCase getUsersUseCase;
-  final AdminRepository adminRepository;
+  final UpdateUserRoleUseCase updateUserRoleUseCase;
+  final ToggleUserActiveUseCase toggleUserActiveUseCase;
+  final ApproveEventUseCase approveEventUseCase;
+  final ToggleEventFeaturedUseCase toggleEventFeaturedUseCase;
+  final DeleteAdminEventUseCase deleteAdminEventUseCase;
+  final GetAdminBookingsUseCase getAdminBookingsUseCase;
+  final GetAdminTicketsUseCase getAdminTicketsUseCase;
 
   AdminBloc({
     required this.getDashboardStatsUseCase,
     required this.getAllEventsUseCase,
     required this.getUsersUseCase,
-    required this.adminRepository,
+    required this.updateUserRoleUseCase,
+    required this.toggleUserActiveUseCase,
+    required this.approveEventUseCase,
+    required this.toggleEventFeaturedUseCase,
+    required this.deleteAdminEventUseCase,
+    required this.getAdminBookingsUseCase,
+    required this.getAdminTicketsUseCase,
   }) : super(const AdminInitial()) {
     on<GetDashboardStatsEvent>(_onGetDashboardStats);
     on<GetAdminUsersEvent>(_onGetUsers);
@@ -56,7 +74,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   Future<void> _onUpdateUserRole(
       UpdateUserRoleEvent event, Emitter<AdminState> emit) async {
     final result =
-        await adminRepository.updateUserRole(event.userId, event.newRole);
+        await updateUserRoleUseCase.call(event.userId, event.newRole);
     result.fold(
       (failure) => emit(AdminError(message: failure.message)),
       (_) => add(const GetAdminUsersEvent()),
@@ -65,7 +83,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
 
   Future<void> _onToggleUserActive(
       ToggleUserActiveEvent event, Emitter<AdminState> emit) async {
-    final result = await adminRepository.toggleUserActive(event.userId);
+    final result = await toggleUserActiveUseCase.call(event.userId);
     result.fold(
       (failure) => emit(AdminError(message: failure.message)),
       (_) => add(const GetAdminUsersEvent()),
@@ -84,7 +102,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
 
   Future<void> _onApproveEvent(
       ApproveEventEvent event, Emitter<AdminState> emit) async {
-    final result = await adminRepository.approveEvent(
+    final result = await approveEventUseCase.call(
       event.eventId,
       approved: event.approved,
       reason: event.reason,
@@ -98,7 +116,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   Future<void> _onToggleEventFeatured(
       ToggleEventFeaturedEvent event, Emitter<AdminState> emit) async {
     final result =
-        await adminRepository.toggleEventFeatured(event.eventId);
+        await toggleEventFeaturedUseCase.call(event.eventId);
     result.fold(
       (failure) => emit(AdminError(message: failure.message)),
       (_) => add(const GetAdminEventsEvent()),
@@ -107,7 +125,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
 
   Future<void> _onDeleteEvent(
       DeleteAdminEventEvent event, Emitter<AdminState> emit) async {
-    final result = await adminRepository.deleteEvent(event.eventId);
+    final result = await deleteAdminEventUseCase.call(event.eventId);
     result.fold(
       (failure) => emit(AdminError(message: failure.message)),
       (_) => add(const GetAdminEventsEvent()),
@@ -117,7 +135,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   Future<void> _onGetAllBookings(
       GetAdminBookingsEvent event, Emitter<AdminState> emit) async {
     emit(const AdminLoading());
-    final result = await adminRepository.getAllBookings();
+    final result = await getAdminBookingsUseCase.call();
     result.fold(
       (failure) => emit(AdminError(message: failure.message)),
       (bookings) => emit(AdminBookingsLoaded(bookings: bookings)),
@@ -127,7 +145,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   Future<void> _onGetAllTickets(
       GetAdminTicketsEvent event, Emitter<AdminState> emit) async {
     emit(const AdminLoading());
-    final result = await adminRepository.getAllTickets();
+    final result = await getAdminTicketsUseCase.call();
     result.fold(
       (failure) => emit(AdminError(message: failure.message)),
       (tickets) => emit(AdminTicketsLoaded(tickets: tickets)),
