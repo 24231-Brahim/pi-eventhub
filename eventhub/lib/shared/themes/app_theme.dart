@@ -58,7 +58,7 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    return ThemeData(
+    return     ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
@@ -66,6 +66,7 @@ class AppTheme {
         brightness: Brightness.dark,
       ),
       scaffoldBackgroundColor: AppColors.surfaceDark,
+      cardColor: AppColors.surfaceCard,
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
