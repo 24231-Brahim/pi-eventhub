@@ -27,6 +27,7 @@ import 'package:eventhub/features/bookings/data/repositories/booking_repository_
 import 'package:eventhub/features/bookings/domain/repositories/booking_repository.dart';
 import 'package:eventhub/features/bookings/domain/usecases/create_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/get_user_bookings_usecase.dart';
+import 'package:eventhub/features/bookings/domain/usecases/confirm_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/cancel_booking_usecase.dart';
 import 'package:eventhub/features/bookings/presentation/bloc/booking_bloc.dart';
 import 'package:eventhub/features/tickets/data/datasources/ticket_supabase_datasource.dart';
@@ -155,10 +156,12 @@ void _initBookings() {
   );
   sl.registerLazySingleton(() => CreateBookingUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetUserBookingsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ConfirmBookingUseCase(repository: sl()));
   sl.registerLazySingleton(() => CancelBookingUseCase(repository: sl()));
   sl.registerFactory(() => BookingBloc(
         createBookingUseCase: sl(),
         getUserBookingsUseCase: sl(),
+        confirmBookingUseCase: sl(),
         cancelBookingUseCase: sl(),
       ));
 }

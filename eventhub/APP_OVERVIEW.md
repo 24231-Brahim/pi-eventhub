@@ -45,7 +45,9 @@ EventHub is a **Flutter mobile app** for event management with Supabase backend.
 |---|---|
 | **Create Booking** | Select quantity → creates pending booking |
 | **My Bookings** | List with event details, status (pending/confirmed/cancelled/refunded) |
-| **Payment Integration** | Triggers payment intent creation |
+| **Confirm Booking** | Free events: direct confirm → ticket → QR code. Paid events: payment → confirm → ticket → QR code |
+| **Cancel Booking** | Cancel existing bookings |
+| **Payment Integration** | Triggers payment intent creation for paid events |
 
 ---
 
@@ -54,8 +56,8 @@ EventHub is a **Flutter mobile app** for event management with Supabase backend.
 |---|---|
 | **My Tickets** | List linked to bookings |
 | **QR Code Display** | Unique QR per ticket (qr_flutter) |
-| **QR Scanner** | Organizer scans to validate (mobile_scanner) |
-| **Validation** | Marks ticket as `used` / `active` / `cancelled` |
+| **QR Scanner** | Organizer-only validation (mobile_scanner), distinct dialogs per status |
+| **Validation** | Marks ticket as `used` / `active` / `cancelled`, organizer ownership check |
 
 ---
 
@@ -120,7 +122,7 @@ EventHub is a **Flutter mobile app** for event management with Supabase backend.
 / (EventList) → /event-details/:id → /booking/:eventId → /qr-code
 /tickets → /qr-scanner
 /notifications
-/profile → /edit-profile
+/profile → /edit-profile → /my-bookings
 /organizer-dashboard → /manage-events → /create-event|/edit-event
 /settings
 /admin → /admin/users|/admin/events|/admin/bookings|/admin/tickets|/admin/analytics

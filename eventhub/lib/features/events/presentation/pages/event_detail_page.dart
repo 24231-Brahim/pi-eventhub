@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
@@ -30,6 +32,27 @@ class _EventDetailPageState extends State<EventDetailPage> {
   void _toggleFavorite() {
     context.read<EventBloc>().add(ToggleFavoriteEvent(eventId: _event.id));
     setState(() => _isFavorite = !_isFavorite);
+  }
+
+  bool _canBook(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! Authenticated) return false;
+    if (_event.status != EventStatus.published) return false;
+    if (_event.isPast) return false;
+    if (_event.isFull) return false;
+    if (_event.organizerId == authState.user.id) return false;
+    return true;
+  }
+
+  Widget? _buildBookButton(BuildContext context) {
+    if (!_canBook(context)) return null;
+    final l10n = AppLocalizations.of(context)!;
+    return FloatingActionButton.extended(
+      onPressed: () => context.push('/booking', extra: _event.id),
+      icon: const Icon(Icons.confirmation_number),
+      label: Text(_event.isFree ? l10n.free : '${_event.price.toStringAsFixed(2)} TND'),
+      heroTag: 'book_event',
+    );
   }
 
   @override
@@ -66,6 +89,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
           ),
         ],
       ),
+      floatingActionButton: _buildBookButton(context),
       body: BlocListener<EventBloc, EventState>(
         listenWhen: (_, state) =>
             state is EventDetailLoaded ||

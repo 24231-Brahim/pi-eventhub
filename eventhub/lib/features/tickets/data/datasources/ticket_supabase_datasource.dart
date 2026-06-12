@@ -1,8 +1,16 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+class TicketValidationException implements Exception {
+  final String message;
+  TicketValidationException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 abstract class TicketSupabaseDataSource {
   Future<List<Map<String, dynamic>>> getUserTickets(String userId);
-  Future<Map<String, dynamic>> validateTicket(String qrData);
+  Future<Map<String, dynamic>> validateTicket(String qrData, String currentUserId);
   Future<Map<String, dynamic>> createTicket({
     required String eventId,
     required String userId,
@@ -30,12 +38,25 @@ class TicketSupabaseDataSourceImpl implements TicketSupabaseDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> validateTicket(String qrData) async {
+  Future<Map<String, dynamic>> validateTicket(String qrData, String currentUserId) async {
     final ticket = await supabase
         .from('tickets')
         .select()
         .eq('qr_code', qrData)
         .single();
+
+    final event = await supabase
+        .from('events')
+        .select('organizer_id')
+        .eq('id', ticket['event_id'])
+        .single()
+        .timeout(const Duration(seconds: 5));
+
+    if (event['organizer_id'] != currentUserId) {
+      throw TicketValidationException(
+        'Only the event organizer can validate tickets.',
+      );
+    }
 
     if (ticket['status'] == 'active') {
       final updated = await supabase

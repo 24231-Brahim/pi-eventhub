@@ -171,10 +171,10 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Events: anyone can read published, organizer can write, invited users can read private
-CREATE POLICY "anyone can read published events"
+CREATE POLICY "anyone can read published public events"
     ON public.events FOR SELECT
     USING (
-        status = 'published' 
+        (status = 'published' AND is_private = false)
         OR auth.uid() = organizer_id
         OR (is_private = true AND public.is_invited_to_event(id))
     );
@@ -360,6 +360,11 @@ CREATE POLICY "organizers can read bookings for own events"
 CREATE POLICY "anyone can read tickets by qr_code"
     ON public.tickets FOR SELECT
     USING (true);
+
+-- ===== Organizer RLS: organizers can update tickets for their own events =====
+CREATE POLICY "organizers can update tickets for own events"
+    ON public.tickets FOR UPDATE
+    USING (public.is_organizer_of_event(event_id));
 
 -- ===== Admin can insert bookings for users =====
 CREATE POLICY "admins can insert bookings"

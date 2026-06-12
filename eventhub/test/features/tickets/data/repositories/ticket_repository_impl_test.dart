@@ -67,7 +67,7 @@ void main() {
 
     group('validateTicket', () {
       test('should return ticket on successful validation', () async {
-        when(() => mockDataSource.validateTicket('qr-test-123'))
+        when(() => mockDataSource.validateTicket('qr-test-123', any()))
             .thenAnswer((_) async => {
                   'id': '1',
                   'eventId': '1',
@@ -91,7 +91,7 @@ void main() {
       });
 
       test('should return ServerFailure on exception', () async {
-        when(() => mockDataSource.validateTicket('qr-test-123'))
+        when(() => mockDataSource.validateTicket('qr-test-123', any()))
             .thenThrow(Exception('Validation error'));
 
         final result = await repository.validateTicket('qr-test-123');

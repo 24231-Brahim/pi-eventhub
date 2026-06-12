@@ -8,17 +8,20 @@ import '../../../../helpers/mocks.dart';
 void main() {
   late MockCreateBookingUseCase mockCreateBookingUseCase;
   late MockGetUserBookingsUseCase mockGetUserBookingsUseCase;
+  late MockConfirmBookingUseCase mockConfirmBookingUseCase;
   late MockCancelBookingUseCase mockCancelBookingUseCase;
 
   setUp(() {
     mockCreateBookingUseCase = MockCreateBookingUseCase();
     mockGetUserBookingsUseCase = MockGetUserBookingsUseCase();
+    mockConfirmBookingUseCase = MockConfirmBookingUseCase();
     mockCancelBookingUseCase = MockCancelBookingUseCase();
   });
 
   BookingBloc createBloc() => BookingBloc(
         createBookingUseCase: mockCreateBookingUseCase,
         getUserBookingsUseCase: mockGetUserBookingsUseCase,
+        confirmBookingUseCase: mockConfirmBookingUseCase,
         cancelBookingUseCase: mockCancelBookingUseCase,
       );
 

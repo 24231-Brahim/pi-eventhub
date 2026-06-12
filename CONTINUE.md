@@ -1,7 +1,7 @@
 # CONTINUE — EventHub
 
 > À lire avant de reprendre le développement.
-> Date : 10/06/2026
+> Date : 12/06/2026
 
 ---
 
@@ -25,7 +25,8 @@ EventHub est une application Flutter de gestion d'événements avec Supabase en 
 * **28 nouveaux tests** écrits (Tickets: 10, Payments: 8, Bookings: 7, Auth: 2, Core: 1).
 * Session (10/06/2026 - suite) : **5 correctifs haute priorité** — `AuthBloc._onCheckAuth` utilise `GetCurrentUserUseCase` (plus d'appel Supabase direct), `EventDetailPage._checkFavorite` passe par le BLoC, 7 use cases Admin créés et câblés, `TokenManager`/`NetworkInfo` retirés du DI, `GetUserFavoriteIdsUseCase` injecté dans `EventBloc`.
 * Session (10/06/2026 - prioritaire) : **7 correctifs** — Dead code `FavoriteIdsLoaded` supprimé, pagination `hasReachedMax` dans `EventsLoaded`, champ `endDate` dans `CreateEventPage`, upload image réel (Supabase Storage) dans `CreateEventPage`, upload photo + pré-remplissage dans `EditProfilePage`, 12 nouveaux tests (Profile bloc: 4, Notifications bloc: 3, Events bloc: 5), **139 tests total** (+14).
-* Session (10/06/2026 - améliorations) : **Notifications** — `markAsRead()` dans repository/datasource/bloc, `onTap` handler, swipe-to-dismiss. **Bookings** — `cancelBooking()` complète (repository/datasource/use case/bloc), `MyBookingsPage` créée dans `bookings/`, route `/my-bookings`. **Events filtres** — les 8 catégories (via `EventCategory.values`). **QR scanner** — débounce 2s + overlay chargement. **l10n** — 5 nouvelles clés de validation (`titleRequired`, `descriptionRequired`, `locationRequired`, `nameRequired`, `required`) dans les 3 langues, remplacement de toutes les chaînes en dur. **139 tests** (+2 notifications +2 bookings).
+* Session (10/06/2026 - améliorations) : **Notifications** — `markAsRead()` dans repository/datasource/bloc, `onTap` handler, swipe-to-dismiss. **Bookings** — `cancelBooking()` complète (repository/datasource/use case/bloc), `MyBookingsPage` créée dans `bookings/`, route `/my-bookings`. **Events filtres** — les 8 catégories (via `EventCategory.values`). **QR scanner** — débounce 2s + overlay chargement. **l10n** — 5 nouvelles clés de validation (`titleRequired`, `descriptionRequired`, `locationRequired`, `nameRequired`, `required`) dans les 3 langues, remplacement de toutes les chaînes en dur.
+* Session (12/06/2026) : **confirmBooking** — nouveau `ConfirmBookingUseCase`, `ConfirmBookingEvent`, `BookingConfirmed` state, câblé dans DI/BLoC/datasource/repository. **BookingPage** — validations complètes (past/full/unpublished/own event), flux free event (booking→confirm→ticket→QR code sans passer par Stripe), navigation vers `/qr-code` avec ticket créé. **EventDetailPage** — FAB bouton réservation avec `_canBook()` guard. **QR Scanner** — UX enrichie (dialogues distincts pour used/cancelled/active/invalid), validation organisateur-only via `TicketValidationException`. **Payments** — bug `confirmPayment` filtre par `id` au lieu de `booking_id` corrigé. **Supabase RLS** — politique tickets update pour organisateurs, filtre `is_private = false` sur lecture événements publics.
 
 ### 2. Ce qui manque (par feature)
 
@@ -33,7 +34,7 @@ EventHub est une application Flutter de gestion d'événements avec Supabase en 
 |---------|----------------|---------------|
 | **Auth** | Login, Register, Forgot Password, Logout, 25 tests | Navigation post-auth, écoute `onAuthStateChange`, `ChangePasswordUseCase` |
 | **Events** | CRUD complet, filtres, favoris, dashboard organisateur, visibilité privée/publique, invitations, import CSV | — |
-| **Bookings** | Création, historique, 3 tests | `cancelBooking()`, page UI dans `bookings/` (actuellement dans `payments/`) |
+| **Bookings** | Création, historique, confirm, cancel, `MyBookingsPage`, 3 tests | — |
 | **Tickets** | QR display, scanner, validation, création après booking | ✅ Création de tickets après réservation/paiement complète. 10 tests. |
 | **Payments** | Structure préparée | ⚠️ **Pas de vrai Stripe**. Paiements simulés (insertion DB directe). 8 tests. |
 | **Notifications** | Liste + lecture | `markAsRead()`, `onTap` handler, swipe-to-dismiss. 0 test. |

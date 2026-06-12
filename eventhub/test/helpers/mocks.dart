@@ -26,6 +26,7 @@ import 'package:eventhub/features/bookings/domain/entities/booking.dart';
 import 'package:eventhub/features/bookings/domain/repositories/booking_repository.dart';
 import 'package:eventhub/features/bookings/domain/usecases/create_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/get_user_bookings_usecase.dart';
+import 'package:eventhub/features/bookings/domain/usecases/confirm_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/cancel_booking_usecase.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
@@ -75,6 +76,7 @@ class MockGetUserFavoriteIdsUseCase extends Mock implements GetUserFavoriteIdsUs
 class MockBookingRepository extends Mock implements BookingRepository {}
 class MockCreateBookingUseCase extends Mock implements CreateBookingUseCase {}
 class MockGetUserBookingsUseCase extends Mock implements GetUserBookingsUseCase {}
+class MockConfirmBookingUseCase extends Mock implements ConfirmBookingUseCase {}
 class MockCancelBookingUseCase extends Mock implements CancelBookingUseCase {}
 
 class MockAuthSupabaseDataSource extends Mock implements AuthSupabaseDataSource {}

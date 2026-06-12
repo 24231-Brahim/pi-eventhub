@@ -30,8 +30,11 @@ class TicketRepositoryImpl implements TicketRepository {
   @override
   Future<Either<Failure, Ticket>> validateTicket(String qrData) async {
     try {
-      final data = await dataSource.validateTicket(qrData);
+      final userId = supabase.auth.currentUser?.id ?? '';
+      final data = await dataSource.validateTicket(qrData, userId);
       return Right(TicketModel.fromJson(data));
+    } on TicketValidationException catch (e) {
+      return Left(ServerFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

@@ -380,6 +380,11 @@ classDiagram
         cancelled, refunded
     }
 
+    class TicketValidationException {
+        +String message
+        <<exception>>
+    }
+
     class Ticket {
         +String id
         +String eventId
@@ -465,14 +470,16 @@ classDiagram
 
     class BookingRepository {
         <<abstract>>
-        +createBooking(Booking) Future~Either~Failure, Booking~~
-        +getUserBookings(String) Future~Either~Failure, List~Booking~~
+        +createBooking(String, int, double) Future~Either~Failure, Booking~~
+        +getUserBookings() Future~Either~Failure, List~Booking~~
+        +confirmBooking(String) Future~Either~Failure, void~~
+        +cancelBooking(String) Future~Either~Failure, void~~
     }
 
     class TicketRepository {
         <<abstract>>
         +getUserTickets(String) Future~Either~Failure, List~Ticket~~
-        +validateTicket(String) Future~Either~Failure, Ticket~~
+        +validateTicket(String, String) Future~Either~Failure, Ticket~~
     }
 
     class PaymentRepository {
@@ -524,6 +531,8 @@ classDiagram
     class BookingBloc {
         +CreateBookingUseCase createBookingUseCase
         +GetUserBookingsUseCase getUserBookingsUseCase
+        +ConfirmBookingUseCase confirmBookingUseCase
+        +CancelBookingUseCase cancelBookingUseCase
     }
 
     class TicketBloc {
@@ -594,6 +603,8 @@ classDiagram
     EventBloc --> DeleteEventUseCase
     BookingBloc --> CreateBookingUseCase
     BookingBloc --> GetUserBookingsUseCase
+    BookingBloc --> ConfirmBookingUseCase
+    BookingBloc --> CancelBookingUseCase
     TicketBloc --> ValidateTicketUseCase
     TicketBloc --> GetUserTicketsUseCase
     PaymentBloc --> CreatePaymentIntentUseCase
@@ -778,6 +789,7 @@ graph TD
     TICK -->|"voir QR"| QR["/qr-code<br/>QrCodePage"]
     TICK -->|"scanner"| SCAN["/qr-scanner<br/>QrScannerPage"]
     PROF -->|"modifier"| EDIT["/edit-profile<br/>EditProfilePage"]
+    PROF -->|"réservations"| MYB["/my-bookings<br/>MyBookingsPage"]
     PROF -->|"paramètres"| SETT["/settings<br/>SettingsPage"]
 
     HOME -->|"organizer"| DASH["/organizer-dashboard<br/>OrganizerDashboardPage"]
@@ -862,20 +874,34 @@ sequenceDiagram
     participant DB as PostgreSQL
 
     Org->>SCAN: Scanne QR code
-    SCAN->>TBLOC: ValidateTicketEvent(qrCode)
-    TBLOC->>UC: call(qrCode)
-    UC->>REPO: validateTicket(qrCode)
+    SCAN->>TBLOC: ValidateTicketEvent(qrData)
+    TBLOC->>UC: call(qrData)
+    UC->>REPO: validateTicket(qrData, currentUserId)
     REPO->>API: supabase.from('tickets').select().eq('qr_code', qr)
     API->>DB: SELECT * FROM tickets WHERE qr_code = ?
-    DB-->>API: Ticket (active)
-    REPO->>API: supabase.from('tickets').update({'status': 'used'})
-    API->>DB: UPDATE tickets SET status = 'used'
-    DB-->>API: done
-    API-->>REPO: Ticket mis à jour
-    REPO-->>UC: Right(Ticket)
-    UC-->>TBLOC: Right(Ticket)
-    TBLOC->>TBLOC: emit(TicketValidated)
-    SCAN->>SCAN: Affiche "✅ Billet valide"
+    DB-->>API: Ticket
+    REPO->>API: supabase.from('events').select('organizer_id').eq('id', event_id)
+    API->>DB: SELECT organizer_id FROM events WHERE id = ?
+    DB-->>API: organizer_id
+    alt organizer_id != currentUserId
+        REPO-->>UC: Left(TicketValidationException)
+        UC-->>TBLOC: Left(ServerFailure)
+        TBLOC->>TBLOC: emit(TicketError)
+        SCAN->>SCAN: Affiche "❌ Only organizer can validate"
+    else status == 'active'
+        REPO->>API: supabase.from('tickets').update({'status': 'used'})
+        API->>DB: UPDATE tickets SET status = 'used'
+        DB-->>API: Ticket mis à jour
+        API-->>REPO: Ticket mis à jour
+        REPO-->>UC: Right(Ticket)
+        UC-->>TBLOC: Right(Ticket)
+        TBLOC->>TBLOC: emit(TicketValidated)
+        SCAN->>SCAN: Affiche "✅ Billet valide"
+    else status == 'used'
+        SCAN->>SCAN: Affiche "⚠️ Déjà utilisé"
+    else status == 'cancelled'
+        SCAN->>SCAN: Affiche "❌ Annulé"
+    end
 ```
 
 ---
@@ -1195,10 +1221,10 @@ features/{feature}/
 | 🟡 Events | UseCase | 7 use cases non testés | **0 test** |
 | 🟡 Bookings | UseCase | 2 use cases non testés | **0 test** |
 | 🟡 Auth | Pages | Navigation post-auth manquante | — |
-| ❌ Payments | — | Feature entière | **0 test** |
-| ❌ Notifications | — | Feature entière | **0 test** |
-| ❌ Profile | — | Feature entière | **0 test** |
-| ❌ Tickets | — | Feature entière | **0 test** |
+| ✅ Tickets | Repository + Bloc + Use Cases | `ticket_repository_impl_test.dart`, `ticket_bloc_test.dart`, etc. | 10 |
+| ✅ Payments | Repository + Bloc + Use Cases | `payment_repository_impl_test.dart`, `payment_bloc_test.dart`, etc. | 8 |
+| ✅ Profile | Bloc | `profile_bloc_test.dart` | 4 |
+| ✅ Notifications | Bloc | `notification_bloc_test.dart` | 3 |
 | ❌ Events | Pages | Pages événements non testées | **0 test** |
 | ❌ Admin | Pages | Pages admin non testées | **0 test** |
 
@@ -1276,15 +1302,15 @@ static const Color surfaceDark  = Color(0xFF121212);
 | 1 | **Spring Boot supprimé** | Le backend Spring Boot a été retiré du projet. L'architecture est désormais 100% Flutter + Supabase. |
 | 2 | **QR Codes** | `qr_flutter` pour l'affichage, `mobile_scanner` (v6.0.11) pour le scan. Les QR codes sont stockés en base Supabase. |
 | 3 | **Paiements Stripe simulés** | Aucune intégration réelle du SDK Stripe. `createPaymentIntent()` insère juste une ligne en DB avec status `pending`. `confirmPayment()` met à jour le statut en DB. Pas de vrai PaymentIntent Stripe. |
-| 4 | **Tests** | ~97 tests. Bonne couverture pour Core (27) et Auth (25). Admin (10), Events (12), Bookings (3). **0 test** pour Payments, Notifications, Profile, Tickets. |
+| 4 | **Tests** | ~116 tests. Bonne couverture pour Core (27), Auth (25), Tickets (10), Admin (10), Events (17). Payments (8), Bookings (3), Profile (4), Notifications (3). |
 | 5 | **CI/CD** | Pipeline GitHub Actions (`.github/workflows/ci.yml`) : Flutter 3.29.0 stable, `flutter analyze` + `flutter test`. Pas de cache SDK, pas de rapport de couverture, pas de matrix strategy (uniquement ubuntu-latest). |
 | 6 | **Thème/Langue** | Persistés localement via `SharedPreferences`. Pas de synchro backend. |
 | 7 | **Dashboard organisateur** | Statistiques calculées dynamiquement depuis les événements chargés côté client. |
 | 8 | **Admin feature** | Panneau d'administration complet avec 6 pages. 7 méthodes du repository admin appelées directement depuis le BLoC (sans use case). |
 | 9 | **Favoris** | Table `favorites` dans Supabase avec RLS. Toggle favori implémenté mais erreur silencieuse (failure → `null`, pas d'état d'erreur émis). |
-| 10 | **Flux réservation → ticket cassé** | Aucune création de ticket après réservation/paiement. Pas de `CreateTicketUseCase`, pas de trigger DB. L'utilisateur verra une page tickets vide. |
-| 11 | **Bugs connus** | Double `@override` dans `forgot_password_page.dart:33` (erreur de compilation). Paiements simulés. Validation email faible (`contains('@')`). |
-| 12 | **Dead code** | `TokenManager` et `NetworkInfo` enregistrés dans DI mais jamais injectés dans les repositories. `GetUserFavoriteIdsUseCase` enregistré mais pas passé à `EventBloc`. |
-| 13 | **Contournements architecture** | `AuthBloc._onCheckAuth` appelle Supabase directement (contourne le repository). `EventDetailPage` appelle Supabase directement pour les favoris (contourne le BLoC). |
+| 10 | **Flux réservation → ticket** | Création automatique de ticket après booking (free) ou après paiement (paid). Navigation vers `/qr-code`. Validation organisateur-only pour le scan. |
+| 11 | **Bugs connus** | Paiements simulés (pas de vrai Stripe). Validation email faible (`contains('@')`). 
+| 12 | **Dead code** | ✅ `TokenManager`, `NetworkInfo` retirés du DI. `GetUserFavoriteIdsUseCase` injecté dans `EventBloc`. |
+| 13 | **Contournements architecture** | ✅ `AuthBloc._onCheckAuth` utilise `GetCurrentUserUseCase`. ✅ `EventDetailPage` passe par le BLoC pour les favoris. ✅ `confirmPayment` filtre par `id` (plus par `booking_id`). |
 | 14 | **Localisation** | Messages de validation dans les pages auth en dur en anglais (pas via l10n). 45+ clés par langue (EN/FR/AR). |
 | 15 | **ApiConstants obsolète** | La classe `ApiConstants` dans le diagramme UML (section 5) est un vestige de l'ancienne architecture REST. Le projet utilise désormais le SDK Supabase direct. Les constantes réelles sont dans `app_constants.dart` et `supabase_constants.dart`. |

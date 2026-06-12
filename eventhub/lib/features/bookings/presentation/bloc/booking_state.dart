@@ -23,6 +23,14 @@ class BookingCreated extends BookingState {
   List<Object?> get props => [booking];
 }
 
+class BookingConfirmed extends BookingState {
+  final Booking booking;
+  const BookingConfirmed({required this.booking});
+
+  @override
+  List<Object?> get props => [booking];
+}
+
 class UserBookingsLoaded extends BookingState {
   final List<Booking> bookings;
   const UserBookingsLoaded({required this.bookings});

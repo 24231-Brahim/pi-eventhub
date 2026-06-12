@@ -1,7 +1,7 @@
 # EventHub — État d'avancement du projet
 
 > Projet Flutter (Clean Architecture + BLoC) + Supabase (Backend as a Service)
-> Date : 10/06/2026
+> Date : 12/06/2026
 
 ---
 
@@ -64,6 +64,7 @@
 - ~~`manage_events_page.dart` → navigation mixte (`go_router` + `Navigator.pushNamed`)~~ ✅ **Corrigé**
 - `create_event_page.dart` → `initialValue` déprécié sur `DropdownButtonFormField`
 - ~~Pas de champ `endDate` dans le formulaire de création~~ ✅ **Corrigé**
+- ~~`EventDetailPage` → pas de bouton de réservation (FAB manquant)~~ ✅ **Corrigé** (FAB avec validation canBook + redirect /booking)
 
 ### ❌ Manquant
 - ~~`GetUserFavoriteIdsEvent` / `FavoriteIdsLoaded` → définis dans `event_event.dart` mais **aucun handler** dans le BLoC~~ ✅ **Corrigé** (dead code supprimé)
@@ -88,14 +89,13 @@
 ## 3. BOOKINGS (Réservations)
 
 ### ✅ Terminé
-- **Domain :** `Booking` entity, `BookingRepository` interface, `CreateBookingUseCase`, `GetUserBookingsUseCase`
-- **Data :** `BookingModel`, `BookingSupabaseDataSourceImpl`, `BookingRepositoryImpl`
-- **Presentation :** BLoC complet (2 events gérés)
+- **Domain :** `Booking` entity, `BookingRepository` interface, `CreateBookingUseCase`, `GetUserBookingsUseCase`, `ConfirmBookingUseCase`, `CancelBookingUseCase`
+- **Data :** `BookingModel`, `BookingSupabaseDataSourceImpl` (CRUD + confirm + cancel), `BookingRepositoryImpl`
+- **Presentation :** BLoC complet (4 events gérés : create, get, confirm, cancel), `MyBookingsPage`
 - **Tests :** 3 tests (bloc)
 
 ### ❌ Manquant
-- `cancelBooking()` / `refundBooking()` / `getBookingById()` → pas dans le repository
-- Page UI des réservations dans le dossier `bookings/` → **absente** (le fichier `booking_page.dart` est dans `payments/`)
+- `refundBooking()` / `getBookingById()` → pas dans le repository
 - Tests use cases individuels (2 use cases non testés)
 - Tests repository
 
@@ -112,9 +112,10 @@
 - **Tests :** 10 tests (bloc, use cases, repository)
 
 ### 🟡 Partiel / Problèmes
-- `QrScannerPage` → `MobileScanner` pas de débounce → scans multiples possibles
-- `QrScannerPage` → pas d'indicateur de chargement (`TicketLoading` émis mais pas affiché)
-- `validateTicket()` → retourne succès même pour tickets déjà `used` ou `cancelled`
+- ~~`QrScannerPage` → `MobileScanner` pas de débounce → scans multiples possibles~~ ✅ **Corrigé** (délai 2s)
+- ~~`QrScannerPage` → pas d'indicateur de chargement (`TicketLoading` émis mais pas affiché)~~ ✅ **Corrigé** (overlay chargement)
+- ~~`validateTicket()` → retourne succès même pour tickets déjà `used` ou `cancelled`~~ ✅ **Corrigé** (gère used/cancelled selon status)
+- ~~`validateTicket()` → n'importe qui peut scanner (pas de vérification organisateur)~~ ✅ **Corrigé** (vérifie `organizer_id`)
 
 ---
 
@@ -131,7 +132,13 @@
 - `createPaymentIntent()` → insère juste une ligne en DB avec status `'pending'` (pas de vrai PaymentIntent)
 - `confirmPayment()` → met juste à jour le status en DB, stocke l'ID comme `stripe_payment_intent_id`
 - **`clientSecret` (payment_bloc.dart ligne 30) est en fait un UUID de base de données**, pas un vrai client secret Stripe
-- `confirmPayment` filtre par `booking_id` au lieu de `id` → risque de mise à jour multiple
+- ~~`confirmPayment` filtre par `booking_id` au lieu de `id` → risque de mise à jour multiple~~ ✅ **Corrigé**
+
+### ✅ Amélioré
+- **Flux free / paid** : Si `total <= 0`, le booking est confirmé directement + ticket créé (pas de passage par Stripe)
+- **Validations booking** : événement passé, complet, non publié, propre événement → bloqués avec SnackBar
+- **Navigation post-booking** : redirection vers `/qr-code` avec le ticket créé
+- **Bug `confirmPayment`** : filtre par `id` au lieu de `booking_id` ✅
 
 ### ❌ Manquant
 - `getUserPayments` → pas de méthode dans le repository
@@ -253,11 +260,14 @@
 ## 13. BASE DE DONNÉES (Supabase)
 
 ### ✅ Terminé
-- `supabase_schema.sql` complet : tables `profiles`, `events`, `bookings`, `tickets`, `payments`, `notifications`, `favorites`
+- `supabase_schema.sql` complet : tables `profiles`, `events`, `bookings`, `tickets`, `payments`, `notifications`, `favorites`, `event_invitations`
 - Triggers : auto-création de profil à l'inscription
 - Politiques RLS complètes pour toutes les tables
 - Politiques admin avec fonction `is_admin()`
 - Politiques organisateur pour voir les réservations de ses événements
+- Politique `organizers can update tickets for own events` (validation organisateur-only)
+- Politique `anyone can read published public events` filtrée par `is_private = false`
+- Fonctions SECURITY DEFINER : `is_invited_to_event()`, `is_organizer_of_event()`
 
 ### ❌ Manquant
 - Trigger DB pour auto-création des tickets après confirmation de réservation
@@ -285,14 +295,13 @@
 | Auth | 25 tests (use cases, repository, bloc, pages, intégration) | ✅ Bon |
 | Shared Widgets | 9 tests | ✅ Complet |
 | Admin | 10 tests (bloc uniquement) | 🟡 Partiel |
-| Events | 12 tests (bloc + event_card) | 🟡 Partiel |
+| Events | 17 tests (bloc + event_card + update/toggle/pagination) | ✅ Renforcé |
 | Bookings | 3 tests (bloc uniquement) | 🟡 Minimal |
 | Payments | 8 tests (bloc, use cases, repository) | ✅ Nouveau |
 | Profile | 4 tests (bloc) | 🟡 Nouveau |
 | Notifications | 3 tests (bloc) | 🟡 Nouveau |
 | Tickets | 10 tests (bloc, use cases, repository) | ✅ Nouveau |
-| Events | 17 tests (bloc + event_card + update/toggle/pagination) | ✅ Renforcé |
-| **Total** | **~137 tests** | |
+| **Total** | **~116 tests** | |
 
 ### ❌ Gaps critiques dans les tests
 - **Profile** (4 tests) ✅ nouveau / **Notifications** (3 tests) ✅ nouveau
@@ -310,6 +319,9 @@
 |---|-----|---------|--------|
 | 1 | Double `@override` → erreur de compilation | `lib/features/auth/presentation/pages/forgot_password_page.dart:33` | ✅ **Corrigé** |
 | 2 | Flux réservation → ticket cassé (aucune création de ticket après booking) | Cross-feature : bookings → tickets | ✅ **Corrigé** |
+| 3 | `confirmPayment` filtre par `booking_id` au lieu de `id` → risque de mise à jour multiple | `lib/features/payments/data/datasources/payment_supabase_datasource.dart:33` | ✅ **Corrigé** |
+| 4 | `validateTicket()` → pas de vérification organisateur (n'importe qui pouvait scanner) | `lib/features/tickets/data/datasources/ticket_supabase_datasource.dart` | ✅ **Corrigé** |
+| 5 | Événements privés visibles par tous (RLS manquait `is_private = false`) | `supabase_schema.sql` | ✅ **Corrigé** |
 
 ---
 
@@ -324,6 +336,7 @@
 | 5 | `GetUserFavoriteIdsUseCase` enregistré dans DI mais pas utilisé par `EventBloc` | `lib/core/di/injection_container.dart:132` | ✅ **Corrigé** |
 | 6 | Paiements simulés (pas de vrai Stripe) mais nommés comme si Stripe était intégré | `lib/features/payments/` | 🟡 Non corrigé |
 | 7 | `BookingPage` située dans `payments/` au lieu de `bookings/` | `lib/features/payments/presentation/pages/booking_page.dart` | 🟡 Non corrigé |
+| 8 | Ticket validation : `TicketValidationException` ajoutée pour meilleure gestion d'erreurs | `lib/features/tickets/data/datasources/ticket_supabase_datasource.dart` | ✅ **Corrigé** |
 
 ---
 
@@ -340,4 +353,4 @@
 - Handler `onTap` sur les notifications
 - ~~Pré-remplissage du formulaire dans `EditProfilePage`~~ ✅ **Corrigé**
 - ~~Upload photo profil fonctionnel~~ ✅ **Corrigé**
-- Bouton "Rejeter" dans `AdminEventsPage`
+- ~~Bouton "Rejeter" dans `AdminEventsPage`~~ ✅ **Corrigé** (approve/reject avec motif)

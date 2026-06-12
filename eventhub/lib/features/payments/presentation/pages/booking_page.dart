@@ -2,11 +2,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:eventhub/core/di/injection_container.dart';
+import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/bookings/presentation/bloc/booking_bloc.dart';
 import 'package:eventhub/features/payments/presentation/bloc/payment_bloc.dart';
+import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
 import 'package:eventhub/features/tickets/domain/usecases/create_ticket_usecase.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 import 'package:eventhub/shared/widgets/error_widget.dart';
@@ -23,6 +27,7 @@ class _BookingPageState extends State<BookingPage> {
   int _quantity = 1;
   bool _isProcessing = false;
   String _bookingId = '';
+  Ticket? _createdTicket;
 
   @override
   void initState() {
@@ -30,8 +35,53 @@ class _BookingPageState extends State<BookingPage> {
     context.read<EventBloc>().add(GetEventByIdEvent(id: widget.eventId));
   }
 
+  bool _validateBooking(Event event) {
+    if (event.isPast) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This event has already passed.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    if (event.isFull) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This event is fully booked.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    if (event.status != EventStatus.published) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This event is not available for booking.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    final authState = context.read<AuthBloc>().state;
+    if (authState is Authenticated && authState.user.id == event.organizerId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You cannot book your own event.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
+
   void _startBooking(double price) {
     if (_isProcessing) return;
+    final eventState = context.read<EventBloc>().state;
+    if (eventState is! EventDetailLoaded) return;
+    if (!_validateBooking(eventState.event)) return;
+
     setState(() => _isProcessing = true);
     final total = price * _quantity;
     context
@@ -40,22 +90,42 @@ class _BookingPageState extends State<BookingPage> {
             eventId: widget.eventId, quantity: _quantity, amount: total));
   }
 
-  void _createTicketForBooking(BuildContext context) {
+  Future<Ticket?> _createTicketForBooking() async {
     final eventState = context.read<EventBloc>().state;
-    if (eventState is EventDetailLoaded) {
-      final event = eventState.event;
-      final rand = Random();
-      final qrCode =
-          '${widget.eventId}-$_bookingId-${DateTime.now().millisecondsSinceEpoch}-${rand.nextInt(999999)}';
-      sl<CreateTicketUseCase>().call(
-            eventId: widget.eventId,
-            bookingId: _bookingId,
-            eventTitle: event.title,
-            eventDate: event.date.toIso8601String(),
-            eventLocation: event.location,
-            qrCode: qrCode,
-          );
+    if (eventState is! EventDetailLoaded) return null;
+    final event = eventState.event;
+    final rand = Random();
+    final qrCode =
+        '${widget.eventId}-$_bookingId-${DateTime.now().millisecondsSinceEpoch}-${rand.nextInt(999999)}';
+    final result = await sl<CreateTicketUseCase>().call(
+          eventId: widget.eventId,
+          bookingId: _bookingId,
+          eventTitle: event.title,
+          eventDate: event.date.toIso8601String(),
+          eventLocation: event.location,
+          qrCode: qrCode,
+        );
+    return result.fold((_) => null, (ticket) => ticket);
+  }
+
+  Future<void> _confirmBooking() async {
+    final ticket = await _createTicketForBooking();
+    if (ticket == null || !mounted) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to create ticket.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
     }
+    _createdTicket = ticket;
+    context
+        .read<BookingBloc>()
+        .add(ConfirmBookingEvent(bookingId: _bookingId));
   }
 
   @override
@@ -68,12 +138,30 @@ class _BookingPageState extends State<BookingPage> {
             listenWhen: (_, state) => state is BookingCreated,
             listener: (context, state) {
               if (state is BookingCreated) {
-                final total = state.booking.totalAmount;
                 _bookingId = state.booking.id;
-                context.read<PaymentBloc>().add(CreatePaymentIntentEvent(
-                      amount: total,
-                      bookingId: _bookingId,
-                    ));
+                final total = state.booking.totalAmount;
+                if (total <= 0) {
+                  _confirmBooking();
+                } else {
+                  context.read<PaymentBloc>().add(CreatePaymentIntentEvent(
+                        amount: total,
+                        bookingId: _bookingId,
+                      ));
+                }
+              }
+            },
+          ),
+          BlocListener<BookingBloc, BookingState>(
+            listenWhen: (_, state) => state is BookingConfirmed,
+            listener: (context, state) {
+              if (state is BookingConfirmed && mounted) {
+                setState(() => _isProcessing = false);
+                final ticket = _createdTicket;
+                if (ticket != null) {
+                  context.pushReplacement('/qr-code', extra: ticket);
+                } else {
+                  context.pop(true);
+                }
               }
             },
           ),
@@ -91,15 +179,7 @@ class _BookingPageState extends State<BookingPage> {
           BlocListener<PaymentBloc, PaymentState>(
             listenWhen: (_, state) => state is PaymentConfirmed,
             listener: (context, state) {
-              _createTicketForBooking(context);
-              setState(() => _isProcessing = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Payment successful! Booking confirmed.'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-              Navigator.pop(context, true);
+              _confirmBooking();
             },
           ),
           BlocListener<BookingBloc, BookingState>(

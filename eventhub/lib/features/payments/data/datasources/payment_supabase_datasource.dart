@@ -30,7 +30,7 @@ class PaymentSupabaseDataSourceImpl implements PaymentSupabaseDataSource {
     final response = await supabase
         .from('payments')
         .update({'status': 'completed', 'stripe_payment_intent_id': paymentIntentId})
-        .eq('booking_id', bookingId)
+        .eq('id', paymentIntentId)
         .select()
         .single();
     return _toCamelCase(response);

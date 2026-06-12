@@ -4,6 +4,7 @@ abstract class BookingSupabaseDataSource {
   Future<Map<String, dynamic>> createBooking(
       String eventId, int quantity, double amount, String userId);
   Future<List<Map<String, dynamic>>> getUserBookings(String userId);
+  Future<void> confirmBooking(String bookingId);
   Future<void> cancelBooking(String bookingId);
 }
 
@@ -33,6 +34,14 @@ class BookingSupabaseDataSourceImpl implements BookingSupabaseDataSource {
         .eq('user_id', userId)
         .order('created_at', ascending: false);
     return response.map((e) => _toCamelCase(e)).toList();
+  }
+
+  @override
+  Future<void> confirmBooking(String bookingId) async {
+    await supabase
+        .from('bookings')
+        .update({'status': 'confirmed'})
+        .eq('id', bookingId);
   }
 
   @override

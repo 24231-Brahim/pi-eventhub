@@ -62,6 +62,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
   Future<void> _onGetEventById(
       GetEventByIdEvent event, Emitter<EventState> emit) async {
+    emit(const EventLoading());
     final result = await getEventByIdUseCase.call(event.id);
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
