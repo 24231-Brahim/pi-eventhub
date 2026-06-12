@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:eventhub/features/bookings/domain/entities/booking.dart';
 import 'package:eventhub/features/bookings/domain/usecases/create_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/get_user_bookings_usecase.dart';
+import 'package:eventhub/features/bookings/domain/usecases/get_event_bookings_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/confirm_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/cancel_booking_usecase.dart';
 
@@ -12,17 +13,20 @@ part 'booking_state.dart';
 class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final CreateBookingUseCase createBookingUseCase;
   final GetUserBookingsUseCase getUserBookingsUseCase;
+  final GetEventBookingsUseCase getEventBookingsUseCase;
   final ConfirmBookingUseCase confirmBookingUseCase;
   final CancelBookingUseCase cancelBookingUseCase;
 
   BookingBloc({
     required this.createBookingUseCase,
     required this.getUserBookingsUseCase,
+    required this.getEventBookingsUseCase,
     required this.confirmBookingUseCase,
     required this.cancelBookingUseCase,
   }) : super(const BookingInitial()) {
     on<CreateBookingEvent>(_onCreateBooking);
     on<GetUserBookingsEvent>(_onGetUserBookings);
+    on<GetEventBookingsEvent>(_onGetEventBookings);
     on<ConfirmBookingEvent>(_onConfirmBooking);
     on<CancelBookingEvent>(_onCancelBooking);
   }
@@ -45,6 +49,16 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     result.fold(
       (failure) => emit(BookingError(message: failure.message)),
       (bookings) => emit(UserBookingsLoaded(bookings: bookings)),
+    );
+  }
+
+  Future<void> _onGetEventBookings(
+      GetEventBookingsEvent event, Emitter<BookingState> emit) async {
+    emit(const BookingLoading());
+    final result = await getEventBookingsUseCase.call(event.eventId);
+    result.fold(
+      (failure) => emit(BookingError(message: failure.message)),
+      (bookings) => emit(EventBookingsLoaded(bookings: bookings)),
     );
   }
 

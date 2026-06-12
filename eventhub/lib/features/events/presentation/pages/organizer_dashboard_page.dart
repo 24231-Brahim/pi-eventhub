@@ -204,44 +204,6 @@ class _OrganizerDashboardPageState extends State<OrganizerDashboardPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.quickActions,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ActionChip(
-                          avatar: const Icon(Icons.add),
-                          label: Text(l10n.createEvent),
-                          onPressed: () =>
-                              context.push('/create-event'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ActionChip(
-                          avatar: const Icon(Icons.list),
-                          label: Text(l10n.manageEvents),
-                          onPressed: () =>
-                              context.push('/manage-events'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ActionChip(
-                          avatar: const Icon(Icons.qr_code_scanner),
-                          label: Text(l10n.scanQR),
-                          onPressed: () =>
-                              context.push('/qr-scanner'),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             );

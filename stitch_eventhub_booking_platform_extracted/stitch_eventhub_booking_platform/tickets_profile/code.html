@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EventHub - My Experience</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            background-color: #0F0F0F;
+            color: #E5E2E1;
+            font-family: 'Inter', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .ticket-perforation {
+            background-image: radial-gradient(circle at 0px 8px, transparent 8px, #202020 8px);
+            background-size: 100% 16px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#bebcbc",
+                        "on-surface": "#e5e2e1",
+                        "on-secondary-fixed": "#062100",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "on-error": "#690005",
+                        "tertiary": "#dad8d7",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "on-primary-fixed-variant": "#185200",
+                        "outline-variant": "#3e4a37",
+                        "surface": "#131313",
+                        "inverse-surface": "#e5e2e1",
+                        "surface-container-highest": "#353534",
+                        "on-primary": "#0e3900",
+                        "on-secondary-container": "#91d870",
+                        "primary-fixed-dim": "#67e037",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#e5e2e1",
+                        "primary-container": "#5dd62c",
+                        "on-secondary": "#0e3900",
+                        "on-tertiary-container": "#4c4c4b",
+                        "on-background": "#e5e2e1",
+                        "background": "#131313",
+                        "secondary-fixed-dim": "#91d971",
+                        "secondary": "#91d971",
+                        "inverse-primary": "#226d00",
+                        "on-primary-container": "#1a5800",
+                        "surface-container-low": "#1c1b1b",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#67e037",
+                        "surface-variant": "#353534",
+                        "outline": "#88957e",
+                        "on-surface-variant": "#bdcbb2",
+                        "error-container": "#93000a",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#acf68a",
+                        "surface-bright": "#3a3939",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "surface-container": "#201f1f",
+                        "on-primary-fixed": "#052100",
+                        "primary-fixed": "#83fe52",
+                        "on-secondary-fixed-variant": "#195200",
+                        "secondary-container": "#1e5f00",
+                        "primary": "#79f349",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary": "#303030",
+                        "surface-dim": "#131313"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "base": "8px",
+                        "stack-sm": "4px",
+                        "gutter": "12px",
+                        "container-padding": "16px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Poppins"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Poppins"],
+                        "headline-md": ["Poppins"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Poppins"],
+                        "label-md": ["Inter"],
+                        "label-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "label-lg": ["16px", {"lineHeight": "24px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top AppBar -->
+<header class="bg-surface docked full-width top-0 sticky z-50 flex justify-between items-center w-full px-container-padding h-16">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a stylish young adult with a friendly expression. The lighting is dramatic and high-contrast, fitting a modern nightlife aesthetic. The background is a soft-focus urban environment with neon bokeh highlights in green and obsidian, matching the electric vibe of an event discovery application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz_HnEaURjYrYg7aH2Afdhq67BOw8Rx4yfhp13AEXrPiiJ_O0jzzRjjUifP2-NyHpZBQ2LH2RbiC4U_gx-UeTMTpgogpL9s-M74k5DvZ3G2_QgRs0o-8rowBoWjz_T4UCsPw5rglitHIK5vifFX6V-WDzg7Li2SiA29w93mTiNEYA7KHfQvOJAOJFECC2EL_2-gCkfHIp0fIE0CSS3dM8SXiIdOS6XdsFGQkY7MS_MhRll8IRv3PLtoXM0MhkXdM2OeThjxWe6krU"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">EventHub</h1>
+</div>
+<button class="relative w-12 h-12 flex items-center justify-center rounded-full transition-transform active:scale-95 duration-150 hover:bg-surface-variant/20 text-primary">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+</header>
+<main class="pb-24">
+<!-- Profile Header Section -->
+<section class="px-container-padding pt-6 pb-8">
+<div class="flex flex-col items-center">
+<div class="relative group">
+<div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary/20 p-1">
+<img alt="User Avatar" class="w-full h-full object-cover rounded-full" data-alt="A detailed headshot of a person with contemporary styling, set against a dark, atmospheric studio background. The skin tones are naturally warm, contrasting with the cool, deep shadows. Sharp focus on the eyes conveys a sense of engagement. Accents of vibrant lime green lighting graze the profile, maintaining visual consistency with the app's high-energy branding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApdv8HUWx164FbN-hHlig12xJ8wLYy67CayBgNkoYSdSMLsinMUbau8huUHPfhki4K6c7c9YsYoupj5f5cASOn6EiS1tq3AUBSYmgoXAA7M5QA6ZctW8WNdI8xbAGS-YKQ568kWK6pjD--Q_zVF76jHT51I675UCwWJxxCuVTmNrdP7vibgk5NJShxkVM8WugmOWIEJlxawwtRX3HryGvL0bYwDW5SAgWQsHRSaq6gqY95a94COGawLllTjVu3AAQbHPJKEnDLMPY"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary text-background w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<h2 class="mt-4 font-headline-sm text-headline-sm text-on-surface">Alex Rivera</h2>
+<p class="text-on-surface-variant font-body-md text-body-md">alex.rivera@design.com</p>
+</div>
+<!-- Stats Row -->
+<div class="grid grid-cols-3 gap-gutter mt-8 bg-surface-container rounded-xl p-4">
+<div class="flex flex-col items-center border-r border-outline-variant/30">
+<span class="font-headline-sm text-primary">12</span>
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Attended</span>
+</div>
+<div class="flex flex-col items-center border-r border-outline-variant/30">
+<span class="font-headline-sm text-primary">3</span>
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Upcoming</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-headline-sm text-primary">850</span>
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wider">Points</span>
+</div>
+</div>
+</section>
+<!-- Tickets Section with Tabs -->
+<section class="px-container-padding space-y-stack-md">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm">My Tickets</h3>
+</div>
+<!-- Custom Tabs -->
+<div class="flex border-b border-outline-variant/20">
+<button class="flex-1 py-3 text-primary font-bold border-b-2 border-primary transition-colors" id="tab-upcoming" onclick="switchTab('upcoming')">Upcoming</button>
+<button class="flex-1 py-3 text-on-surface-variant font-medium hover:text-on-surface transition-colors" id="tab-past" onclick="switchTab('past')">Past Events</button>
+</div>
+<!-- Ticket Card 1 (Upcoming) -->
+<div class="space-y-4" id="tickets-upcoming">
+<div class="bg-surface-container rounded-xl overflow-hidden shadow-lg border border-outline-variant/10">
+<div class="flex h-32">
+<div class="w-1/3 relative">
+<img alt="Event" class="w-full h-full object-cover" data-alt="A wide-angle shot of a massive outdoor music festival at dusk. A sea of people is silhouetted against a vibrant stage illuminated with lasers and pyrotechnics. The sky is a deep twilight purple, contrasting with the brilliant neon green and electric blue stage lights. The atmosphere is explosive, captured in a high-contrast, modern cinematic photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAPvJFt9PO2mI-6PqOPDZpv4gSHjPPgB8AVWbPBPNao1CpjynkdbtBX2idJf3fH-1Reg9Rbyb4lU9t1GnCnhl3QD5o2J2wSE5aNFId7am2BNz6EZPF-TNMfyPYNTpIsUlKg4dDQQvv_JQr2dfYFdMZEMLD_zKn_-c1d8fHhJV1U3G4kNmD6JYMXbmBr-MlD5cEcSt5WOkoFyoDGhd_WEqKLlSZs1CqzNOJKn45Kwvo5lM6SmJ0dVi6vEcNxDBIOnr-S8LqwhCVpzg"/>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-surface-container"></div>
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-on-surface leading-tight">Neon Nights: Electronic Pulse</h4>
+<span class="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">VIP</span>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant mt-1">Fri, Oct 24 • 09:00 PM</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-label-md text-on-surface-variant"><span class="material-symbols-outlined text-[14px] align-middle mr-1">location_on</span>Cyber Arena</span>
+<button class="text-primary font-bold text-label-md flex items-center gap-1 active:scale-95 transition-transform">
+                                    VIEW TICKET <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl overflow-hidden shadow-lg border border-outline-variant/10">
+<div class="flex h-32">
+<div class="w-1/3 relative">
+<img alt="Event" class="w-full h-full object-cover" data-alt="An intimate rooftop jazz concert during a warm city evening. Silhouettes of a jazz band playing instruments are seen against a glowing urban skyline. The scene is lit by warm amber string lights and cool city blues, creating a sophisticated and cozy mood. The visual style is crisp and elegant, emphasizing the upscale social nature of the event." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcKaTB1cu0wl_-TPiCmPXkZUldXEubrg-Xwavhs7YTkmtP8UUxRd9M4I-7J32-fTYy11NwJFS4pg6oYq-BFCWPsU40lMZsPr0wzpkYQ1XtXJhTcfbx6KSMadNB3Kjgu4Shk9ZHl1EDeM1QQh7ecAxV53z0OSSOeCqHDNAyKwUIIZSTK5Sb78jBsiMkVlRHYrTp0nl3uA5A2B2yyzLvcse25w5c6gWSxBjBGpNoIjFqF5QPIG9CNkVfa6w7mZsYuFizko__i5zdy_I"/>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-surface-container"></div>
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-between">
+<div>
+<h4 class="font-bold text-on-surface leading-tight">Urban Jazz Rooftop Sessions</h4>
+<p class="text-label-md font-label-md text-on-surface-variant mt-1">Sat, Nov 02 • 07:30 PM</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-label-md text-on-surface-variant"><span class="material-symbols-outlined text-[14px] align-middle mr-1">location_on</span>Sky Garden</span>
+<button class="text-primary font-bold text-label-md flex items-center gap-1 active:scale-95 transition-transform">
+                                    VIEW TICKET <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="hidden space-y-4 opacity-60 grayscale-[0.5]" id="tickets-past">
+<!-- Past Ticket -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant/5">
+<div class="flex h-24">
+<div class="w-1/4">
+<img alt="Past Event" class="w-full h-full object-cover opacity-50" data-alt="A professional conference hall with soft ambient lighting and large presentation screens. A speaker is seen in the distance on a stage. The atmosphere is one of corporate elegance and knowledge sharing. The color palette is dominated by deep blues and greys with subtle pops of professional accent colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwtWgF9qvQmYR3LuiFh0OXwMD7dU2joXp3j6LhJM1EL68h4ab3kuWOk0LL8NbtZFPxFdV_m_B16s5nxjRZUrUTDxcao1rSyBSVe715BhYduR6hQ23NZQbGNvpdAeuqqCOhQmq9FDe94dblOOr_WNEeFWFAdvUIFmHGA_fn0-DL3F6yXJ22HTDC2IdVeGsftPElVc5OZrCbgZhAHsvSU-ppM19NslHKFDii5Y-th-5ErL3MKRCfD5PFv6mEUfK4KkAxf5IPToMCBkw"/>
+</div>
+<div class="w-3/4 p-3 flex flex-col justify-center">
+<h4 class="font-bold text-on-surface text-sm">Tech Frontiers 2024</h4>
+<p class="text-xs text-on-surface-variant mt-1">Sep 15, 2024 • Completed</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Menu items -->
+<section class="px-container-padding mt-8 space-y-2">
+<h3 class="font-headline-sm text-headline-sm mb-4">Settings</h3>
+<button class="w-full flex items-center justify-between p-4 bg-surface-container rounded-xl hover:bg-surface-variant/20 transition-colors active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">history</span>
+</div>
+<span class="font-medium text-on-surface">My Bookings</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-surface-container rounded-xl hover:bg-surface-variant/20 transition-colors active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">settings</span>
+</div>
+<span class="font-medium text-on-surface">Preferences</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-surface-container rounded-xl hover:bg-surface-variant/20 transition-colors active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">help</span>
+</div>
+<span class="font-medium text-on-surface">Support Center</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 mt-6 text-error">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center">
+<span class="material-symbols-outlined">logout</span>
+</div>
+<span class="font-bold">Log Out</span>
+</div>
+</button>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 pb-safe px-4 bg-surface-container dark:bg-surface-container rounded-t-xl shadow-[0px_-4px_12px_rgba(0,0,0,0.5)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant transition-all duration-200 ease-in-out active:scale-90 hover:opacity-80" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-label-md text-label-md mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant transition-all duration-200 ease-in-out active:scale-90 hover:opacity-80" href="#">
+<span class="material-symbols-outlined">confirmation_number</span>
+<span class="font-label-md text-label-md mt-1">Tickets</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant transition-all duration-200 ease-in-out active:scale-90 hover:opacity-80" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-md text-label-md mt-1">Notifications</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary font-bold transition-all duration-200 ease-in-out active:scale-90 hover:opacity-80" href="#">
+<span class="material-symbols-outlined fill-icon">person</span>
+<span class="font-label-md text-label-md mt-1">Profile</span>
+</a>
+</nav>
+<!-- Notification Overlay (Micro-interaction example) -->
+<div class="fixed inset-x-0 bottom-0 z-[60] h-[618px] bg-surface-container-high rounded-t-3xl translate-y-full transition-transform duration-300 ease-out shadow-2xl" id="notif-panel">
+<div class="w-12 h-1.5 bg-outline-variant/30 rounded-full mx-auto mt-3 mb-6" onclick="toggleNotifications()"></div>
+<div class="px-container-padding h-full overflow-y-auto pb-20">
+<h3 class="font-headline-md text-headline-md mb-6">Notifications</h3>
+<div class="space-y-4">
+<!-- Unread Notif -->
+<div class="flex gap-4 p-3 rounded-xl bg-primary/5 border-l-4 border-primary">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">celebration</span>
+</div>
+<div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full border-2 border-surface-container-high"></div>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-surface">Flash Sale! 20% Off</p>
+<p class="text-xs text-on-surface-variant">Get tickets for 'Neon Nights' at a discounted price for the next 2 hours.</p>
+<p class="text-[10px] text-primary font-bold mt-1">12m ago</p>
+</div>
+</div>
+<!-- Read Notif -->
+<div class="flex gap-4 p-3 rounded-xl bg-surface/40">
+<div class="w-10 h-10 rounded-full bg-surface-variant/40 flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">confirmation_number</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-medium text-on-surface">Ticket Confirmed</p>
+<p class="text-xs text-on-surface-variant">Your order for Urban Jazz Rooftop Sessions was successful.</p>
+<p class="text-[10px] text-on-surface-variant mt-1">2d ago</p>
+</div>
+</div>
+<div class="flex gap-4 p-3 rounded-xl bg-surface/40">
+<div class="w-10 h-10 rounded-full bg-surface-variant/40 flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">person_add</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-medium text-on-surface">New Friend! Sarah followed you</p>
+<p class="text-xs text-on-surface-variant">See what events Sarah is attending this weekend.</p>
+<p class="text-[10px] text-on-surface-variant mt-1">3d ago</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+        function switchTab(tab) {
+            const upcomingBtn = document.getElementById('tab-upcoming');
+            const pastBtn = document.getElementById('tab-past');
+            const upcomingList = document.getElementById('tickets-upcoming');
+            const pastList = document.getElementById('tickets-past');
+
+            if (tab === 'upcoming') {
+                upcomingBtn.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary');
+                upcomingBtn.classList.remove('text-on-surface-variant', 'font-medium');
+                pastBtn.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary');
+                pastBtn.classList.add('text-on-surface-variant', 'font-medium');
+                
+                upcomingList.classList.remove('hidden');
+                pastList.classList.add('hidden');
+            } else {
+                pastBtn.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary');
+                pastBtn.classList.remove('text-on-surface-variant', 'font-medium');
+                upcomingBtn.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary');
+                upcomingBtn.classList.add('text-on-surface-variant', 'font-medium');
+
+                pastList.classList.remove('hidden');
+                upcomingList.classList.add('hidden');
+            }
+        }
+
+        let notifOpen = false;
+        function toggleNotifications() {
+            const panel = document.getElementById('notif-panel');
+            if (!notifOpen) {
+                panel.style.transform = 'translateY(0)';
+                notifOpen = true;
+            } else {
+                panel.style.transform = 'translateY(100%)';
+                notifOpen = false;
+            }
+        }
+
+        // Attach click to the bell icon in app bar
+        document.querySelector('header button').onclick = toggleNotifications;
+
+        // Simple backdrop click to close
+        window.onclick = function(event) {
+            const panel = document.getElementById('notif-panel');
+            if (notifOpen && !panel.contains(event.target) && !document.querySelector('header button').contains(event.target)) {
+                toggleNotifications();
+            }
+        }
+    </script>
+</body></html>

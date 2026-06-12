@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/services/local_storage_service.dart';
+import 'package:eventhub/shared/themes/app_colors.dart';
+import 'package:eventhub/shared/themes/app_dimensions.dart';
+import 'package:eventhub/shared/themes/app_typography.dart';
 import 'package:eventhub/core/di/injection_container.dart' as di;
 
 class OnboardingPage extends StatefulWidget {
@@ -24,93 +27,108 @@ class _OnboardingPageState extends State<OnboardingPage> {
   List<_OnboardingContent> _buildPages(AppLocalizations l10n) => [
     _OnboardingContent(
       key: const ValueKey(0),
-      icon: Icons.event,
-      title: l10n.discoverEvents,
-      description: l10n.discoverEventsDesc,
+      icon: Icons.explore,
+      title: l10n.browseEvents,
+      description: l10n.browseEventsDesc,
     ),
     _OnboardingContent(
       key: const ValueKey(1),
-      icon: Icons.book_online,
+      icon: Icons.confirmation_number,
       title: l10n.bookTickets,
       description: l10n.bookTicketsDesc,
     ),
     _OnboardingContent(
       key: const ValueKey(2),
-      icon: Icons.qr_code_scanner,
-      title: l10n.easyCheckin,
-      description: l10n.easyCheckinDesc,
+      icon: Icons.share,
+      title: l10n.enjoyShare,
+      description: l10n.enjoyShareDesc,
     ),
   ];
+
+  void _finishOnboarding() {
+    di.sl<LocalStorageService>().setBool('onboarding_completed', true);
+    context.go('/login');
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final pages = _buildPages(l10n);
+    final isLastPage = _currentPage == pages.length - 1;
+
     return Scaffold(
+      backgroundColor: AppColors.obsidian,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: ClipRect(
-                child: PageView(
-                  key: const ValueKey('onboarding_pages'),
-                  controller: _pageController,
-                  onPageChanged: (index) =>
-                      setState(() => _currentPage = index),
-                  children: pages,
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                pages.length,
-                (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: _currentPage == index ? 24 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _currentPage == index
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(4),
+            Column(
+              children: [
+                Expanded(
+                  child: PageView(
+                    key: const ValueKey('onboarding_pages'),
+                    controller: _pageController,
+                    onPageChanged: (index) =>
+                        setState(() => _currentPage = index),
+                    children: pages,
                   ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.containerPadding,
+                    vertical: AppSpacing.stackLg,
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          pages.length,
+                          (index) => AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.base / 2,
+                            ),
+                            width: _currentPage == index ? 32 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _currentPage == index
+                                  ? AppColors.vibrantGreen
+                                  : AppColors.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(AppRadius.full),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.stackLg),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (isLastPage) {
+                            _finishOnboarding();
+                          } else {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                        child: Text(isLastPage ? l10n.getStarted : l10n.next),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      di.sl<LocalStorageService>()
-                          .setBool('onboarding_completed', true);
-                      context.go('/login');
-                    },
-                    child: Text(l10n.skip),
+            Positioned(
+              top: AppSpacing.containerPadding,
+              right: AppSpacing.containerPadding,
+              child: TextButton(
+                onPressed: _finishOnboarding,
+                child: Text(
+                  l10n.skip,
+                  style: AppTypography.labelLg.copyWith(
+                    color: AppColors.onSurfaceVariant,
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_currentPage == pages.length - 1) {
-                        di.sl<LocalStorageService>()
-                            .setBool('onboarding_completed', true);
-                        context.go('/login');
-                      } else {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                    child: Text(
-                      _currentPage == pages.length - 1 ? l10n.getStarted : l10n.next,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -135,26 +153,52 @@ class _OnboardingContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(48),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.containerPadding,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 120, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(height: 48),
+          Container(
+            width: 256,
+            height: 256,
+            margin: const EdgeInsets.only(bottom: AppSpacing.stackLg * 2),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainer,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Center(
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: AppColors.vibrantGreen.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.vibrantGreen.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Icon(icon, color: AppColors.vibrantGreen, size: 40),
+              ),
+            ),
+          ),
           Text(
             title,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: AppTypography.headlineLgMobile.copyWith(
+              color: AppColors.onSurface,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
-            textAlign: TextAlign.center,
+          const SizedBox(height: AppSpacing.stackMd),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 280),
+            child: Text(
+              description,
+              style: AppTypography.bodyLg.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),

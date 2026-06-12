@@ -160,7 +160,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
     if (result.errors.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.importErrors.replaceFirst('{count}', result.errors.length.toString())),
+          content: Text(l10n.importErrors(result.errors.length)),
           backgroundColor: Colors.orange,
         ),
       );
@@ -168,7 +168,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
     if (result.validRows > 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.importSuccess.replaceFirst('{count}', result.validRows.toString())),
+          content: Text(l10n.importSuccess(result.validRows)),
           backgroundColor: Colors.green,
         ),
       );

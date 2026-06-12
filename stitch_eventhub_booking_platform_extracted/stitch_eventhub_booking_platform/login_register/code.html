@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EventHub | Authentication</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#bebcbc",
+                        "on-surface": "#e5e2e1",
+                        "on-secondary-fixed": "#062100",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "on-error": "#690005",
+                        "tertiary": "#dad8d7",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "on-primary-fixed-variant": "#185200",
+                        "outline-variant": "#3e4a37",
+                        "surface": "#131313",
+                        "inverse-surface": "#e5e2e1",
+                        "surface-container-highest": "#353534",
+                        "on-primary": "#0e3900",
+                        "on-secondary-container": "#91d870",
+                        "primary-fixed-dim": "#67e037",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#e5e2e1",
+                        "primary-container": "#5dd62c",
+                        "on-secondary": "#0e3900",
+                        "on-tertiary-container": "#4c4c4b",
+                        "on-background": "#e5e2e1",
+                        "background": "#131313",
+                        "secondary-fixed-dim": "#91d971",
+                        "secondary": "#91d971",
+                        "inverse-primary": "#226d00",
+                        "on-primary-container": "#1a5800",
+                        "surface-container-low": "#1c1b1b",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#67e037",
+                        "surface-variant": "#353534",
+                        "outline": "#88957e",
+                        "on-surface-variant": "#bdcbb2",
+                        "error-container": "#93000a",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#acf68a",
+                        "surface-bright": "#3a3939",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "surface-container": "#201f1f",
+                        "on-primary-fixed": "#052100",
+                        "primary-fixed": "#83fe52",
+                        "on-secondary-fixed-variant": "#195200",
+                        "secondary-container": "#1e5f00",
+                        "primary": "#79f349",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary": "#303030",
+                        "surface-dim": "#131313"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "base": "8px",
+                        "stack-sm": "4px",
+                        "gutter": "12px",
+                        "container-padding": "16px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Poppins"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Poppins"],
+                        "headline-md": ["Poppins"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Poppins"],
+                        "label-md": ["Inter"],
+                        "label-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "label-lg": ["16px", {"lineHeight": "24px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0F0F0F;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .auth-card {
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .input-focus-ring:focus-within {
+            box-shadow: 0 0 0 1px #5DD62C;
+            border-bottom-color: #5DD62C;
+        }
+
+        .fade-transition {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Glassmorphism effect for background depth */
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(93, 214, 44, 0.1) 0%, rgba(15, 15, 15, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(40px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen items-center justify-center px-container-padding">
+<!-- Ambient background effects -->
+<div class="ambient-glow top-[-50px] left-[-50px]"></div>
+<div class="ambient-glow bottom-[-100px] right-[-50px]"></div>
+<!-- Login View -->
+<main class="w-full max-w-[400px] fade-transition opacity-100 scale-100" id="login-container">
+<header class="flex flex-col items-center mb-stack-lg">
+<div class="mb-gutter">
+<span class="text-primary font-headline-md text-headline-md font-bold tracking-tighter">EventHub</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-center">Welcome back</h1>
+<p class="font-body-md text-on-surface-variant text-center mt-2">Discover and book the hottest events near you.</p>
+</header>
+<section class="space-y-stack-md">
+<!-- Form Fields -->
+<div class="space-y-gutter">
+<div class="relative group">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-stack-sm ml-1 uppercase">Email</label>
+<div class="flex items-center bg-surface-container rounded-xl p-3 border-b-2 border-transparent transition-all duration-200 input-focus-ring">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant">mail</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-surface-variant font-body-md" placeholder="name@company.com" type="email"/>
+</div>
+</div>
+<div class="relative group">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-stack-sm ml-1 uppercase">Password</label>
+<div class="flex items-center bg-surface-container rounded-xl p-3 border-b-2 border-transparent transition-all duration-200 input-focus-ring">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant">lock</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-surface-variant font-body-md" placeholder="••••••••" type="password"/>
+<button class="text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Forgot Password -->
+<div class="flex justify-end">
+<a class="font-label-md text-label-md text-primary font-semibold hover:underline" href="#">Forgot Password?</a>
+</div>
+<!-- Primary Action -->
+<button class="w-full h-[48px] bg-primary-container text-on-primary-container font-headline-sm text-headline-sm rounded-xl transition-all hover:opacity-90 active:scale-95 flex items-center justify-center">
+                Sign In
+            </button>
+<!-- Divider -->
+<div class="flex items-center py-4">
+<div class="flex-grow h-[1px] bg-surface-variant"></div>
+<span class="px-3 font-label-md text-label-md text-surface-variant uppercase">Or continue with</span>
+<div class="flex-grow h-[1px] bg-surface-variant"></div>
+</div>
+<!-- Social Action -->
+<button class="w-full h-[48px] bg-transparent border border-outline text-on-surface font-body-lg rounded-xl flex items-center justify-center gap-3 hover:bg-surface-container transition-colors active:scale-95">
+<svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+                Google
+            </button>
+</section>
+<footer class="mt-stack-lg text-center">
+<p class="font-body-md text-on-surface">
+                Don't have an account? 
+                <button class="text-primary font-bold ml-1 hover:underline" onclick="toggleAuth('register')">Sign Up</button>
+</p>
+</footer>
+</main>
+<!-- Register View (Hidden by default) -->
+<main class="w-full max-w-[400px] fade-transition opacity-0 scale-95 hidden" id="register-container">
+<header class="flex flex-col items-center mb-stack-lg">
+<div class="mb-gutter">
+<span class="text-primary font-headline-md text-headline-md font-bold tracking-tighter">EventHub</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-center">Create Account</h1>
+<p class="font-body-md text-on-surface-variant text-center mt-2">Join the community and explore events.</p>
+</header>
+<section class="space-y-stack-md">
+<div class="space-y-gutter">
+<div class="relative group">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-stack-sm ml-1 uppercase">Full Name</label>
+<div class="flex items-center bg-surface-container rounded-xl p-3 border-b-2 border-transparent transition-all duration-200 input-focus-ring">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant">person</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-surface-variant font-body-md" placeholder="John Doe" type="text"/>
+</div>
+</div>
+<div class="relative group">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-stack-sm ml-1 uppercase">Email</label>
+<div class="flex items-center bg-surface-container rounded-xl p-3 border-b-2 border-transparent transition-all duration-200 input-focus-ring">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant">mail</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-surface-variant font-body-md" placeholder="name@company.com" type="email"/>
+</div>
+</div>
+<div class="relative group">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-stack-sm ml-1 uppercase">Password</label>
+<div class="flex items-center bg-surface-container rounded-xl p-3 border-b-2 border-transparent transition-all duration-200 input-focus-ring">
+<span class="material-symbols-outlined mr-3 text-on-surface-variant">lock</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-surface-variant font-body-md" placeholder="Min. 8 characters" type="password"/>
+</div>
+</div>
+</div>
+<button class="w-full h-[48px] bg-primary-container text-on-primary-container font-headline-sm text-headline-sm rounded-xl transition-all hover:opacity-90 active:scale-95 flex items-center justify-center">
+                Create Account
+            </button>
+<p class="font-label-md text-label-md text-on-surface-variant text-center px-4">
+                By signing up, you agree to our <span class="text-primary cursor-pointer">Terms of Service</span> and <span class="text-primary cursor-pointer">Privacy Policy</span>.
+            </p>
+</section>
+<footer class="mt-stack-lg text-center">
+<p class="font-body-md text-on-surface">
+                Already have an account? 
+                <button class="text-primary font-bold ml-1 hover:underline" onclick="toggleAuth('login')">Sign In</button>
+</p>
+</footer>
+</main>
+<!-- Decorative Bottom Image -->
+<div class="fixed bottom-0 left-0 w-full opacity-20 pointer-events-none -z-20 h-64 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A cinematic low-angle shot of a vibrant concert crowd with colorful stage lighting beams cutting through a hazy atmosphere. The silhouettes of hands are raised in excitement against a deep dark background with vivid green and purple lens flares, capturing the high-energy electric atmosphere of a live music festival at night." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfugdyfvOZpRlG8PmDDOpl7421ETFtlPZg_6tVVjWBQjVSRtzFw_1Xab1ZnAjpLVaNKi5RFhlCke565dxNcG1VEhqG1xEQpP6MM9YxJslfd3lqM6CkAMA7e1Nyrji3xT9J_gKu8BdScjD4I1EX8ktmJ5oIv9hf4qlnpfp3QVbNK_eFu2utU9TvDd9Krhw4FJdQuiL9FTf7bFWEn4hhNjPgHIvVsPFoZfkJCsjxvr6Vk4IQnrmKWNr9-9Fez7oJnVV29QpP99WNrLk"/>
+</div>
+<script>
+        function toggleAuth(view) {
+            const login = document.getElementById('login-container');
+            const register = document.getElementById('register-container');
+
+            if (view === 'register') {
+                // Fade out login
+                login.classList.remove('opacity-100', 'scale-100');
+                login.classList.add('opacity-0', 'scale-95');
+                
+                setTimeout(() => {
+                    login.classList.add('hidden');
+                    register.classList.remove('hidden');
+                    // Force reflow
+                    register.offsetHeight;
+                    register.classList.remove('opacity-0', 'scale-95');
+                    register.classList.add('opacity-100', 'scale-100');
+                }, 300);
+            } else {
+                // Fade out register
+                register.classList.remove('opacity-100', 'scale-100');
+                register.classList.add('opacity-0', 'scale-95');
+                
+                setTimeout(() => {
+                    register.classList.add('hidden');
+                    login.classList.remove('hidden');
+                    // Force reflow
+                    login.offsetHeight;
+                    login.classList.remove('opacity-0', 'scale-95');
+                    login.classList.add('opacity-100', 'scale-100');
+                }, 300);
+            }
+        }
+
+        // Add subtle mouse move effect to ambient glows
+        document.addEventListener('mousemove', (e) => {
+            const glows = document.querySelectorAll('.ambient-glow');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            glows.forEach((glow, index) => {
+                const speed = (index + 1) * 20;
+                glow.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+        });
+    </script>
+</body></html>

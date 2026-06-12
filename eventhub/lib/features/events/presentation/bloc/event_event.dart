@@ -77,4 +77,35 @@ class GetUserFavoriteIdsEvent extends EventEvent {
   const GetUserFavoriteIdsEvent();
 }
 
+class GetInvitationsEvent extends EventEvent {
+  final String eventId;
+  const GetInvitationsEvent({required this.eventId});
+
+  @override
+  List<Object?> get props => [eventId];
+}
+
+class CreateInvitationEvent extends EventEvent {
+  final String eventId;
+  final String email;
+  final String name;
+  const CreateInvitationEvent({
+    required this.eventId,
+    required this.email,
+    this.name = '',
+  });
+
+  @override
+  List<Object?> get props => [eventId, email, name];
+}
+
+class DeleteInvitationEvent extends EventEvent {
+  final String id;
+  final String eventId;
+  const DeleteInvitationEvent({required this.id, required this.eventId});
+
+  @override
+  List<Object?> get props => [id, eventId];
+}
+
 

@@ -16,6 +16,8 @@ import 'package:eventhub/features/tickets/presentation/pages/tickets_page.dart';
 import 'package:eventhub/features/tickets/presentation/pages/qr_code_page.dart';
 import 'package:eventhub/features/tickets/presentation/pages/qr_scanner_page.dart';
 import 'package:eventhub/features/bookings/presentation/pages/my_bookings_page.dart';
+import 'package:eventhub/features/bookings/presentation/pages/event_attendees_page.dart';
+import 'package:eventhub/features/events/presentation/pages/event_invitations_page.dart';
 import 'package:eventhub/features/payments/presentation/pages/booking_page.dart';
 import 'package:eventhub/features/events/presentation/pages/organizer_dashboard_page.dart';
 import 'package:eventhub/features/events/presentation/pages/manage_events_page.dart';
@@ -169,6 +171,16 @@ class AppRouter {
       GoRoute(
         path: '/manage-events',
         builder: (context, state) => const ManageEventsPage(),
+      ),
+      GoRoute(
+        path: '/event-attendees',
+        builder: (context, state) =>
+            EventAttendeesPage(event: state.extra as Event),
+      ),
+      GoRoute(
+        path: '/event-invitations',
+        builder: (context, state) =>
+            EventInvitationsPage(event: state.extra as Event),
       ),
       GoRoute(
         path: '/settings',

@@ -76,3 +76,11 @@ class FavoriteIdsLoadedState extends EventState {
   @override
   List<Object?> get props => [ids];
 }
+
+class InvitationsLoaded extends EventState {
+  final List<EventInvitation> invitations;
+  const InvitationsLoaded({required this.invitations});
+
+  @override
+  List<Object?> get props => [invitations];
+}

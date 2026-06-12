@@ -25,6 +25,14 @@ class GetUserBookingsEvent extends BookingEvent {
   const GetUserBookingsEvent();
 }
 
+class GetEventBookingsEvent extends BookingEvent {
+  final String eventId;
+  const GetEventBookingsEvent({required this.eventId});
+
+  @override
+  List<Object?> get props => [eventId];
+}
+
 class ConfirmBookingEvent extends BookingEvent {
   final String bookingId;
   const ConfirmBookingEvent({required this.bookingId});

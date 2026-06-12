@@ -41,6 +41,17 @@ class BookingRepositoryImpl implements BookingRepository {
   }
 
   @override
+  Future<Either<Failure, List<Booking>>> getEventBookings(String eventId) async {
+    try {
+      final data = await dataSource.getEventBookings(eventId);
+      final bookings = data.map((e) => BookingModel.fromJson(e)).toList();
+      return Right(bookings);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> confirmBooking(String bookingId) async {
     try {
       await dataSource.confirmBooking(bookingId);

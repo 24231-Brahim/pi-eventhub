@@ -944,55 +944,328 @@ abstract class AppLocalizations {
   String get required;
 
   /// No description provided for @publicEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Event'**
   String get publicEvent;
 
   /// No description provided for @privateEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Private Event'**
   String get privateEvent;
 
   /// No description provided for @eventVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Visibility'**
   String get eventVisibility;
 
   /// No description provided for @invitePeople.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite People'**
   String get invitePeople;
 
   /// No description provided for @invitedPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited People'**
   String get invitedPeople;
 
   /// No description provided for @noInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'No invitations yet'**
   String get noInvitations;
 
   /// No description provided for @addInviteByEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add by email'**
   String get addInviteByEmail;
 
   /// No description provided for @importFromFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from file'**
   String get importFromFile;
 
   /// No description provided for @importSuccess.
-  String get importSuccess;
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully imported {count} invitations'**
+  String importSuccess(Object count);
 
   /// No description provided for @importErrors.
-  String get importErrors;
+  ///
+  /// In en, this message translates to:
+  /// **'{count} errors found in the file'**
+  String importErrors(Object count);
 
   /// No description provided for @emailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'email@example.com'**
   String get emailHint;
 
   /// No description provided for @nameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
   String get nameHint;
 
   /// No description provided for @invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
   String get invite;
 
   /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
   String get remove;
 
   /// No description provided for @importInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Invitations'**
   String get importInvitations;
 
   /// No description provided for @invitationsImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations imported successfully'**
   String get invitationsImported;
 
   /// No description provided for @onlyInvitedCanBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Only invited people can book this event'**
   String get onlyInvitedCanBook;
+
+  /// No description provided for @browseEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Events'**
+  String get browseEvents;
+
+  /// No description provided for @browseEventsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Find concerts, workshops, and nightlife happenings tailored to your taste.'**
+  String get browseEventsDesc;
+
+  /// No description provided for @enjoyShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy & Share'**
+  String get enjoyShare;
+
+  /// No description provided for @enjoyShareDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Make memories with friends and share your experiences with the community.'**
+  String get enjoyShareDesc;
+
+  /// No description provided for @bookingConfirmedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Confirmed!'**
+  String get bookingConfirmedTitle;
+
+  /// No description provided for @bookingConfirmedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set! Your ticket has been added to your profile.'**
+  String get bookingConfirmedMessage;
+
+  /// No description provided for @orderId.
+  ///
+  /// In en, this message translates to:
+  /// **'Order ID'**
+  String get orderId;
+
+  /// No description provided for @seats.
+  ///
+  /// In en, this message translates to:
+  /// **'Seats'**
+  String get seats;
+
+  /// No description provided for @generalAdmission.
+  ///
+  /// In en, this message translates to:
+  /// **'General Admission'**
+  String get generalAdmission;
+
+  /// No description provided for @viewTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'View Tickets'**
+  String get viewTickets;
+
+  /// No description provided for @discoverEventsNearYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover Events Near You'**
+  String get discoverEventsNearYou;
+
+  /// No description provided for @searchEventsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search events, locations...'**
+  String get searchEventsHint;
+
+  /// No description provided for @eventsAttended.
+  ///
+  /// In en, this message translates to:
+  /// **'Events Attended'**
+  String get eventsAttended;
+
+  /// No description provided for @upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcoming;
+
+  /// No description provided for @points.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get points;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @attendees.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendees'**
+  String get attendees;
+
+  /// No description provided for @noAttendeesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendees yet'**
+  String get noAttendeesYet;
+
+  /// No description provided for @bookingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Date'**
+  String get bookingDate;
+
+  /// No description provided for @confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get confirmed;
+
+  /// No description provided for @pendingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pendingStatus;
+
+  /// No description provided for @cancelledStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get cancelledStatus;
+
+  /// No description provided for @refunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get refunded;
+
+  /// No description provided for @published.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get published;
+
+  /// No description provided for @quantityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantityLabel;
+
+  /// No description provided for @guestInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest Invitations'**
+  String get guestInvitations;
+
+  /// No description provided for @inviteGuests.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Guests'**
+  String get inviteGuests;
+
+  /// No description provided for @sendInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Invite'**
+  String get sendInvite;
+
+  /// No description provided for @acceptedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get acceptedStatus;
+
+  /// No description provided for @declinedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get declinedStatus;
+
+  /// No description provided for @viewAttendees.
+  ///
+  /// In en, this message translates to:
+  /// **'View Attendees'**
+  String get viewAttendees;
+
+  /// No description provided for @alreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Already Used'**
+  String get alreadyUsed;
+
+  /// No description provided for @ticketAlreadyUsedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticket was already checked in.'**
+  String get ticketAlreadyUsedMessage;
+
+  /// No description provided for @ticketCancelledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticket has been cancelled.'**
+  String get ticketCancelledMessage;
+
+  /// No description provided for @checkInSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Check-in successful!'**
+  String get checkInSuccessful;
+
+  /// No description provided for @eventLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get eventLabel;
+
+  /// No description provided for @pointCameraAtQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Point your camera at a ticket QR code'**
+  String get pointCameraAtQRCode;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

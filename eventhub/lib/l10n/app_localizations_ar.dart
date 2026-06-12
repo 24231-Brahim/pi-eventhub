@@ -456,10 +456,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get importFromFile => 'استيراد من ملف';
 
   @override
-  String get importSuccess => 'تم استيراد {count} دعوة بنجاح';
+  String importSuccess(Object count) {
+    return 'تم استيراد $count دعوة بنجاح';
+  }
 
   @override
-  String get importErrors => 'تم العثور على {count} خطأ في الملف';
+  String importErrors(Object count) {
+    return 'تم العثور على $count خطأ في الملف';
+  }
 
   @override
   String get emailHint => 'email@example.com';
@@ -481,4 +485,115 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onlyInvitedCanBook => 'يمكن للأشخاص المدعوين فقط الحجز';
+
+  @override
+  String get browseEvents => 'تصفح الفعاليات';
+
+  @override
+  String get browseEventsDesc => 'اعثر على حفلات وورش عمل وفعاليات ليلية تناسب اهتماماتك.';
+
+  @override
+  String get enjoyShare => 'استمتع وشارك';
+
+  @override
+  String get enjoyShareDesc => 'اصنع ذكريات مع أصدقائك وشارك تجاربك مع المجتمع.';
+
+  @override
+  String get bookingConfirmedTitle => 'تم تأكيد الحجز!';
+
+  @override
+  String get bookingConfirmedMessage => 'كل شيء جاهز! تمت إضافة تذكرتك إلى ملفك الشخصي.';
+
+  @override
+  String get orderId => 'رقم الطلب';
+
+  @override
+  String get seats => 'المقاعد';
+
+  @override
+  String get generalAdmission => 'دخول عام';
+
+  @override
+  String get viewTickets => 'عرض التذاكر';
+
+  @override
+  String get discoverEventsNearYou => 'اكتشف الفعاليات القريبة منك';
+
+  @override
+  String get searchEventsHint => 'ابحث عن فعاليات، أماكن...';
+
+  @override
+  String get eventsAttended => 'الفعاليات المحضورة';
+
+  @override
+  String get upcoming => 'القادمة';
+
+  @override
+  String get points => 'النقاط';
+
+  @override
+  String get account => 'الحساب';
+
+  @override
+  String get attendees => 'الحضور';
+
+  @override
+  String get noAttendeesYet => 'لا يوجد حضور حتى الآن';
+
+  @override
+  String get bookingDate => 'تاريخ الحجز';
+
+  @override
+  String get confirmed => 'مؤكد';
+
+  @override
+  String get pendingStatus => 'قيد الانتظار';
+
+  @override
+  String get cancelledStatus => 'ملغى';
+
+  @override
+  String get refunded => 'مسترد';
+
+  @override
+  String get published => 'منشور';
+
+  @override
+  String get quantityLabel => 'الكمية';
+
+  @override
+  String get guestInvitations => 'دعوات الضيوف';
+
+  @override
+  String get inviteGuests => 'دعوة ضيوف';
+
+  @override
+  String get sendInvite => 'إرسال الدعوة';
+
+  @override
+  String get acceptedStatus => 'مقبول';
+
+  @override
+  String get declinedStatus => 'مرفوض';
+
+  @override
+  String get viewAttendees => 'عرض الحضور';
+
+  @override
+  String get alreadyUsed => 'مستخدمة بالفعل';
+
+  @override
+  String get ticketAlreadyUsedMessage => 'تم تسجيل هذه التذكرة بالفعل.';
+
+  @override
+  String get ticketCancelledMessage => 'تم إلغاء هذه التذكرة.';
+
+  @override
+  String get checkInSuccessful => 'تم تسجيل الدخول بنجاح!';
+
+  @override
+  String get eventLabel => 'الفعالية';
+
+  @override
+  String get pointCameraAtQRCode => 'وجّه الكاميرا نحو رمز QR للتذكرة';
 }

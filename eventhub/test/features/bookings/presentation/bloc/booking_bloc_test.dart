@@ -10,12 +10,14 @@ void main() {
   late MockGetUserBookingsUseCase mockGetUserBookingsUseCase;
   late MockConfirmBookingUseCase mockConfirmBookingUseCase;
   late MockCancelBookingUseCase mockCancelBookingUseCase;
+  late MockGetEventBookingsUseCase mockGetEventBookingsUseCase;
 
   setUp(() {
     mockCreateBookingUseCase = MockCreateBookingUseCase();
     mockGetUserBookingsUseCase = MockGetUserBookingsUseCase();
     mockConfirmBookingUseCase = MockConfirmBookingUseCase();
     mockCancelBookingUseCase = MockCancelBookingUseCase();
+    mockGetEventBookingsUseCase = MockGetEventBookingsUseCase();
   });
 
   BookingBloc createBloc() => BookingBloc(
@@ -23,6 +25,7 @@ void main() {
         getUserBookingsUseCase: mockGetUserBookingsUseCase,
         confirmBookingUseCase: mockConfirmBookingUseCase,
         cancelBookingUseCase: mockCancelBookingUseCase,
+        getEventBookingsUseCase: mockGetEventBookingsUseCase,
       );
 
   group('BookingBloc', () {

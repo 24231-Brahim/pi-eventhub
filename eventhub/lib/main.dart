@@ -91,7 +91,7 @@ class _EventHubAppState extends State<EventHubApp> {
 
 class ThemeNotifier extends ChangeNotifier {
   final LocalStorageService storage;
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.dark;
   Locale _locale = const Locale('en');
 
   ThemeNotifier({required this.storage}) {

@@ -456,10 +456,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importFromFile => 'Import from file';
 
   @override
-  String get importSuccess => 'Successfully imported {count} invitations';
+  String importSuccess(Object count) {
+    return 'Successfully imported $count invitations';
+  }
 
   @override
-  String get importErrors => '{count} errors found in the file';
+  String importErrors(Object count) {
+    return '$count errors found in the file';
+  }
 
   @override
   String get emailHint => 'email@example.com';
@@ -481,4 +485,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onlyInvitedCanBook => 'Only invited people can book this event';
+
+  @override
+  String get browseEvents => 'Browse Events';
+
+  @override
+  String get browseEventsDesc => 'Find concerts, workshops, and nightlife happenings tailored to your taste.';
+
+  @override
+  String get enjoyShare => 'Enjoy & Share';
+
+  @override
+  String get enjoyShareDesc => 'Make memories with friends and share your experiences with the community.';
+
+  @override
+  String get bookingConfirmedTitle => 'Booking Confirmed!';
+
+  @override
+  String get bookingConfirmedMessage => 'You\'re all set! Your ticket has been added to your profile.';
+
+  @override
+  String get orderId => 'Order ID';
+
+  @override
+  String get seats => 'Seats';
+
+  @override
+  String get generalAdmission => 'General Admission';
+
+  @override
+  String get viewTickets => 'View Tickets';
+
+  @override
+  String get discoverEventsNearYou => 'Discover Events Near You';
+
+  @override
+  String get searchEventsHint => 'Search events, locations...';
+
+  @override
+  String get eventsAttended => 'Events Attended';
+
+  @override
+  String get upcoming => 'Upcoming';
+
+  @override
+  String get points => 'Points';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get attendees => 'Attendees';
+
+  @override
+  String get noAttendeesYet => 'No attendees yet';
+
+  @override
+  String get bookingDate => 'Booking Date';
+
+  @override
+  String get confirmed => 'Confirmed';
+
+  @override
+  String get pendingStatus => 'Pending';
+
+  @override
+  String get cancelledStatus => 'Cancelled';
+
+  @override
+  String get refunded => 'Refunded';
+
+  @override
+  String get published => 'Published';
+
+  @override
+  String get quantityLabel => 'Quantity';
+
+  @override
+  String get guestInvitations => 'Guest Invitations';
+
+  @override
+  String get inviteGuests => 'Invite Guests';
+
+  @override
+  String get sendInvite => 'Send Invite';
+
+  @override
+  String get acceptedStatus => 'Accepted';
+
+  @override
+  String get declinedStatus => 'Declined';
+
+  @override
+  String get viewAttendees => 'View Attendees';
+
+  @override
+  String get alreadyUsed => 'Already Used';
+
+  @override
+  String get ticketAlreadyUsedMessage => 'This ticket was already checked in.';
+
+  @override
+  String get ticketCancelledMessage => 'This ticket has been cancelled.';
+
+  @override
+  String get checkInSuccessful => 'Check-in successful!';
+
+  @override
+  String get eventLabel => 'Event';
+
+  @override
+  String get pointCameraAtQRCode => 'Point your camera at a ticket QR code';
 }

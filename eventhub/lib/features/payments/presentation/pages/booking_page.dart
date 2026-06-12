@@ -5,10 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:eventhub/core/di/injection_container.dart';
+import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/bookings/presentation/bloc/booking_bloc.dart';
+import 'package:eventhub/features/bookings/presentation/widgets/booking_confirmation_modal.dart';
 import 'package:eventhub/features/payments/presentation/bloc/payment_bloc.dart';
 import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
 import 'package:eventhub/features/tickets/domain/usecases/create_ticket_usecase.dart';
@@ -158,7 +160,18 @@ class _BookingPageState extends State<BookingPage> {
                 setState(() => _isProcessing = false);
                 final ticket = _createdTicket;
                 if (ticket != null) {
-                  context.pushReplacement('/qr-code', extra: ticket);
+                  final l10n = AppLocalizations.of(context)!;
+                  final shortId = _bookingId.length > 8
+                      ? _bookingId.substring(0, 8).toUpperCase()
+                      : _bookingId.toUpperCase();
+                  showBookingConfirmationModal(
+                    context,
+                    orderId: '#$shortId',
+                    seatInfo: '${_quantity}x ${l10n.generalAdmission}',
+                    onViewTickets: () {
+                      context.pushReplacement('/qr-code', extra: ticket);
+                    },
+                  );
                 } else {
                   context.pop(true);
                 }

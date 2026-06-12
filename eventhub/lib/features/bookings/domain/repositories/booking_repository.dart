@@ -5,6 +5,7 @@ import 'package:eventhub/features/bookings/domain/entities/booking.dart';
 abstract class BookingRepository {
   Future<Either<Failure, Booking>> createBooking(String eventId, int quantity, double amount);
   Future<Either<Failure, List<Booking>>> getUserBookings();
+  Future<Either<Failure, List<Booking>>> getEventBookings(String eventId);
   Future<Either<Failure, void>> confirmBooking(String bookingId);
   Future<Either<Failure, void>> cancelBooking(String bookingId);
 }

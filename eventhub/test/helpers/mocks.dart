@@ -22,12 +22,16 @@ import 'package:eventhub/features/events/domain/usecases/update_event_usecase.da
 import 'package:eventhub/features/events/domain/usecases/delete_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/toggle_favorite_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/get_user_favorite_ids_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/get_invitations_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/create_invitation_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/delete_invitation_usecase.dart';
 import 'package:eventhub/features/bookings/domain/entities/booking.dart';
 import 'package:eventhub/features/bookings/domain/repositories/booking_repository.dart';
 import 'package:eventhub/features/bookings/domain/usecases/create_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/get_user_bookings_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/confirm_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/cancel_booking_usecase.dart';
+import 'package:eventhub/features/bookings/domain/usecases/get_event_bookings_usecase.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
 import 'package:eventhub/features/tickets/domain/repositories/ticket_repository.dart';
@@ -72,12 +76,16 @@ class MockUpdateEventUseCase extends Mock implements UpdateEventUseCase {}
 class MockDeleteEventUseCase extends Mock implements DeleteEventUseCase {}
 class MockToggleFavoriteUseCase extends Mock implements ToggleFavoriteUseCase {}
 class MockGetUserFavoriteIdsUseCase extends Mock implements GetUserFavoriteIdsUseCase {}
+class MockGetInvitationsUseCase extends Mock implements GetInvitationsUseCase {}
+class MockCreateInvitationUseCase extends Mock implements CreateInvitationUseCase {}
+class MockDeleteInvitationUseCase extends Mock implements DeleteInvitationUseCase {}
 
 class MockBookingRepository extends Mock implements BookingRepository {}
 class MockCreateBookingUseCase extends Mock implements CreateBookingUseCase {}
 class MockGetUserBookingsUseCase extends Mock implements GetUserBookingsUseCase {}
 class MockConfirmBookingUseCase extends Mock implements ConfirmBookingUseCase {}
 class MockCancelBookingUseCase extends Mock implements CancelBookingUseCase {}
+class MockGetEventBookingsUseCase extends Mock implements GetEventBookingsUseCase {}
 
 class MockAuthSupabaseDataSource extends Mock implements AuthSupabaseDataSource {}
 class MockAuthRepository extends Mock implements AuthRepository {}

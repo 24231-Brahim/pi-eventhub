@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
+import 'package:eventhub/features/events/domain/entities/event_invitation.dart';
 import 'package:eventhub/features/events/domain/usecases/get_events_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/get_event_by_id_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/create_event_usecase.dart';
@@ -8,6 +9,9 @@ import 'package:eventhub/features/events/domain/usecases/update_event_usecase.da
 import 'package:eventhub/features/events/domain/usecases/delete_event_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/toggle_favorite_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/get_user_favorite_ids_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/get_invitations_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/create_invitation_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/delete_invitation_usecase.dart';
 
 part 'event_event.dart';
 part 'event_state.dart';
@@ -20,6 +24,9 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   final DeleteEventUseCase deleteEventUseCase;
   final ToggleFavoriteUseCase toggleFavoriteUseCase;
   final GetUserFavoriteIdsUseCase getUserFavoriteIdsUseCase;
+  final GetInvitationsUseCase getInvitationsUseCase;
+  final CreateInvitationUseCase createInvitationUseCase;
+  final DeleteInvitationUseCase deleteInvitationUseCase;
 
   EventBloc({
     required this.getEventsUseCase,
@@ -29,6 +36,9 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     required this.deleteEventUseCase,
     required this.toggleFavoriteUseCase,
     required this.getUserFavoriteIdsUseCase,
+    required this.getInvitationsUseCase,
+    required this.createInvitationUseCase,
+    required this.deleteInvitationUseCase,
   }) : super(const EventInitial()) {
     on<GetEventsEvent>(_onGetEvents);
     on<GetEventByIdEvent>(_onGetEventById);
@@ -37,6 +47,9 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<DeleteEventEvent>(_onDeleteEvent);
     on<ToggleFavoriteEvent>(_onToggleFavorite);
     on<GetUserFavoriteIdsEvent>(_onGetUserFavoriteIds);
+    on<GetInvitationsEvent>(_onGetInvitations);
+    on<CreateInvitationEvent>(_onCreateInvitation);
+    on<DeleteInvitationEvent>(_onDeleteInvitation);
   }
 
   Future<void> _onGetEvents(GetEventsEvent event, Emitter<EventState> emit) async {
@@ -118,6 +131,47 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     result.fold(
       (failure) => null,
       (ids) => emit(FavoriteIdsLoadedState(ids: ids)),
+    );
+  }
+
+  Future<void> _onGetInvitations(
+      GetInvitationsEvent event, Emitter<EventState> emit) async {
+    emit(const EventLoading());
+    final result = await getInvitationsUseCase.call(event.eventId);
+    result.fold(
+      (failure) => emit(EventError(message: failure.message)),
+      (invitations) => emit(InvitationsLoaded(invitations: invitations)),
+    );
+  }
+
+  Future<void> _onCreateInvitation(
+      CreateInvitationEvent event, Emitter<EventState> emit) async {
+    final result = await createInvitationUseCase.call(
+        event.eventId, event.email, event.name);
+    await result.fold(
+      (failure) async => emit(EventError(message: failure.message)),
+      (_) async {
+        final invitations = await getInvitationsUseCase.call(event.eventId);
+        invitations.fold(
+          (failure) => emit(EventError(message: failure.message)),
+          (list) => emit(InvitationsLoaded(invitations: list)),
+        );
+      },
+    );
+  }
+
+  Future<void> _onDeleteInvitation(
+      DeleteInvitationEvent event, Emitter<EventState> emit) async {
+    final result = await deleteInvitationUseCase.call(event.id);
+    await result.fold(
+      (failure) async => emit(EventError(message: failure.message)),
+      (_) async {
+        final invitations = await getInvitationsUseCase.call(event.eventId);
+        invitations.fold(
+          (failure) => emit(EventError(message: failure.message)),
+          (list) => emit(InvitationsLoaded(invitations: list)),
+        );
+      },
     );
   }
 }

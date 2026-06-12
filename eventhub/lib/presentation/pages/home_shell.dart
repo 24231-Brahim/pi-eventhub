@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
+import 'package:eventhub/shared/themes/app_dimensions.dart';
 
 class HomeShell extends StatelessWidget {
   final Widget child;
@@ -11,31 +12,44 @@ class HomeShell extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _getSelectedIndex(context),
-        onDestinationSelected: (index) => _onItemTapped(context, index),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.explore_outlined),
-            selectedIcon: const Icon(Icons.explore),
-            label: l10n.events,
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.lg),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.confirmation_number_outlined),
-            selectedIcon: const Icon(Icons.confirmation_number),
-            label: l10n.tickets,
+          boxShadow: AppShadows.level1,
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppRadius.lg),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.notifications_outlined),
-            selectedIcon: const Icon(Icons.notifications),
-            label: l10n.notifications,
+          child: NavigationBar(
+            selectedIndex: _getSelectedIndex(context),
+            onDestinationSelected: (index) => _onItemTapped(context, index),
+            destinations: [
+              NavigationDestination(
+                icon: const Icon(Icons.explore_outlined),
+                selectedIcon: const Icon(Icons.explore),
+                label: l10n.events,
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.confirmation_number_outlined),
+                selectedIcon: const Icon(Icons.confirmation_number),
+                label: l10n.tickets,
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.notifications_outlined),
+                selectedIcon: const Icon(Icons.notifications),
+                label: l10n.notifications,
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.person_outlined),
+                selectedIcon: const Icon(Icons.person),
+                label: l10n.profile,
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outlined),
-            selectedIcon: const Icon(Icons.person),
-            label: l10n.profile,
-          ),
-        ],
+        ),
       ),
     );
   }

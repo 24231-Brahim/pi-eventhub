@@ -4,6 +4,9 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
 import 'package:eventhub/features/tickets/presentation/bloc/ticket_bloc.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
+import 'package:eventhub/shared/themes/app_colors.dart';
+import 'package:eventhub/shared/themes/app_dimensions.dart';
+import 'package:eventhub/shared/themes/app_typography.dart';
 import 'package:eventhub/shared/widgets/loading_widget.dart';
 
 class QrScannerPage extends StatefulWidget {
@@ -26,78 +29,116 @@ class _QrScannerPageState extends State<QrScannerPage> {
     bloc.add(ValidateTicketEvent(qrData: barcode!.rawValue!));
   }
 
+  void _showResultDialog(
+    BuildContext context, {
+    required IconData icon,
+    required Color accentColor,
+    required String title,
+    required Widget content,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(icon, color: accentColor),
+            ),
+            const SizedBox(width: AppSpacing.stackMd),
+            Expanded(
+              child: Text(
+                title,
+                style: AppTypography.sectionHeader
+                    .copyWith(color: AppColors.onSurface),
+              ),
+            ),
+          ],
+        ),
+        content: content,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              l10n.ok,
+              style: AppTypography.labelLg
+                  .copyWith(color: AppColors.vibrantGreen),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showValidationResult(BuildContext context, TicketState state) {
     final l10n = AppLocalizations.of(context)!;
     if (state is TicketValidated) {
       final ticket = state.ticket;
       switch (ticket.status) {
         case TicketStatus.used:
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded,
-                      color: Colors.orange, size: 28),
-                  SizedBox(width: 8),
-                  Text('Already Used'),
-                ],
-              ),
-              content: const Text('This ticket was already checked in.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(l10n.ok),
-                ),
-              ],
+          _showResultDialog(
+            context,
+            icon: Icons.warning_amber_rounded,
+            accentColor: AppColors.warning,
+            title: l10n.alreadyUsed,
+            content: Text(
+              l10n.ticketAlreadyUsedMessage,
+              style: AppTypography.bodyMd
+                  .copyWith(color: AppColors.onSurfaceVariant),
             ),
           );
         case TicketStatus.cancelled:
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: Row(
-                children: [
-                  const Icon(Icons.cancel, color: Colors.red, size: 28),
-                  const SizedBox(width: 8),
-                  Text(l10n.invalidTicket),
-                ],
-              ),
-              content: const Text('This ticket has been cancelled.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(l10n.ok),
-                ),
-              ],
+          _showResultDialog(
+            context,
+            icon: Icons.cancel,
+            accentColor: AppColors.error,
+            title: l10n.invalidTicket,
+            content: Text(
+              l10n.ticketCancelledMessage,
+              style: AppTypography.bodyMd
+                  .copyWith(color: AppColors.onSurfaceVariant),
             ),
           );
         case TicketStatus.active:
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: Row(
-                children: [
-                  const Icon(Icons.check_circle,
-                      color: Colors.green, size: 28),
-                  const SizedBox(width: 8),
-                  Text(l10n.validTicket),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('${l10n.ticketID}: ${ticket.id}'),
-                  if (ticket.eventTitle != null)
-                    Text('Event: ${ticket.eventTitle}'),
-                  const Text('Check-in successful!'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(l10n.ok),
+          _showResultDialog(
+            context,
+            icon: Icons.check_circle,
+            accentColor: AppColors.vibrantGreen,
+            title: l10n.validTicket,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${l10n.ticketID}: ${ticket.id}',
+                  style: AppTypography.bodyMd
+                      .copyWith(color: AppColors.onSurfaceVariant),
+                ),
+                if (ticket.eventTitle != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '${l10n.eventLabel}: ${ticket.eventTitle}',
+                      style: AppTypography.bodyMd
+                          .copyWith(color: AppColors.onSurfaceVariant),
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.stackSm),
+                Text(
+                  l10n.checkInSuccessful,
+                  style: AppTypography.labelLg
+                      .copyWith(color: AppColors.vibrantGreen),
                 ),
               ],
             ),
@@ -105,23 +146,15 @@ class _QrScannerPageState extends State<QrScannerPage> {
       }
     }
     if (state is TicketError) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.error, color: Colors.red, size: 28),
-              SizedBox(width: 8),
-              Text('Invalid Ticket'),
-            ],
-          ),
-          content: Text(state.message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.ok),
-            ),
-          ],
+      _showResultDialog(
+        context,
+        icon: Icons.error,
+        accentColor: AppColors.error,
+        title: l10n.invalidTicket,
+        content: Text(
+          state.message,
+          style:
+              AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
         ),
       );
     }
@@ -131,7 +164,11 @@ class _QrScannerPageState extends State<QrScannerPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.scanQRCode)),
+      backgroundColor: AppColors.obsidian,
+      appBar: AppBar(
+        backgroundColor: AppColors.obsidian,
+        title: Text(l10n.scanQRCode),
+      ),
       body: BlocListener<TicketBloc, TicketState>(
         listener: (context, state) => _showValidationResult(context, state),
         child: BlocBuilder<TicketBloc, TicketState>(
@@ -142,11 +179,36 @@ class _QrScannerPageState extends State<QrScannerPage> {
                   onDetect: (capture) =>
                       _onDetect(capture, context.read<TicketBloc>()),
                 ),
+                const Positioned.fill(
+                  child: IgnorePointer(child: _ScannerOverlay()),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 48,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.stackMd,
+                        vertical: AppSpacing.stackSm,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.obsidian.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                      ),
+                      child: Text(
+                        l10n.pointCameraAtQRCode,
+                        style: AppTypography.bodyMd
+                            .copyWith(color: AppColors.onSurface),
+                      ),
+                    ),
+                  ),
+                ),
                 if (state is TicketLoading)
-                  const Positioned.fill(
+                  Positioned.fill(
                     child: ColoredBox(
-                      color: Colors.black54,
-                      child: Center(child: LoadingWidget()),
+                      color: AppColors.obsidian.withValues(alpha: 0.6),
+                      child: const Center(child: LoadingWidget()),
                     ),
                   ),
               ],
@@ -156,4 +218,74 @@ class _QrScannerPageState extends State<QrScannerPage> {
       ),
     );
   }
+}
+
+class _ScannerOverlay extends StatelessWidget {
+  const _ScannerOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: _ScannerOverlayPainter());
+  }
+}
+
+class _ScannerOverlayPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cutoutSize = size.shortestSide * 0.7;
+    final cutoutRect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: cutoutSize,
+      height: cutoutSize,
+    );
+    final cutoutRRect =
+        RRect.fromRectAndRadius(cutoutRect, const Radius.circular(24));
+
+    final backgroundPath = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final cutoutPath = Path()..addRRect(cutoutRRect);
+    final overlayPath =
+        Path.combine(PathOperation.difference, backgroundPath, cutoutPath);
+
+    canvas.drawPath(
+      overlayPath,
+      Paint()..color = AppColors.obsidian.withValues(alpha: 0.6),
+    );
+
+    canvas.drawRRect(
+      cutoutRRect,
+      Paint()
+        ..color = AppColors.vibrantGreen.withValues(alpha: 0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+
+    const cornerLength = 28.0;
+    final cornerPaint = Paint()
+      ..color = AppColors.vibrantGreen
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+
+    final l = cutoutRect.left;
+    final t = cutoutRect.top;
+    final r = cutoutRect.right;
+    final b = cutoutRect.bottom;
+
+    // Top-left
+    canvas.drawLine(Offset(l, t + cornerLength), Offset(l, t), cornerPaint);
+    canvas.drawLine(Offset(l, t), Offset(l + cornerLength, t), cornerPaint);
+    // Top-right
+    canvas.drawLine(Offset(r - cornerLength, t), Offset(r, t), cornerPaint);
+    canvas.drawLine(Offset(r, t), Offset(r, t + cornerLength), cornerPaint);
+    // Bottom-left
+    canvas.drawLine(Offset(l, b - cornerLength), Offset(l, b), cornerPaint);
+    canvas.drawLine(Offset(l, b), Offset(l + cornerLength, b), cornerPaint);
+    // Bottom-right
+    canvas.drawLine(Offset(r - cornerLength, b), Offset(r, b), cornerPaint);
+    canvas.drawLine(Offset(r, b), Offset(r, b - cornerLength), cornerPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

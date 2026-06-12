@@ -456,10 +456,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importFromFile => 'Importer depuis un fichier';
 
   @override
-  String get importSuccess => '{count} invitations importées avec succès';
+  String importSuccess(Object count) {
+    return '$count invitations importées avec succès';
+  }
 
   @override
-  String get importErrors => '{count} erreurs trouvées dans le fichier';
+  String importErrors(Object count) {
+    return '$count erreurs trouvées dans le fichier';
+  }
 
   @override
   String get emailHint => 'email@example.com';
@@ -481,4 +485,115 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onlyInvitedCanBook => 'Seules les personnes invitées peuvent réserver';
+
+  @override
+  String get browseEvents => 'Découvrir les événements';
+
+  @override
+  String get browseEventsDesc => 'Trouvez des concerts, ateliers et soirées qui correspondent à vos goûts.';
+
+  @override
+  String get enjoyShare => 'Profitez et partagez';
+
+  @override
+  String get enjoyShareDesc => 'Créez des souvenirs avec vos amis et partagez vos expériences avec la communauté.';
+
+  @override
+  String get bookingConfirmedTitle => 'Réservation confirmée !';
+
+  @override
+  String get bookingConfirmedMessage => 'C\'est confirmé ! Votre billet a été ajouté à votre profil.';
+
+  @override
+  String get orderId => 'Numéro de commande';
+
+  @override
+  String get seats => 'Places';
+
+  @override
+  String get generalAdmission => 'Admission générale';
+
+  @override
+  String get viewTickets => 'Voir les billets';
+
+  @override
+  String get discoverEventsNearYou => 'Découvrez des événements près de vous';
+
+  @override
+  String get searchEventsHint => 'Rechercher des événements, lieux...';
+
+  @override
+  String get eventsAttended => 'Événements suivis';
+
+  @override
+  String get upcoming => 'À venir';
+
+  @override
+  String get points => 'Points';
+
+  @override
+  String get account => 'Compte';
+
+  @override
+  String get attendees => 'Participants';
+
+  @override
+  String get noAttendeesYet => 'Aucun participant pour le moment';
+
+  @override
+  String get bookingDate => 'Date de réservation';
+
+  @override
+  String get confirmed => 'Confirmée';
+
+  @override
+  String get pendingStatus => 'En attente';
+
+  @override
+  String get cancelledStatus => 'Annulée';
+
+  @override
+  String get refunded => 'Remboursée';
+
+  @override
+  String get published => 'Publiée';
+
+  @override
+  String get quantityLabel => 'Quantité';
+
+  @override
+  String get guestInvitations => 'Invitations des invités';
+
+  @override
+  String get inviteGuests => 'Inviter des invités';
+
+  @override
+  String get sendInvite => 'Envoyer l\'invitation';
+
+  @override
+  String get acceptedStatus => 'Acceptée';
+
+  @override
+  String get declinedStatus => 'Refusée';
+
+  @override
+  String get viewAttendees => 'Voir les participants';
+
+  @override
+  String get alreadyUsed => 'Déjà utilisé';
+
+  @override
+  String get ticketAlreadyUsedMessage => 'Ce billet a déjà été enregistré.';
+
+  @override
+  String get ticketCancelledMessage => 'Ce billet a été annulé.';
+
+  @override
+  String get checkInSuccessful => 'Enregistrement réussi !';
+
+  @override
+  String get eventLabel => 'Événement';
+
+  @override
+  String get pointCameraAtQRCode => 'Pointez la caméra vers le code QR du billet';
 }

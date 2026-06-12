@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Poppins:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#bebcbc",
+                      "on-surface": "#e5e2e1",
+                      "on-secondary-fixed": "#062100",
+                      "on-tertiary-fixed-variant": "#474746",
+                      "on-error": "#690005",
+                      "tertiary": "#dad8d7",
+                      "tertiary-fixed-dim": "#c8c6c5",
+                      "on-primary-fixed-variant": "#185200",
+                      "outline-variant": "#3e4a37",
+                      "surface": "#131313",
+                      "inverse-surface": "#e5e2e1",
+                      "surface-container-highest": "#353534",
+                      "on-primary": "#0e3900",
+                      "on-secondary-container": "#91d870",
+                      "primary-fixed-dim": "#67e037",
+                      "error": "#ffb4ab",
+                      "tertiary-fixed": "#e5e2e1",
+                      "primary-container": "#5dd62c",
+                      "on-secondary": "#0e3900",
+                      "on-tertiary-container": "#4c4c4b",
+                      "on-background": "#e5e2e1",
+                      "background": "#131313",
+                      "secondary-fixed-dim": "#91d971",
+                      "secondary": "#91d971",
+                      "inverse-primary": "#226d00",
+                      "on-primary-container": "#1a5800",
+                      "surface-container-low": "#1c1b1b",
+                      "on-error-container": "#ffdad6",
+                      "surface-tint": "#67e037",
+                      "surface-variant": "#353534",
+                      "outline": "#88957e",
+                      "on-surface-variant": "#bdcbb2",
+                      "error-container": "#93000a",
+                      "surface-container-high": "#2a2a2a",
+                      "surface-container-lowest": "#0e0e0e",
+                      "secondary-fixed": "#acf68a",
+                      "surface-bright": "#3a3939",
+                      "on-tertiary-fixed": "#1b1c1c",
+                      "surface-container": "#201f1f",
+                      "on-primary-fixed": "#052100",
+                      "primary-fixed": "#83fe52",
+                      "on-secondary-fixed-variant": "#195200",
+                      "secondary-container": "#1e5f00",
+                      "primary": "#79f349",
+                      "inverse-on-surface": "#313030",
+                      "on-tertiary": "#303030",
+                      "surface-dim": "#131313"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-lg": "24px",
+                      "base": "8px",
+                      "stack-sm": "4px",
+                      "gutter": "12px",
+                      "container-padding": "16px",
+                      "stack-md": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Poppins"],
+                      "body-md": ["Inter"],
+                      "headline-sm": ["Poppins"],
+                      "headline-md": ["Poppins"],
+                      "body-lg": ["Inter"],
+                      "headline-lg": ["Poppins"],
+                      "label-md": ["Inter"],
+                      "label-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "label-lg": ["16px", {"lineHeight": "24px", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation Placeholder (Hidden for this specific task-focused detail view) -->
+<main class="relative pb-32">
+<!-- Hero Section -->
+<section class="relative h-[397px] w-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A high-energy electronic dance music festival with vibrant neon green laser beams cutting through a dark obsidian sky. Thousands of hands are raised in excitement towards a brightly lit stage in a massive stadium. The scene is cinematic and electric, featuring deep blacks and intense lime green highlights, consistent with a high-contrast modern corporate nightlife aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGjgPiBWkfaq8fgnYIXlDPoP90c1srjE5XVnerLpvaq2aTycA7T9biuiiWLHUyxvDuXg5DxlG_4q5csMqdnY3Wxln7Xh_2aDcnuLqCKeAoEV16r92AJJ360-HSAqa_wIPhArdy7fJ2_e00Eu-_gwRB5-7dR_EoTFRiv4Xl-Rw4Nzxv0706aaEfJ7ZmPnVvu3OGQ1e2R_qvNVloE6oILt0lhfIAw5tHzNEqAExMSnGbfGoSxU9ZFcTw4YPc7rUijEQTgTdfye-MOnw"/>
+<!-- Hero Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/40"></div>
+<!-- Top Actions -->
+<div class="absolute top-0 left-0 w-full px-container-padding pt-12 flex justify-between items-center">
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container/60 backdrop-blur-md text-on-surface transition-transform active:scale-95" onclick="window.history.back()">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container/60 backdrop-blur-md text-on-surface transition-transform active:scale-95">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+</section>
+<!-- Event Content -->
+<section class="px-container-padding -mt-8 relative z-10">
+<div class="bg-surface-container p-stack-md rounded-xl shadow-lg border border-outline-variant/10">
+<div class="flex flex-wrap gap-2 mb-stack-md">
+<span class="px-3 py-1 bg-primary/10 text-primary font-label-md text-label-md rounded-full">Music</span>
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant font-label-md text-label-md rounded-full">Trending</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-stack-sm leading-tight">Neon Pulse Night: Live in London</h1>
+<!-- Organizer Row -->
+<div class="flex items-center gap-stack-md mt-stack-md pb-stack-md border-b border-outline-variant/20">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a creative event producer in a modern studio setting. The lighting is dramatic and low-key, emphasizing a sophisticated urban style. The background is a dark charcoal gray with subtle textures. The individual wears professional black attire, reflecting a modern corporate energy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUNjlzUF_9AFhfGmka65hK1z_BrfSINNQrZOziNpQMcggLv9xWftWB6BmO4o1FcFA4I2e0Tm1s2RAC7NGBCi-1LMgfk8TowQrBl1r4a04JUUcNmEcint2Aw1Ve38Dg9kHEfeK7Iab_g5raCg8ArfbpRPY6FakodEO2Buq1pt_XOjBR2aoQi5YUXeJwBWiE45GN5lpiM9lOiQ4mR3AubiRv48tYCDRjxwt_uTFEzJzdR8-Rr1m_dhDZB6CxrHyij2leW5k1Nrn9EaU"/>
+</div>
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">Organized by</p>
+<p class="text-body-lg font-body-lg text-primary">Prism Events UK</p>
+</div>
+<button class="ml-auto text-primary px-4 py-2 rounded-lg border border-primary/20 bg-primary/5 font-label-md text-label-md">Follow</button>
+</div>
+<!-- Info Grid -->
+<div class="grid grid-cols-1 gap-stack-md mt-stack-lg">
+<div class="flex items-start gap-stack-md">
+<div class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary-container/20 shrink-0">
+<span class="material-symbols-outlined text-primary">calendar_today</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface">Friday, October 24</p>
+<p class="font-label-md text-label-md text-on-surface-variant">9:00 PM - 4:00 AM</p>
+</div>
+</div>
+<div class="flex items-start gap-stack-md">
+<div class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary-container/20 shrink-0">
+<span class="material-symbols-outlined text-primary">location_on</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface">The Grand Stadium</p>
+<p class="font-label-md text-label-md text-on-surface-variant">Greenwich, London SE10 0DX</p>
+</div>
+</div>
+</div>
+<!-- Description -->
+<div class="mt-stack-lg">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-stack-sm">About Event</h2>
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed">
+                        Prepare for an unparalleled sensory explosion at Neon Pulse Night. Featuring world-class lighting design and a lineup of international techno titans, this is the ultimate celebration of London's underground nightlife scene. Witness the stadium transform into a digital playground of light and sound.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Location Map Mock -->
+<section class="px-container-padding mt-stack-lg">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-stack-md px-2">Location</h3>
+<div class="w-full h-48 rounded-xl overflow-hidden grayscale contrast-125 border border-outline-variant/20 relative group">
+<img class="w-full h-full object-cover" data-alt="A dark-themed city map showing urban street patterns in London. The aesthetic is high-contrast, with dark charcoal roads and glowing neon green accents for primary routes and location markers. The atmosphere is minimalist, technical, and modern corporate, fitting for a premium event discovery app." data-location="London" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaQ6A_gO-8OnReJrAiVI0hWb3vSVqx9St3gPYxLyDUneP9JBlXSCTSEWV9fZPKwqJPNbUB0M9AfkY-lAxKaQBR8TH7V8c2RdyWFNUh7N21hH_Pjhy7wmLs8Rx-GonuHW_HI14t5yW7MToyb-HHB9Hd6gxY6IXQTmvtnDk9wK-n1Z89i9wpDXhwxdktgYfYmtrgMP_YeojS6eXwGYy9j_nWMcpWgtGZaBDVPMdHjgVXymzB0lLbr-eLFH3NljmNw68XKtgyVW2_iEg"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-lg animate-pulse">
+<span class="material-symbols-outlined text-on-primary">location_on</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Booking Bar -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-container/80 backdrop-blur-xl border-t border-outline-variant/10 px-container-padding py-stack-md safe-area-bottom z-40">
+<div class="flex items-center justify-between gap-stack-md max-w-2xl mx-auto">
+<div class="flex flex-col">
+<p class="text-label-md font-label-md text-on-surface-variant">Price from</p>
+<p class="font-headline-md text-headline-md text-primary">£45.00</p>
+</div>
+<button class="flex-1 h-12 bg-primary text-on-primary font-label-lg text-label-lg font-bold rounded-xl flex items-center justify-center transition-transform active:scale-95 shadow-lg shadow-primary/20" id="bookNowBtn">
+                Book Now
+            </button>
+</div>
+</div>
+<!-- Booking Success Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center px-container-padding hidden" id="successModal">
+<!-- Modal Backdrop -->
+<div class="absolute inset-0 bg-background/95 backdrop-blur-sm"></div>
+<!-- Modal Content -->
+<div class="relative bg-surface-container w-full max-w-sm rounded-2xl p-stack-lg border border-outline-variant/20 shadow-2xl flex flex-col items-center text-center transform transition-all duration-300 scale-90 opacity-0" id="modalContainer">
+<div class="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center mb-stack-lg">
+<span class="material-symbols-outlined text-primary !text-5xl" style="font-variation-settings: 'wght' 700;">check_circle</span>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-stack-sm">Booking Confirmed!</h2>
+<p class="text-body-md text-on-surface-variant mb-stack-lg">
+                You're all set! Your ticket has been added to your profile and sent to your email.
+            </p>
+<div class="w-full bg-surface-container-low rounded-xl p-stack-md mb-stack-lg border border-outline-variant/10">
+<div class="flex justify-between items-center mb-2">
+<span class="text-label-md text-on-surface-variant">Order ID</span>
+<span class="text-label-md font-bold text-on-surface">#EH-82934</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-label-md text-on-surface-variant">Seats</span>
+<span class="text-label-md font-bold text-on-surface">General Admission</span>
+</div>
+</div>
+<button class="w-full h-12 bg-surface-container-highest text-on-surface font-label-lg rounded-xl flex items-center justify-center transition-colors hover:bg-surface-variant active:scale-95" id="closeModalBtn">
+                View Tickets
+            </button>
+</div>
+</div>
+<script>
+        const bookNowBtn = document.getElementById('bookNowBtn');
+        const successModal = document.getElementById('successModal');
+        const modalContainer = document.getElementById('modalContainer');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        bookNowBtn.addEventListener('click', () => {
+            // Show Modal
+            successModal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContainer.classList.remove('scale-90', 'opacity-0');
+                modalContainer.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Trigger haptic-like micro interaction
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modalContainer.classList.add('scale-90', 'opacity-0');
+            modalContainer.classList.remove('scale-100', 'opacity-100');
+            setTimeout(() => {
+                successModal.classList.add('hidden');
+            }, 300);
+        });
+
+        // Toggle Favorite
+        const favBtn = document.querySelectorAll('button')[1];
+        favBtn.addEventListener('click', function() {
+            const icon = this.querySelector('.material-symbols-outlined');
+            const isFilled = icon.style.fontVariationSettings.includes("'FILL' 1");
+            
+            if(isFilled) {
+                icon.style.fontVariationSettings = "'FILL' 0";
+                icon.classList.remove('text-primary');
+            } else {
+                icon.style.fontVariationSettings = "'FILL' 1";
+                icon.classList.add('text-primary');
+            }
+        });
+    </script>
+</body></html>

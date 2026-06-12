@@ -13,6 +13,8 @@ class BookingModel extends Booking {
     super.totalAmount,
     super.status,
     super.createdAt,
+    super.attendeeName,
+    super.attendeeEmail,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,8 @@ class BookingModel extends Booking {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
+      attendeeName: json['attendeeName'] as String?,
+      attendeeEmail: json['attendeeEmail'] as String?,
     );
   }
 
@@ -48,6 +52,8 @@ class BookingModel extends Booking {
       'totalAmount': totalAmount,
       'status': status.name,
       'createdAt': createdAt?.toIso8601String(),
+      'attendeeName': attendeeName,
+      'attendeeEmail': attendeeEmail,
     };
   }
 

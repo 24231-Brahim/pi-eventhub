@@ -4,6 +4,7 @@ abstract class BookingSupabaseDataSource {
   Future<Map<String, dynamic>> createBooking(
       String eventId, int quantity, double amount, String userId);
   Future<List<Map<String, dynamic>>> getUserBookings(String userId);
+  Future<List<Map<String, dynamic>>> getEventBookings(String eventId);
   Future<void> confirmBooking(String bookingId);
   Future<void> cancelBooking(String bookingId);
 }
@@ -34,6 +35,38 @@ class BookingSupabaseDataSourceImpl implements BookingSupabaseDataSource {
         .eq('user_id', userId)
         .order('created_at', ascending: false);
     return response.map((e) => _toCamelCase(e)).toList();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getEventBookings(String eventId) async {
+    final response = await supabase
+        .from('bookings')
+        .select()
+        .eq('event_id', eventId)
+        .order('created_at', ascending: false);
+    final bookings = response.map((e) => _toCamelCase(e)).toList();
+
+    final userIds = bookings
+        .map((b) => b['userId'] as String?)
+        .whereType<String>()
+        .toSet()
+        .toList();
+    if (userIds.isEmpty) return bookings;
+
+    final profiles = await supabase
+        .from('profiles')
+        .select('id, name, email')
+        .inFilter('id', userIds);
+    final profileById = {
+      for (final p in profiles) p['id'] as String: p,
+    };
+
+    for (final booking in bookings) {
+      final profile = profileById[booking['userId']];
+      booking['attendeeName'] = profile?['name'];
+      booking['attendeeEmail'] = profile?['email'];
+    }
+    return bookings;
   }
 
   @override

@@ -39,6 +39,14 @@ class UserBookingsLoaded extends BookingState {
   List<Object?> get props => [bookings];
 }
 
+class EventBookingsLoaded extends BookingState {
+  final List<Booking> bookings;
+  const EventBookingsLoaded({required this.bookings});
+
+  @override
+  List<Object?> get props => [bookings];
+}
+
 class BookingError extends BookingState {
   final String message;
   const BookingError({required this.message});

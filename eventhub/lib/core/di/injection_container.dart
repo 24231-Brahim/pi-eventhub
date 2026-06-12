@@ -21,12 +21,16 @@ import 'package:eventhub/features/events/domain/usecases/delete_event_usecase.da
 import 'package:eventhub/features/events/domain/usecases/get_event_by_id_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/toggle_favorite_usecase.dart';
 import 'package:eventhub/features/events/domain/usecases/get_user_favorite_ids_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/get_invitations_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/create_invitation_usecase.dart';
+import 'package:eventhub/features/events/domain/usecases/delete_invitation_usecase.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/bookings/data/datasources/booking_supabase_datasource.dart';
 import 'package:eventhub/features/bookings/data/repositories/booking_repository_impl.dart';
 import 'package:eventhub/features/bookings/domain/repositories/booking_repository.dart';
 import 'package:eventhub/features/bookings/domain/usecases/create_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/get_user_bookings_usecase.dart';
+import 'package:eventhub/features/bookings/domain/usecases/get_event_bookings_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/confirm_booking_usecase.dart';
 import 'package:eventhub/features/bookings/domain/usecases/cancel_booking_usecase.dart';
 import 'package:eventhub/features/bookings/presentation/bloc/booking_bloc.dart';
@@ -133,6 +137,9 @@ void _initEvents() {
   sl.registerLazySingleton(() => DeleteEventUseCase(repository: sl()));
   sl.registerLazySingleton(() => ToggleFavoriteUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetUserFavoriteIdsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetInvitationsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => CreateInvitationUseCase(repository: sl()));
+  sl.registerLazySingleton(() => DeleteInvitationUseCase(repository: sl()));
   sl.registerFactory(() => EventBloc(
         getEventsUseCase: sl(),
         getEventByIdUseCase: sl(),
@@ -141,6 +148,9 @@ void _initEvents() {
         deleteEventUseCase: sl(),
         toggleFavoriteUseCase: sl(),
         getUserFavoriteIdsUseCase: sl(),
+        getInvitationsUseCase: sl(),
+        createInvitationUseCase: sl(),
+        deleteInvitationUseCase: sl(),
       ));
 }
 
@@ -156,11 +166,13 @@ void _initBookings() {
   );
   sl.registerLazySingleton(() => CreateBookingUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetUserBookingsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetEventBookingsUseCase(repository: sl()));
   sl.registerLazySingleton(() => ConfirmBookingUseCase(repository: sl()));
   sl.registerLazySingleton(() => CancelBookingUseCase(repository: sl()));
   sl.registerFactory(() => BookingBloc(
         createBookingUseCase: sl(),
         getUserBookingsUseCase: sl(),
+        getEventBookingsUseCase: sl(),
         confirmBookingUseCase: sl(),
         cancelBookingUseCase: sl(),
       ));

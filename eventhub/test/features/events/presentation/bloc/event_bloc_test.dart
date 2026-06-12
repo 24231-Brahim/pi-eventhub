@@ -13,6 +13,9 @@ void main() {
   late MockDeleteEventUseCase mockDeleteEventUseCase;
   late MockToggleFavoriteUseCase mockToggleFavoriteUseCase;
   late MockGetUserFavoriteIdsUseCase mockGetUserFavoriteIdsUseCase;
+  late MockGetInvitationsUseCase mockGetInvitationsUseCase;
+  late MockCreateInvitationUseCase mockCreateInvitationUseCase;
+  late MockDeleteInvitationUseCase mockDeleteInvitationUseCase;
 
   setUp(() {
     mockGetEventsUseCase = MockGetEventsUseCase();
@@ -22,6 +25,9 @@ void main() {
     mockDeleteEventUseCase = MockDeleteEventUseCase();
     mockToggleFavoriteUseCase = MockToggleFavoriteUseCase();
     mockGetUserFavoriteIdsUseCase = MockGetUserFavoriteIdsUseCase();
+    mockGetInvitationsUseCase = MockGetInvitationsUseCase();
+    mockCreateInvitationUseCase = MockCreateInvitationUseCase();
+    mockDeleteInvitationUseCase = MockDeleteInvitationUseCase();
   });
 
   EventBloc createBloc() => EventBloc(
@@ -32,6 +38,9 @@ void main() {
         deleteEventUseCase: mockDeleteEventUseCase,
         toggleFavoriteUseCase: mockToggleFavoriteUseCase,
         getUserFavoriteIdsUseCase: mockGetUserFavoriteIdsUseCase,
+        getInvitationsUseCase: mockGetInvitationsUseCase,
+        createInvitationUseCase: mockCreateInvitationUseCase,
+        deleteInvitationUseCase: mockDeleteInvitationUseCase,
       );
 
   group('EventBloc', () {

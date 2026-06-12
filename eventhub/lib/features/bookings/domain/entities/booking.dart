@@ -14,6 +14,8 @@ class Booking extends Equatable {
   final double totalAmount;
   final BookingStatus status;
   final DateTime? createdAt;
+  final String? attendeeName;
+  final String? attendeeEmail;
 
   const Booking({
     required this.id,
@@ -27,11 +29,14 @@ class Booking extends Equatable {
     this.totalAmount = 0,
     this.status = BookingStatus.pending,
     this.createdAt,
+    this.attendeeName,
+    this.attendeeEmail,
   });
 
   @override
   List<Object?> get props => [
         id, eventId, userId, eventTitle, eventImageUrl, eventDate,
         eventLocation, quantity, totalAmount, status, createdAt,
+        attendeeName, attendeeEmail,
       ];
 }

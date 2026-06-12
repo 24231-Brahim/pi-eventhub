@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EventHub | Discover &amp; Experience</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#bebcbc",
+                    "on-surface": "#e5e2e1",
+                    "on-secondary-fixed": "#062100",
+                    "on-tertiary-fixed-variant": "#474746",
+                    "on-error": "#690005",
+                    "tertiary": "#dad8d7",
+                    "tertiary-fixed-dim": "#c8c6c5",
+                    "on-primary-fixed-variant": "#185200",
+                    "outline-variant": "#3e4a37",
+                    "surface": "#131313",
+                    "inverse-surface": "#e5e2e1",
+                    "surface-container-highest": "#353534",
+                    "on-primary": "#0e3900",
+                    "on-secondary-container": "#91d870",
+                    "primary-fixed-dim": "#67e037",
+                    "error": "#ffb4ab",
+                    "tertiary-fixed": "#e5e2e1",
+                    "primary-container": "#5dd62c",
+                    "on-secondary": "#0e3900",
+                    "on-tertiary-container": "#4c4c4b",
+                    "on-background": "#e5e2e1",
+                    "background": "#131313",
+                    "secondary-fixed-dim": "#91d971",
+                    "secondary": "#91d971",
+                    "inverse-primary": "#226d00",
+                    "on-primary-container": "#1a5800",
+                    "surface-container-low": "#1c1b1b",
+                    "on-error-container": "#ffdad6",
+                    "surface-tint": "#67e037",
+                    "surface-variant": "#353534",
+                    "outline": "#88957e",
+                    "on-surface-variant": "#bdcbb2",
+                    "error-container": "#93000a",
+                    "surface-container-high": "#2a2a2a",
+                    "surface-container-lowest": "#0e0e0e",
+                    "secondary-fixed": "#acf68a",
+                    "surface-bright": "#3a3939",
+                    "on-tertiary-fixed": "#1b1c1c",
+                    "surface-container": "#201f1f",
+                    "on-primary-fixed": "#052100",
+                    "primary-fixed": "#83fe52",
+                    "on-secondary-fixed-variant": "#195200",
+                    "secondary-container": "#1e5f00",
+                    "primary": "#79f349",
+                    "inverse-on-surface": "#313030",
+                    "on-tertiary": "#303030",
+                    "surface-dim": "#131313"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-lg": "24px",
+                    "base": "8px",
+                    "stack-sm": "4px",
+                    "gutter": "12px",
+                    "container-padding": "16px",
+                    "stack-md": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Poppins"],
+                    "body-md": ["Inter"],
+                    "headline-sm": ["Poppins"],
+                    "headline-md": ["Poppins"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Poppins"],
+                    "label-md": ["Inter"],
+                    "label-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "label-lg": ["16px", {"lineHeight": "24px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #0F0F0F; color: #E5E2E1; overflow: hidden; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-effect {
+            box-shadow: 0 0 40px rgba(93, 214, 44, 0.4);
+        }
+        .slide-transition {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .splash-out {
+            animation: splashOut 0.6s ease-in forwards;
+        }
+        @keyframes splashOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        .pulse-logo {
+            animation: pulse 2.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased">
+<!-- Splash Screen -->
+<div class="fixed inset-0 z-[100] bg-[#0F0F0F] flex flex-col items-center justify-center" id="splash-screen">
+<div class="relative mb-8">
+<div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full"></div>
+<div class="relative flex items-center justify-center w-24 h-24 bg-primary-container rounded-2xl glow-effect pulse-logo">
+<span class="material-symbols-outlined text-on-primary-container text-[48px]" style="font-variation-settings: 'FILL' 1;">event_available</span>
+</div>
+</div>
+<div class="text-center px-12">
+<h1 class="font-headline-md text-headline-md text-primary mb-2">EventHub</h1>
+<p class="font-body-md text-body-md text-on-surface/80">Discover amazing events near you</p>
+</div>
+</div>
+<!-- Main Onboarding Container -->
+<main class="relative min-h-screen w-full flex flex-col opacity-0" id="onboarding-screen">
+<!-- Skip Button -->
+<button class="absolute top-12 right-6 z-50 font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors" id="skip-btn">
+            Skip
+        </button>
+<!-- Carousel Track -->
+<div class="flex-1 flex slide-transition w-[300%]" id="carousel-track">
+<!-- Step 1: Browse -->
+<section class="w-screen h-full flex flex-col items-center justify-center px-container-padding text-center">
+<div class="mb-12 relative">
+<div class="w-64 h-64 bg-surface-container rounded-3xl flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover opacity-60" data-alt="A high-energy concert scene with a large crowd bathed in vibrant neon green and deep obsidian lighting. Laser lights cut through a hazy atmosphere above the audience. The composition is modern and professional, focusing on the immersive experience of a live event. The overall mood is electric and exciting, perfectly matching a dark-mode discovery app aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0s5uYzTaMKrBQg68ZR25lHbW4w-TYZfr70Zc5564e2huwFi1jTK-jWLf1FM3WzcaJsgdqf2RGKjhB-t1Clghvfm8JdeTJrRw868xVvVfLSYadvYebgrMUWDgIM1Q_VBTqqbEjb1NfQ6Gy3pJPSixVJ0yhrCldeEd62k2TkmHTJQY6GkjgbZt0pT9KPC-KTg5njfB646137ctFvj26xwvLh_ZfbRSt9OA6gZfDWXOyHEVqx9yM-_94TwADJsg567aXjFRovmhZ2CY"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-20 h-20 bg-primary/10 backdrop-blur-md rounded-full flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary text-[40px]">explore</span>
+</div>
+</div>
+</div>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-4">Browse Events</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-[280px]">Find concerts, workshops, and nightlife happenings tailored to your taste.</p>
+</section>
+<!-- Step 2: Book -->
+<section class="w-screen h-full flex flex-col items-center justify-center px-container-padding text-center">
+<div class="mb-12 relative">
+<div class="w-64 h-64 bg-surface-container rounded-3xl flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover opacity-60" data-alt="A close-up shot of a glowing smartphone screen displaying a digital event ticket with a QR code in a dark venue environment. Subtle bokeh lights from a distant stage create a professional atmosphere. The primary colors used are deep blacks and neon greens, reflecting a high-contrast corporate tech aesthetic. The lighting is focused and clean, emphasizing ease of use." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApFXFgOm25skTuIbce4e2Xt8nYpMTuRuyFy5GWZUmo9XONoKSEQ01MZqNZtSohsleBGtD5D1aR007p36FKNdJXiGl3Qj_XyqW40SuNVehCnT4qPU4OqB0Lg-RNvy7ASn4DrmS8qADwRqM8XYblNq0Nk3rnZgZnc687QTzHqNrKqRRfXCCw3yTrfg2fUkeufuXJK6ClCNnDJzHXph-Q6CeC5eDE4bEWzkRAa-V7SJr5UWrYnFUpPu_Qwn-ygazVPDuIAogFp_Xiy0g"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-20 h-20 bg-primary/10 backdrop-blur-md rounded-full flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary text-[40px]">confirmation_number</span>
+</div>
+</div>
+</div>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-4">Book Tickets</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-[280px]">Secure your spot in seconds with our seamless and secure checkout process.</p>
+</section>
+<!-- Step 3: Enjoy -->
+<section class="w-screen h-full flex flex-col items-center justify-center px-container-padding text-center">
+<div class="mb-12 relative">
+<div class="w-64 h-64 bg-surface-container rounded-3xl flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover opacity-60" data-alt="A group of friends laughing and sharing a moment at a modern, high-end entertainment venue. The scene is captured with professional cinematic lighting, featuring deep shadows and vibrant lime green accents. The composition conveys joy and social connection in a high-energy nightlife setting. The style is crisp and modern, matching a dark-mode lifestyle application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVrizgu5pkh8MCQF4acPIQtiMIqgjrD74TrguFXqzTfXbr14e1aIpTk2PmUnwvkSgfa9OU-Q6nbyNMdD9eDpPIx-GMBmJAlbR6Cs3SkUCrWTMCDe3ZZg9ESnh7bxvYOj-rI6PkqD4BpcG9oGe1X0t-XOVAVSVfU9RpHQo6ceKYwzTU6Q7uormIPK2QxcmIfCJblABnCSRKW6WLkjwk9KV9qaRojZOvQfh_Y3FP4yDPMCJNPVB-mFd3Km6f77CQJL6qvl_P-4WG5hw"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-20 h-20 bg-primary/10 backdrop-blur-md rounded-full flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary text-[40px]">share</span>
+</div>
+</div>
+</div>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-4">Enjoy &amp; Share</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-[280px]">Make memories with friends and share your experiences with the community.</p>
+</section>
+</div>
+<!-- Bottom Controls -->
+<div class="h-48 px-container-padding flex flex-col items-center justify-start gap-8 pb-12">
+<!-- Indicators -->
+<div class="flex gap-2">
+<div class="indicator w-8 h-2 rounded-full bg-primary transition-all duration-300" data-index="0"></div>
+<div class="indicator w-2 h-2 rounded-full bg-surface-container-highest transition-all duration-300" data-index="1"></div>
+<div class="indicator w-2 h-2 rounded-full bg-surface-container-highest transition-all duration-300" data-index="2"></div>
+</div>
+<!-- CTA Button -->
+<button class="w-full max-w-sm h-12 bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-xl flex items-center justify-center transition-all active:scale-95 hover:bg-primary-fixed-dim" id="next-btn">
+                Next
+            </button>
+</div>
+</main>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const splash = document.getElementById('splash-screen');
+            const onboarding = document.getElementById('onboarding-screen');
+            const track = document.getElementById('carousel-track');
+            const nextBtn = document.getElementById('next-btn');
+            const skipBtn = document.getElementById('skip-btn');
+            const indicators = document.querySelectorAll('.indicator');
+
+            let currentStep = 0;
+            const totalSteps = 3;
+
+            // Transition from Splash to Onboarding
+            setTimeout(() => {
+                splash.classList.add('splash-out');
+                onboarding.classList.add('fade-in');
+                onboarding.style.opacity = '1';
+                setTimeout(() => splash.remove(), 600);
+            }, 2500);
+
+            const updateUI = () => {
+                // Move track
+                track.style.transform = `translateX(-${currentStep * (100 / totalSteps)}%)`;
+
+                // Update indicators
+                indicators.forEach((ind, i) => {
+                    if (i === currentStep) {
+                        ind.classList.remove('w-2', 'bg-surface-container-highest');
+                        ind.classList.add('w-8', 'bg-primary');
+                    } else {
+                        ind.classList.remove('w-8', 'bg-primary');
+                        ind.classList.add('w-2', 'bg-surface-container-highest');
+                    }
+                });
+
+                // Update Button Text
+                if (currentStep === totalSteps - 1) {
+                    nextBtn.textContent = 'Get Started';
+                } else {
+                    nextBtn.textContent = 'Next';
+                }
+            };
+
+            nextBtn.addEventListener('click', () => {
+                if (currentStep < totalSteps - 1) {
+                    currentStep++;
+                    updateUI();
+                } else {
+                    // Final CTA Action
+                    nextBtn.classList.add('scale-95', 'opacity-50');
+                    alert('Redirecting to Explore Events...');
+                }
+            });
+
+            skipBtn.addEventListener('click', () => {
+                currentStep = totalSteps - 1;
+                updateUI();
+            });
+
+            // Handle touch swipes for the carousel
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            track.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            track.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+
+            const handleSwipe = () => {
+                if (touchEndX < touchStartX - 50) {
+                    if (currentStep < totalSteps - 1) {
+                        currentStep++;
+                        updateUI();
+                    }
+                }
+                if (touchEndX > touchStartX + 50) {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        updateUI();
+                    }
+                }
+            };
+        });
+    </script>
+</body></html>
