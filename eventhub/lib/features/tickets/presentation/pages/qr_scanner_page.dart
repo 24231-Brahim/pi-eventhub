@@ -44,7 +44,7 @@ class _QrScannerPageState extends State<QrScannerPage>
     if (controller == null) return;
     switch (state) {
       case AppLifecycleState.resumed:
-        controller.start();
+        _safeStart();
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
@@ -58,21 +58,44 @@ class _QrScannerPageState extends State<QrScannerPage>
     if (!mounted) return;
     setState(() {
       _cameraPermissionStatus = status;
-      if (status.isGranted) {
-        // Recreate the controller fresh each time the page opens / permission
-        // is granted so the camera initializes cleanly.
-        _controller?.dispose();
+      if (status.isGranted && _controller == null) {
+        // Create the controller fresh when the page opens / permission is
+        // granted. autoStart is disabled so we can delay the first start —
+        // this avoids a camera2 null-reference init race seen on some
+        // Android devices.
         _controller = MobileScannerController(
+          autoStart: false,
           facing: CameraFacing.back,
-          detectionSpeed: DetectionSpeed.normal,
+          detectionSpeed: DetectionSpeed.noDuplicates,
           formats: const [BarcodeFormat.qrCode],
         );
       }
     });
+    if (status.isGranted) {
+      await _safeStart(initialDelay: true);
+    }
   }
 
   Future<void> _restartScanner() async {
-    await _controller?.start();
+    await _safeStart(initialDelay: true);
+  }
+
+  Future<void> _safeStart({bool initialDelay = false}) async {
+    final controller = _controller;
+    if (controller == null) return;
+    try {
+      if (initialDelay) {
+        // Give the platform camera a moment to release/initialize before the
+        // first start; works around the camera2 null-object crash on some
+        // devices.
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+      if (!mounted) return;
+      await controller.start();
+    } catch (_) {
+      // Any initialization failure is surfaced by the MobileScanner
+      // errorBuilder, so we just swallow it here.
+    }
   }
 
   void _onDetect(BarcodeCapture capture, TicketBloc bloc) {
@@ -253,7 +276,7 @@ class _QrScannerPageState extends State<QrScannerPage>
                 controller: controller,
                 onDetect: (capture) =>
                     _onDetect(capture, context.read<TicketBloc>()),
-                errorBuilder: (context, error, child) => _ScannerError(
+                errorBuilder: (context, error) => _ScannerError(
                   error: error,
                   onRetry: _restartScanner,
                 ),
