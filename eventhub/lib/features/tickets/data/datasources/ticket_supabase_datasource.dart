@@ -39,20 +39,28 @@ class TicketSupabaseDataSourceImpl implements TicketSupabaseDataSource {
 
   @override
   Future<Map<String, dynamic>> validateTicket(String qrData, String currentUserId) async {
+    // maybeSingle() returns null instead of throwing PGRST116 when no row
+    // matches (or when RLS hides the row), so we can show a friendly message.
     final ticket = await supabase
         .from('tickets')
         .select()
         .eq('qr_code', qrData)
-        .single();
+        .maybeSingle();
+
+    if (ticket == null) {
+      throw TicketValidationException(
+        'Ticket not found.\nScanned code: $qrData',
+      );
+    }
 
     final event = await supabase
         .from('events')
         .select('organizer_id')
         .eq('id', ticket['event_id'])
-        .single()
+        .maybeSingle()
         .timeout(const Duration(seconds: 5));
 
-    if (event['organizer_id'] != currentUserId) {
+    if (event == null || event['organizer_id'] != currentUserId) {
       throw TicketValidationException(
         'Only the event organizer can validate tickets.',
       );
@@ -64,8 +72,10 @@ class TicketSupabaseDataSourceImpl implements TicketSupabaseDataSource {
           .update({'status': 'used'})
           .eq('id', ticket['id'])
           .select()
-          .single();
-      return _toCamelCase(updated);
+          .maybeSingle();
+      // If RLS allows the update but not returning the row, fall back to the
+      // ticket we already read.
+      return _toCamelCase(updated ?? {...ticket, 'status': 'used'});
     }
 
     return _toCamelCase(ticket);
