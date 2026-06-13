@@ -201,5 +201,6 @@
   "cameraPermissionDeniedMessage": "Please grant camera access in your device settings to use the QR scanner.",
   "openSettings": "Open Settings",
   "grantPermission": "Grant Permission",
-  "alreadyInvited": "This person is already invited"
+  "alreadyInvited": "This person is already invited",
+  "cameraError": "Camera Error"
 }

@@ -617,4 +617,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get alreadyInvited => 'تمت دعوة هذا الشخص بالفعل';
+
+  @override
+  String get cameraError => 'خطأ في الكاميرا';
 }

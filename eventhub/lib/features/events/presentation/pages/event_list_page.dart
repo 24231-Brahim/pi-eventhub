@@ -153,6 +153,22 @@ class _GreetingHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 32,
+              filterQuality: FilterQuality.medium,
+            ),
+            const SizedBox(width: AppSpacing.stackSm),
+            Text(
+              'EventHub',
+              style: AppTypography.headlineSm
+                  .copyWith(color: AppColors.onSurface),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.stackLg),
         Text(
           name.isEmpty ? 'Hey there 👋' : 'Hey, $name 👋',
           style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),

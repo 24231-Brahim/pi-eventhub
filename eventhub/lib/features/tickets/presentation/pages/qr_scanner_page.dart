@@ -17,21 +17,62 @@ class QrScannerPage extends StatefulWidget {
   State<QrScannerPage> createState() => _QrScannerPageState();
 }
 
-class _QrScannerPageState extends State<QrScannerPage> {
+class _QrScannerPageState extends State<QrScannerPage>
+    with WidgetsBindingObserver {
   DateTime _lastScan = DateTime.now();
   static const Duration _debounceDuration = Duration(seconds: 2);
   PermissionStatus? _cameraPermissionStatus;
+  MobileScannerController? _controller;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _requestCameraPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final controller = _controller;
+    if (controller == null) return;
+    switch (state) {
+      case AppLifecycleState.resumed:
+        controller.start();
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        controller.stop();
+    }
   }
 
   Future<void> _requestCameraPermission() async {
     final status = await Permission.camera.request();
     if (!mounted) return;
-    setState(() => _cameraPermissionStatus = status);
+    setState(() {
+      _cameraPermissionStatus = status;
+      if (status.isGranted) {
+        // Recreate the controller fresh each time the page opens / permission
+        // is granted so the camera initializes cleanly.
+        _controller?.dispose();
+        _controller = MobileScannerController(
+          facing: CameraFacing.back,
+          detectionSpeed: DetectionSpeed.normal,
+          formats: const [BarcodeFormat.qrCode],
+        );
+      }
+    });
+  }
+
+  Future<void> _restartScanner() async {
+    await _controller?.start();
   }
 
   void _onDetect(BarcodeCapture capture, TicketBloc bloc) {
@@ -198,6 +239,10 @@ class _QrScannerPageState extends State<QrScannerPage> {
         onRequestPermission: _requestCameraPermission,
       );
     }
+    final controller = _controller;
+    if (controller == null) {
+      return const Center(child: LoadingWidget());
+    }
     return BlocListener<TicketBloc, TicketState>(
       listener: (context, state) => _showValidationResult(context, state),
       child: BlocBuilder<TicketBloc, TicketState>(
@@ -205,8 +250,13 @@ class _QrScannerPageState extends State<QrScannerPage> {
           return Stack(
             children: [
               MobileScanner(
+                controller: controller,
                 onDetect: (capture) =>
                     _onDetect(capture, context.read<TicketBloc>()),
+                errorBuilder: (context, error, child) => _ScannerError(
+                  error: error,
+                  onRetry: _restartScanner,
+                ),
               ),
               const Positioned.fill(
                 child: IgnorePointer(child: _ScannerOverlay()),
@@ -309,6 +359,76 @@ class _CameraPermissionDenied extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScannerError extends StatelessWidget {
+  final MobileScannerException error;
+  final VoidCallback onRetry;
+
+  const _ScannerError({required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final details = error.errorDetails?.message;
+    final errorText = details != null && details.isNotEmpty
+        ? '${error.errorCode.name}: $details'
+        : error.errorCode.name;
+    return ColoredBox(
+      color: AppColors.obsidian,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.containerPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Icon(Icons.error_outline,
+                    color: AppColors.error, size: 32),
+              ),
+              const SizedBox(height: AppSpacing.stackMd),
+              Text(
+                l10n.cameraError,
+                textAlign: TextAlign.center,
+                style: AppTypography.sectionHeader
+                    .copyWith(color: AppColors.onSurface),
+              ),
+              const SizedBox(height: AppSpacing.stackSm),
+              Text(
+                errorText,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMd
+                    .copyWith(color: AppColors.onSurfaceVariant),
+              ),
+              const SizedBox(height: AppSpacing.stackMd),
+              ElevatedButton(
+                onPressed: onRetry,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.vibrantGreen,
+                  foregroundColor: AppColors.obsidian,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                ),
+                child: Text(
+                  l10n.retry,
+                  style: AppTypography.labelLg
+                      .copyWith(color: AppColors.obsidian),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

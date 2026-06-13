@@ -1308,6 +1308,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This person is already invited'**
   String get alreadyInvited;
+
+  /// No description provided for @cameraError.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera Error'**
+  String get cameraError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

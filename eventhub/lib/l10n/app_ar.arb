@@ -201,5 +201,6 @@
   "cameraPermissionDeniedMessage": "يرجى منح إذن الوصول إلى الكاميرا من إعدادات جهازك لاستخدام ماسح رموز QR.",
   "openSettings": "فتح الإعدادات",
   "grantPermission": "منح الإذن",
-  "alreadyInvited": "تمت دعوة هذا الشخص بالفعل"
+  "alreadyInvited": "تمت دعوة هذا الشخص بالفعل",
+  "cameraError": "خطأ في الكاميرا"
 }

@@ -617,4 +617,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alreadyInvited => 'This person is already invited';
+
+  @override
+  String get cameraError => 'Camera Error';
 }
