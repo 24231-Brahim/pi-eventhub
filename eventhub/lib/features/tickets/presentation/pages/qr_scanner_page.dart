@@ -19,7 +19,9 @@ class QrScannerPage extends StatefulWidget {
 
 class _QrScannerPageState extends State<QrScannerPage>
     with WidgetsBindingObserver {
-  DateTime _lastScan = DateTime.now();
+  // Start in the past so the very first detection is never swallowed by the
+  // debounce window.
+  DateTime _lastScan = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _debounceDuration = Duration(seconds: 2);
   PermissionStatus? _cameraPermissionStatus;
   MobileScannerController? _controller;
@@ -66,7 +68,11 @@ class _QrScannerPageState extends State<QrScannerPage>
         _controller = MobileScannerController(
           autoStart: false,
           facing: CameraFacing.back,
-          detectionSpeed: DetectionSpeed.noDuplicates,
+          // normal re-emits frames (~every 250ms) so a momentary debounce
+          // never permanently loses a code, unlike noDuplicates which emits
+          // each code only once.
+          detectionSpeed: DetectionSpeed.normal,
+          torchEnabled: false,
           formats: const [BarcodeFormat.qrCode],
         );
       }
@@ -266,56 +272,61 @@ class _QrScannerPageState extends State<QrScannerPage>
     if (controller == null) {
       return const Center(child: LoadingWidget());
     }
+    // The scanner preview and overlay are built once here — only the loading
+    // overlay below is wrapped in a BlocBuilder, so TicketState changes never
+    // rebuild (or restart) the MobileScanner/camera.
     return BlocListener<TicketBloc, TicketState>(
       listener: (context, state) => _showValidationResult(context, state),
-      child: BlocBuilder<TicketBloc, TicketState>(
-        builder: (context, state) {
-          return Stack(
-            children: [
-              MobileScanner(
-                controller: controller,
-                onDetect: (capture) =>
-                    _onDetect(capture, context.read<TicketBloc>()),
-                errorBuilder: (context, error) => _ScannerError(
-                  error: error,
-                  onRetry: _restartScanner,
+      child: Stack(
+        children: [
+          MobileScanner(
+            controller: controller,
+            onDetect: (capture) =>
+                _onDetect(capture, context.read<TicketBloc>()),
+            errorBuilder: (context, error) => _ScannerError(
+              error: error,
+              onRetry: _restartScanner,
+            ),
+          ),
+          const Positioned.fill(
+            child: IgnorePointer(child: _ScannerOverlay()),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 48,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.stackMd,
+                  vertical: AppSpacing.stackSm,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.obsidian.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                child: Text(
+                  l10n.pointCameraAtQRCode,
+                  style: AppTypography.bodyMd
+                      .copyWith(color: AppColors.onSurface),
                 ),
               ),
-              const Positioned.fill(
-                child: IgnorePointer(child: _ScannerOverlay()),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 48,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.stackMd,
-                      vertical: AppSpacing.stackSm,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.obsidian.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                    child: Text(
-                      l10n.pointCameraAtQRCode,
-                      style: AppTypography.bodyMd
-                          .copyWith(color: AppColors.onSurface),
-                    ),
-                  ),
-                ),
-              ),
-              if (state is TicketLoading)
-                Positioned.fill(
-                  child: ColoredBox(
-                    color: AppColors.obsidian.withValues(alpha: 0.6),
-                    child: const Center(child: LoadingWidget()),
-                  ),
-                ),
-            ],
-          );
-        },
+            ),
+          ),
+          Positioned.fill(
+            child: BlocBuilder<TicketBloc, TicketState>(
+              buildWhen: (previous, current) =>
+                  previous is TicketLoading || current is TicketLoading,
+              builder: (context, state) {
+                if (state is! TicketLoading) return const SizedBox.shrink();
+                return ColoredBox(
+                  color: AppColors.obsidian.withValues(alpha: 0.6),
+                  child: const Center(child: LoadingWidget()),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
