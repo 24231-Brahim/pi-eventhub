@@ -553,6 +553,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancelledStatus => 'ملغى';
 
   @override
+  String get activeStatus => 'نشطة';
+
+  @override
+  String get usedStatus => 'مستخدمة';
+
+  @override
   String get refunded => 'مسترد';
 
   @override
@@ -596,4 +602,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pointCameraAtQRCode => 'وجّه الكاميرا نحو رمز QR للتذكرة';
+
+  @override
+  String get cameraPermissionRequired => 'يلزم إذن الكاميرا لمسح رموز QR';
+
+  @override
+  String get cameraPermissionDeniedMessage => 'يرجى منح إذن الوصول إلى الكاميرا من إعدادات جهازك لاستخدام ماسح رموز QR.';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
+  String get grantPermission => 'منح الإذن';
+
+  @override
+  String get alreadyInvited => 'تمت دعوة هذا الشخص بالفعل';
 }

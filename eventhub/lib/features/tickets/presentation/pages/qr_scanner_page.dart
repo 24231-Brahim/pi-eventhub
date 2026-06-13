@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
 import 'package:eventhub/features/tickets/presentation/bloc/ticket_bloc.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
@@ -19,6 +20,19 @@ class QrScannerPage extends StatefulWidget {
 class _QrScannerPageState extends State<QrScannerPage> {
   DateTime _lastScan = DateTime.now();
   static const Duration _debounceDuration = Duration(seconds: 2);
+  PermissionStatus? _cameraPermissionStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestCameraPermission();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    if (!mounted) return;
+    setState(() => _cameraPermissionStatus = status);
+  }
 
   void _onDetect(BarcodeCapture capture, TicketBloc bloc) {
     final barcode = capture.barcodes.firstOrNull;
@@ -169,51 +183,132 @@ class _QrScannerPageState extends State<QrScannerPage> {
         backgroundColor: AppColors.obsidian,
         title: Text(l10n.scanQRCode),
       ),
-      body: BlocListener<TicketBloc, TicketState>(
-        listener: (context, state) => _showValidationResult(context, state),
-        child: BlocBuilder<TicketBloc, TicketState>(
-          builder: (context, state) {
-            return Stack(
-              children: [
-                MobileScanner(
-                  onDetect: (capture) =>
-                      _onDetect(capture, context.read<TicketBloc>()),
-                ),
-                const Positioned.fill(
-                  child: IgnorePointer(child: _ScannerOverlay()),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 48,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.stackMd,
-                        vertical: AppSpacing.stackSm,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.obsidian.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                      ),
-                      child: Text(
-                        l10n.pointCameraAtQRCode,
-                        style: AppTypography.bodyMd
-                            .copyWith(color: AppColors.onSurface),
-                      ),
+      body: _buildBody(l10n),
+    );
+  }
+
+  Widget _buildBody(AppLocalizations l10n) {
+    final status = _cameraPermissionStatus;
+    if (status == null) {
+      return const Center(child: LoadingWidget());
+    }
+    if (!status.isGranted) {
+      return _CameraPermissionDenied(
+        isPermanentlyDenied: status.isPermanentlyDenied,
+        onRequestPermission: _requestCameraPermission,
+      );
+    }
+    return BlocListener<TicketBloc, TicketState>(
+      listener: (context, state) => _showValidationResult(context, state),
+      child: BlocBuilder<TicketBloc, TicketState>(
+        builder: (context, state) {
+          return Stack(
+            children: [
+              MobileScanner(
+                onDetect: (capture) =>
+                    _onDetect(capture, context.read<TicketBloc>()),
+              ),
+              const Positioned.fill(
+                child: IgnorePointer(child: _ScannerOverlay()),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 48,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.stackMd,
+                      vertical: AppSpacing.stackSm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.obsidian.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                    ),
+                    child: Text(
+                      l10n.pointCameraAtQRCode,
+                      style: AppTypography.bodyMd
+                          .copyWith(color: AppColors.onSurface),
                     ),
                   ),
                 ),
-                if (state is TicketLoading)
-                  Positioned.fill(
-                    child: ColoredBox(
-                      color: AppColors.obsidian.withValues(alpha: 0.6),
-                      child: const Center(child: LoadingWidget()),
-                    ),
+              ),
+              if (state is TicketLoading)
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: AppColors.obsidian.withValues(alpha: 0.6),
+                    child: const Center(child: LoadingWidget()),
                   ),
-              ],
-            );
-          },
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CameraPermissionDenied extends StatelessWidget {
+  final bool isPermanentlyDenied;
+  final VoidCallback onRequestPermission;
+
+  const _CameraPermissionDenied({
+    required this.isPermanentlyDenied,
+    required this.onRequestPermission,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.containerPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: const Icon(Icons.videocam_off,
+                  color: AppColors.error, size: 32),
+            ),
+            const SizedBox(height: AppSpacing.stackMd),
+            Text(
+              l10n.cameraPermissionRequired,
+              textAlign: TextAlign.center,
+              style: AppTypography.sectionHeader
+                  .copyWith(color: AppColors.onSurface),
+            ),
+            const SizedBox(height: AppSpacing.stackSm),
+            Text(
+              l10n.cameraPermissionDeniedMessage,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyMd
+                  .copyWith(color: AppColors.onSurfaceVariant),
+            ),
+            const SizedBox(height: AppSpacing.stackMd),
+            ElevatedButton(
+              onPressed:
+                  isPermanentlyDenied ? openAppSettings : onRequestPermission,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.vibrantGreen,
+                foregroundColor: AppColors.obsidian,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+              ),
+              child: Text(
+                isPermanentlyDenied ? l10n.openSettings : l10n.grantPermission,
+                style: AppTypography.labelLg
+                    .copyWith(color: AppColors.obsidian),
+              ),
+            ),
+          ],
         ),
       ),
     );

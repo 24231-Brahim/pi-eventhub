@@ -43,6 +43,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   bool _isEditing = false;
   bool _isPrivate = false;
   bool _isSavingInvitations = false;
+  bool _isLoadingInvitations = false;
   final List<Map<String, String>> _invitations = [];
 
   @override
@@ -65,7 +66,26 @@ class _CreateEventPageState extends State<CreateEventPage> {
       _selectedCategory = widget.event!.category;
       _isFree = widget.event!.isFree;
       _isPrivate = widget.event!.isPrivate;
+      _loadExistingInvitations();
     }
+  }
+
+  Future<void> _loadExistingInvitations() async {
+    setState(() => _isLoadingInvitations = true);
+    final repository = sl<EventRepository>();
+    final result = await repository.getInvitations(widget.event!.id);
+    if (!mounted) return;
+    result.fold(
+      (failure) => null,
+      (invitations) => setState(() {
+        _invitations.addAll(invitations.map((inv) => {
+              'id': inv.id,
+              'email': inv.email,
+              'name': inv.name,
+            }));
+      }),
+    );
+    setState(() => _isLoadingInvitations = false);
   }
 
   @override
@@ -141,7 +161,23 @@ class _CreateEventPageState extends State<CreateEventPage> {
     return Future.value();
   }
 
-  void _removeInvitation(int index) {
+  Future<void> _removeInvitation(int index) async {
+    final id = _invitations[index]['id'];
+    if (id != null && id.isNotEmpty) {
+      final repository = sl<EventRepository>();
+      final result = await repository.deleteInvitation(id);
+      if (!mounted) return;
+      final failure = result.fold((f) => f, (_) => null);
+      if (failure != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(failure.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
     setState(() => _invitations.removeAt(index));
   }
 
@@ -176,14 +212,17 @@ class _CreateEventPageState extends State<CreateEventPage> {
   }
 
   Future<void> _saveInvitations(String eventId) async {
-    if (_invitations.isEmpty) {
+    final newInvitations =
+        _invitations.where((inv) => (inv['id'] ?? '').isEmpty).toList();
+    if (newInvitations.isEmpty) {
       if (mounted) Navigator.pop(context, true);
       return;
     }
     setState(() => _isSavingInvitations = true);
     try {
       final repository = sl<EventRepository>();
-      final result = await repository.createInvitationsBulk(eventId, _invitations);
+      final result =
+          await repository.createInvitationsBulk(eventId, newInvitations);
       if (!mounted) return;
       result.fold(
         (failure) {
@@ -514,7 +553,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
-                  if (_invitations.isEmpty)
+                  if (_isLoadingInvitations)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: LoadingWidget()),
+                    )
+                  else if (_invitations.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Center(

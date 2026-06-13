@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:eventhub/core/di/injection_container.dart';
 import 'package:eventhub/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:eventhub/features/events/presentation/bloc/event_bloc.dart';
 import 'package:eventhub/features/events/domain/entities/event.dart';
+import 'package:eventhub/features/events/domain/repositories/event_repository.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
 import 'package:eventhub/shared/themes/app_colors.dart';
 import 'package:eventhub/shared/themes/app_dimensions.dart';
@@ -27,6 +29,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
   late Event _event;
   bool _isFavorite = false;
   bool _favoritesLoaded = false;
+  bool _isInvitedGuest = false;
 
   @override
   void initState() {
@@ -34,6 +37,24 @@ class _EventDetailPageState extends State<EventDetailPage> {
     _event = widget.event;
     context.read<EventBloc>().add(GetEventByIdEvent(id: _event.id));
     context.read<EventBloc>().add(const GetUserFavoriteIdsEvent());
+    if (_event.isPrivate) {
+      _checkInvitedGuest();
+    }
+  }
+
+  Future<void> _checkInvitedGuest() async {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! Authenticated) return;
+    final email = authState.user.email.toLowerCase();
+    final result = await sl<EventRepository>().getInvitations(_event.id);
+    if (!mounted) return;
+    result.fold(
+      (failure) => null,
+      (invitations) => setState(() {
+        _isInvitedGuest =
+            invitations.any((inv) => inv.email.toLowerCase() == email);
+      }),
+    );
   }
 
   void _toggleFavorite() {
@@ -48,6 +69,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     if (_event.isPast) return false;
     if (_event.isFull) return false;
     if (_event.organizerId == authState.user.id) return false;
+    if (_event.isPrivate && !_isInvitedGuest) return false;
     return true;
   }
 

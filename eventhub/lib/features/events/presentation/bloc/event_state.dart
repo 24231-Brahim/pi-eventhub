@@ -84,3 +84,14 @@ class InvitationsLoaded extends EventState {
   @override
   List<Object?> get props => [invitations];
 }
+
+class InvitationActionError extends EventState {
+  final String message;
+  final List<EventInvitation> invitations;
+  final DateTime occurredAt;
+  InvitationActionError({required this.message, required this.invitations})
+      : occurredAt = DateTime.now();
+
+  @override
+  List<Object?> get props => [message, invitations, occurredAt];
+}

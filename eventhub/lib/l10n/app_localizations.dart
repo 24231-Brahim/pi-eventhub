@@ -1177,6 +1177,18 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get cancelledStatus;
 
+  /// No description provided for @activeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeStatus;
+
+  /// No description provided for @usedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get usedStatus;
+
   /// No description provided for @refunded.
   ///
   /// In en, this message translates to:
@@ -1266,6 +1278,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Point your camera at a ticket QR code'**
   String get pointCameraAtQRCode;
+
+  /// No description provided for @cameraPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission is required to scan QR codes'**
+  String get cameraPermissionRequired;
+
+  /// No description provided for @cameraPermissionDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please grant camera access in your device settings to use the QR scanner.'**
+  String get cameraPermissionDeniedMessage;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @grantPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Permission'**
+  String get grantPermission;
+
+  /// No description provided for @alreadyInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'This person is already invited'**
+  String get alreadyInvited;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -180,6 +180,8 @@
   "confirmed": "مؤكد",
   "pendingStatus": "قيد الانتظار",
   "cancelledStatus": "ملغى",
+  "activeStatus": "نشطة",
+  "usedStatus": "مستخدمة",
   "refunded": "مسترد",
   "published": "منشور",
   "quantityLabel": "الكمية",
@@ -194,5 +196,10 @@
   "ticketCancelledMessage": "تم إلغاء هذه التذكرة.",
   "checkInSuccessful": "تم تسجيل الدخول بنجاح!",
   "eventLabel": "الفعالية",
-  "pointCameraAtQRCode": "وجّه الكاميرا نحو رمز QR للتذكرة"
+  "pointCameraAtQRCode": "وجّه الكاميرا نحو رمز QR للتذكرة",
+  "cameraPermissionRequired": "يلزم إذن الكاميرا لمسح رموز QR",
+  "cameraPermissionDeniedMessage": "يرجى منح إذن الوصول إلى الكاميرا من إعدادات جهازك لاستخدام ماسح رموز QR.",
+  "openSettings": "فتح الإعدادات",
+  "grantPermission": "منح الإذن",
+  "alreadyInvited": "تمت دعوة هذا الشخص بالفعل"
 }

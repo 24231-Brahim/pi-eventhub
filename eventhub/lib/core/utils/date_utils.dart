@@ -25,4 +25,14 @@ class DateUtils {
   static String toISO(DateTime date) => date.toIso8601String();
 
   static DateTime fromISO(String iso) => DateTime.parse(iso);
+
+  static String formatFriendly(DateTime date) {
+    return '${DateFormat('MMM d, yyyy').format(date)} at ${DateFormat('HH:mm').format(date)}';
+  }
+
+  static String formatFriendlyFromIso(String iso) {
+    final date = DateTime.tryParse(iso);
+    if (date == null) return iso;
+    return formatFriendly(date);
+  }
 }

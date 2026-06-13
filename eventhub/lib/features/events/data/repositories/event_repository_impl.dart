@@ -174,12 +174,27 @@ class EventRepositoryImpl implements EventRepository {
   Future<Either<Failure, EventInvitation>> createInvitation(
       String eventId, String email, String name) async {
     try {
+      final existing = await dataSource.getInvitations(eventId);
+      final alreadyInvited = existing.any((invitation) =>
+          (invitation['email'] as String?)?.toLowerCase() ==
+          email.toLowerCase());
+      if (alreadyInvited) {
+        return const Left(
+            ValidationFailure(message: 'This person is already invited'));
+      }
+
       final data = await dataSource.createInvitation({
         'eventId': eventId,
         'email': email,
         'name': name,
       });
       return Right(EventInvitationModel.fromJson(data));
+    } on PostgrestException catch (e) {
+      if (e.code == '23505') {
+        return const Left(
+            ValidationFailure(message: 'This person is already invited'));
+      }
+      return Left(ServerFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

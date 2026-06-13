@@ -74,7 +74,17 @@ class _EventInvitationsPageState extends State<EventInvitationsPage> {
             ),
           ),
           Expanded(
-            child: BlocBuilder<EventBloc, EventState>(
+            child: BlocConsumer<EventBloc, EventState>(
+              listener: (context, state) {
+                if (state is InvitationActionError) {
+                  final message = state.message == 'This person is already invited'
+                      ? l10n.alreadyInvited
+                      : state.message;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(message)),
+                  );
+                }
+              },
               builder: (context, state) {
                 if (state is EventLoading) {
                   return const LoadingWidget();
@@ -85,8 +95,14 @@ class _EventInvitationsPageState extends State<EventInvitationsPage> {
                     onRetry: _loadInvitations,
                   );
                 }
+                List<EventInvitation>? invitations;
                 if (state is InvitationsLoaded) {
-                  if (state.invitations.isEmpty) {
+                  invitations = state.invitations;
+                } else if (state is InvitationActionError) {
+                  invitations = state.invitations;
+                }
+                if (invitations != null) {
+                  if (invitations.isEmpty) {
                     return EmptyWidget(
                       message: l10n.noInvitations,
                       icon: Icons.mail_outline,
@@ -99,9 +115,9 @@ class _EventInvitationsPageState extends State<EventInvitationsPage> {
                       AppSpacing.containerPadding,
                       AppSpacing.containerPadding,
                     ),
-                    itemCount: state.invitations.length,
+                    itemCount: invitations.length,
                     itemBuilder: (context, index) {
-                      final invitation = state.invitations[index];
+                      final invitation = invitations![index];
                       return _InvitationCard(
                         invitation: invitation,
                         onDelete: () => context.read<EventBloc>().add(

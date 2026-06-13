@@ -553,6 +553,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelledStatus => 'Cancelled';
 
   @override
+  String get activeStatus => 'Active';
+
+  @override
+  String get usedStatus => 'Used';
+
+  @override
   String get refunded => 'Refunded';
 
   @override
@@ -596,4 +602,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pointCameraAtQRCode => 'Point your camera at a ticket QR code';
+
+  @override
+  String get cameraPermissionRequired => 'Camera permission is required to scan QR codes';
+
+  @override
+  String get cameraPermissionDeniedMessage => 'Please grant camera access in your device settings to use the QR scanner.';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get grantPermission => 'Grant Permission';
+
+  @override
+  String get alreadyInvited => 'This person is already invited';
 }

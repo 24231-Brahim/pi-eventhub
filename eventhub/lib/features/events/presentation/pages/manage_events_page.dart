@@ -104,6 +104,10 @@ class _ManageEventsPageState extends State<ManageEventsPage> {
           }
         },
         child: BlocBuilder<EventBloc, EventState>(
+          buildWhen: (previous, current) =>
+              current is EventLoading ||
+              current is EventError ||
+              current is EventsLoaded,
           builder: (context, state) {
             if (state is EventLoading) {
               return const LoadingWidget();

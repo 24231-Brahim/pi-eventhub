@@ -180,6 +180,8 @@
   "confirmed": "Confirmed",
   "pendingStatus": "Pending",
   "cancelledStatus": "Cancelled",
+  "activeStatus": "Active",
+  "usedStatus": "Used",
   "refunded": "Refunded",
   "published": "Published",
   "quantityLabel": "Quantity",
@@ -194,5 +196,10 @@
   "ticketCancelledMessage": "This ticket has been cancelled.",
   "checkInSuccessful": "Check-in successful!",
   "eventLabel": "Event",
-  "pointCameraAtQRCode": "Point your camera at a ticket QR code"
+  "pointCameraAtQRCode": "Point your camera at a ticket QR code",
+  "cameraPermissionRequired": "Camera permission is required to scan QR codes",
+  "cameraPermissionDeniedMessage": "Please grant camera access in your device settings to use the QR scanner.",
+  "openSettings": "Open Settings",
+  "grantPermission": "Grant Permission",
+  "alreadyInvited": "This person is already invited"
 }

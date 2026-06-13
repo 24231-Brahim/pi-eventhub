@@ -149,7 +149,16 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     final result = await createInvitationUseCase.call(
         event.eventId, event.email, event.name);
     await result.fold(
-      (failure) async => emit(EventError(message: failure.message)),
+      (failure) async {
+        final invitations = await getInvitationsUseCase.call(event.eventId);
+        invitations.fold(
+          (f) => emit(EventError(message: f.message)),
+          (list) => emit(InvitationActionError(
+            message: failure.message,
+            invitations: list,
+          )),
+        );
+      },
       (_) async {
         final invitations = await getInvitationsUseCase.call(event.eventId);
         invitations.fold(

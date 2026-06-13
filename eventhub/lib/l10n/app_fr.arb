@@ -180,6 +180,8 @@
   "confirmed": "Confirmée",
   "pendingStatus": "En attente",
   "cancelledStatus": "Annulée",
+  "activeStatus": "Active",
+  "usedStatus": "Utilisée",
   "refunded": "Remboursée",
   "published": "Publiée",
   "quantityLabel": "Quantité",
@@ -194,5 +196,10 @@
   "ticketCancelledMessage": "Ce billet a été annulé.",
   "checkInSuccessful": "Enregistrement réussi !",
   "eventLabel": "Événement",
-  "pointCameraAtQRCode": "Pointez la caméra vers le code QR du billet"
+  "pointCameraAtQRCode": "Pointez la caméra vers le code QR du billet",
+  "cameraPermissionRequired": "L'autorisation d'accès à la caméra est requise pour scanner les codes QR",
+  "cameraPermissionDeniedMessage": "Veuillez autoriser l'accès à la caméra dans les paramètres de votre appareil pour utiliser le scanner QR.",
+  "openSettings": "Ouvrir les paramètres",
+  "grantPermission": "Autoriser l'accès",
+  "alreadyInvited": "Cette personne est déjà invitée"
 }

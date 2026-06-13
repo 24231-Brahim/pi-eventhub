@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:eventhub/core/utils/date_utils.dart' as app_date_utils;
 import 'package:eventhub/features/tickets/domain/entities/ticket.dart';
 import 'package:eventhub/l10n/app_localizations.dart';
 
@@ -62,7 +63,7 @@ class _QrCodePageState extends State<QrCodePage> {
       l10n.myQRCode,
       'Event: ${widget.ticket.eventTitle ?? l10n.eventTicket}',
       if (widget.ticket.eventDate != null)
-        '📅 ${widget.ticket.eventDate}',
+        '📅 ${app_date_utils.DateUtils.formatFriendlyFromIso(widget.ticket.eventDate!)}',
       if (widget.ticket.eventLocation != null)
         '📍 ${widget.ticket.eventLocation}',
       '${l10n.status}: ${widget.ticket.status.name.toUpperCase()}',
@@ -115,7 +116,8 @@ class _QrCodePageState extends State<QrCodePage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 24),
                 child: Text(
-                  widget.ticket.eventDate!,
+                  app_date_utils.DateUtils.formatFriendlyFromIso(
+                      widget.ticket.eventDate!),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
