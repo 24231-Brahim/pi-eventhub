@@ -23,6 +23,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -30,6 +31,18 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // R8 full-mode minification obfuscates ML Kit's reflection/JNI
+            // accessed classes (mobile_scanner uses Google ML Kit), which
+            // causes an obfuscated null-reference native crash when opening
+            // the camera on release builds. Disable shrinking so the QR
+            // scanner works reliably; the keep rules in proguard-rules.pro are
+            // a safety net if minification is ever re-enabled.
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

@@ -150,33 +150,32 @@ class _GreetingHeader extends StatelessWidget {
     final name =
         authState is Authenticated ? authState.user.name.split(' ').first : '';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 32,
-              filterQuality: FilterQuality.medium,
-            ),
-            const SizedBox(width: AppSpacing.stackSm),
-            Text(
-              'EventHub',
-              style: AppTypography.headlineSm
-                  .copyWith(color: AppColors.onSurface),
-            ),
-          ],
+        Image.asset(
+          'assets/images/logo.png',
+          height: 36,
+          filterQuality: FilterQuality.medium,
         ),
-        const SizedBox(height: AppSpacing.stackLg),
-        Text(
-          name.isEmpty ? 'Hey there 👋' : 'Hey, $name 👋',
-          style: AppTypography.headlineMd.copyWith(color: AppColors.onSurface),
-        ),
-        const SizedBox(height: AppSpacing.stackSm),
-        Text(
-          subtitle,
-          style: AppTypography.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+        const SizedBox(width: AppSpacing.gutter),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name.isEmpty ? 'Hey there 👋' : 'Hey, $name 👋',
+                style: AppTypography.headlineMd
+                    .copyWith(color: AppColors.onSurface),
+              ),
+              const SizedBox(height: AppSpacing.stackSm),
+              Text(
+                subtitle,
+                style: AppTypography.bodyMd
+                    .copyWith(color: AppColors.onSurfaceVariant),
+              ),
+            ],
+          ),
         ),
       ],
     );
